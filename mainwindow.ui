@@ -237,6 +237,12 @@ QScrollBar::sub-page:vertical {
     color: #ffffff;
 }</string>
             </property>
+            <property name="placeholderText">
+             <string>None</string>
+            </property>
+            <property name="duplicatesEnabled">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
           <item>
@@ -589,7 +595,7 @@ QScrollBar::sub-page:vertical {
        <item>
         <widget class="QStackedWidget" name="pages">
          <property name="currentIndex">
-          <number>2</number>
+          <number>0</number>
          </property>
          <widget class="QWidget" name="homePage">
           <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -678,8 +684,17 @@ QScrollBar::sub-page:vertical {
                  </item>
                  <item>
                   <widget class="QLabel" name="phoneVersionLbl">
+                   <property name="cursor">
+                    <cursorShape>PointingHandCursor</cursorShape>
+                   </property>
                    <property name="text">
-                    <string>Version</string>
+                    <string>&lt;a style=&quot;text-decoration:none; color: white&quot; href=&quot;#&quot;&gt;Version&lt;/a&gt;</string>
+                   </property>
+                   <property name="textFormat">
+                    <enum>Qt::RichText</enum>
+                   </property>
+                   <property name="openExternalLinks">
+                    <bool>false</bool>
                    </property>
                   </widget>
                  </item>

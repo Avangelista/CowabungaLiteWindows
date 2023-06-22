@@ -47,7 +47,7 @@ void MainWindow::refreshDevices() {
         ui->devicePicker->setEnabled(true);
         // Populate the combobox with device names
         for (auto& device : devices) {
-            auto deviceName = QString("%1 (%2)").arg(QString::fromStdString(device.Name), QString::fromStdString(device.Version));
+            auto deviceName = QString("%1").arg(QString::fromStdString(device.Name));
             ui->devicePicker->addItem(deviceName, QVariant::fromValue(device.UUID));
         }
     }
@@ -98,9 +98,9 @@ void MainWindow::updatePhoneInfo() {
     auto version = DeviceManager::getInstance().getCurrentVersion();
     if (version) {
         if (DeviceManager::getInstance().isDeviceAvailable()) {
-            ui->phoneVersionLbl->setText(QString::fromStdString(*version) + " (supported)");
+            ui->phoneVersionLbl->setText("<a style=\"text-decoration:none; color: white\" href=\"#\">" + QString::fromStdString(*version) + " (supported) </a>");
         } else {
-            ui->phoneVersionLbl->setText(QString::fromStdString(*version) + " (not supported)");
+            ui->phoneVersionLbl->setText("<a style=\"text-decoration:none; color: white\" href=\"#\">" + QString::fromStdString(*version) + " (not supported) </a>");
         }
 
     } else {
@@ -170,5 +170,13 @@ void MainWindow::updateEnabledTweaks() {
 void MainWindow::on_applyTweaksBtn_clicked()
 {
     DeviceManager::getInstance().applyTweaks();
+}
+
+void MainWindow::on_phoneVersionLbl_linkActivated(const QString &link)
+{
+    auto uuid = DeviceManager::getInstance().getCurrentUUID();
+    if (uuid) {
+        ui->phoneVersionLbl->setText("<a style=\"text-decoration:none; color: white\" href=\"#\">" + QString::fromStdString(*uuid) + "</a>");
+    }
 }
 

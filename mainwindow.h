@@ -40,6 +40,8 @@ private slots:
 
     void on_applyTweaksBtn_clicked();
 
+    void on_phoneVersionLbl_linkActivated(const QString &link);
+
 private:
     Ui::CowabungaLite *ui;
 
