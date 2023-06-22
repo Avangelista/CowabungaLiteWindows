@@ -1,7 +1,9 @@
 #ifndef DEVICEMANAGER_H
 #define DEVICEMANAGER_H
 
+#include "tweaks.h"
 #include <vector>
+#include <unordered_set>
 #include <string>
 #include <optional>
 
@@ -28,6 +30,11 @@ public:
     const std::optional<std::string> getCurrentName() const;
 
     bool isDeviceAvailable();
+    void setTweakEnabled(Tweak t, bool);
+    bool isTweakEnabled(Tweak t);
+    std::vector<Tweak> getEnabledTweaks();
+
+    void applyTweaks();
 private:
     DeviceManager();
     ~DeviceManager();
@@ -41,6 +48,8 @@ private:
     int currentDeviceIndex;
     std::vector<DeviceInfo> devices;
     bool deviceAvailable;
+
+    std::unordered_set<Tweak> enabledTweaks;
 
     std::optional<std::string> currentWorkspace;
 };

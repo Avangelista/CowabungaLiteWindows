@@ -4,11 +4,6 @@
 #include "statusmanager/StatusManager.h"
 #include <QDebug>
 
-enum class Page {
-    Home = 0,
-    StatusBar = 1
-};
-
 // Boilerplate
 
 MainWindow::MainWindow(QWidget *parent)
@@ -42,7 +37,7 @@ void MainWindow::refreshDevices() {
     ui->devicePicker->clear();
 
     // Load devices
-    std::vector<DeviceInfo> devices = DeviceManager::getInstance().loadDevices();
+    auto devices = DeviceManager::getInstance().loadDevices();
 
     if (devices.empty()) {
         ui->devicePicker->setEnabled(false);
@@ -51,8 +46,8 @@ void MainWindow::refreshDevices() {
     } else {
         ui->devicePicker->setEnabled(true);
         // Populate the combobox with device names
-        for (const DeviceInfo& device : devices) {
-            QString deviceName = QString("%1 (%2)").arg(QString::fromStdString(device.Name), QString::fromStdString(device.Version));
+        for (auto& device : devices) {
+            auto deviceName = QString("%1 (%2)").arg(QString::fromStdString(device.Name), QString::fromStdString(device.Version));
             ui->devicePicker->addItem(deviceName, QVariant::fromValue(device.UUID));
         }
     }
@@ -69,10 +64,16 @@ void MainWindow::on_homePageBtn_clicked()
     ui->pages->setCurrentIndex(static_cast<int>(Page::Home));
 }
 
-void MainWindow::on_statusBarBtn_clicked()
+void MainWindow::on_statusBarPageBtn_clicked()
 {
     ui->pages->setCurrentIndex(static_cast<int>(Page::StatusBar));
 }
+
+void MainWindow::on_applyPageBtn_clicked()
+{
+    ui->pages->setCurrentIndex(static_cast<int>(Page::Apply));
+}
+
 
 void MainWindow::on_refreshBtn_clicked()
 {
@@ -88,18 +89,18 @@ void MainWindow::on_devicePicker_activated(int index)
 // Home Page
 
 void MainWindow::updatePhoneInfo() {
-    std::optional name = DeviceManager::getInstance().getCurrentName();
+    auto name = DeviceManager::getInstance().getCurrentName();
     if (name) {
-        ui->phoneNameLbl->setText(QString::fromStdString(name.value()));
+        ui->phoneNameLbl->setText(QString::fromStdString(*name));
     } else {
         ui->phoneNameLbl->setText("None");
     }
-    std::optional version = DeviceManager::getInstance().getCurrentVersion();
+    auto version = DeviceManager::getInstance().getCurrentVersion();
     if (version) {
         if (DeviceManager::getInstance().isDeviceAvailable()) {
-            ui->phoneVersionLbl->setText(QString::fromStdString(version.value()) + " (supported)");
+            ui->phoneVersionLbl->setText(QString::fromStdString(*version) + " (supported)");
         } else {
-            ui->phoneVersionLbl->setText(QString::fromStdString(version.value()) + " (not supported)");
+            ui->phoneVersionLbl->setText(QString::fromStdString(*version) + " (not supported)");
         }
 
     } else {
@@ -123,6 +124,8 @@ void MainWindow::loadStatusBar() {
 void MainWindow::on_statusBarEnabledChk_toggled(bool checked)
 {
     ui->statusBarPageContent->setDisabled(!checked);
+    DeviceManager::getInstance().setTweakEnabled(Tweak::StatusBar, checked);
+    MainWindow::updateEnabledTweaks();
 }
 
 void MainWindow::on_primaryCarrierTextChk_clicked(bool checked)
@@ -147,4 +150,25 @@ void MainWindow::on_hideBatteryChk_clicked(bool checked)
     StatusManager::getInstance().hideBattery(checked);
 }
 
+// Apply Page
+
+void MainWindow::updateEnabledTweaks() {
+    auto labelText = std::string();
+    auto tweaks = DeviceManager::getInstance().getEnabledTweaks();
+    if (tweaks.empty()) {
+        labelText = "None";
+    } else {
+        for (auto t : tweaks) {
+            labelText += "  • " + Tweaks::getTweakData(t).description + "\n";
+        }
+    }
+    ui->enabledTweaksLbl->setText(QString::fromStdString(labelText));
+
+}
+
+
+void MainWindow::on_applyTweaksBtn_clicked()
+{
+    DeviceManager::getInstance().applyTweaks();
+}
 

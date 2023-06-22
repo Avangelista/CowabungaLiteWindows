@@ -1,4 +1,6 @@
 #include "DeviceManager.h"
+#include "CreateBackup.h"
+#include "utils.h"
 #include <libimobiledevice/libimobiledevice.h>
 #include <libimobiledevice/lockdown.h>
 #include <QDebug>
@@ -34,41 +36,15 @@ void DeviceManager::setCurrentWorkspace(std::string str)
 void DeviceManager::configureWorkspace(std::string uuid)
 {
     // Get the destination directory path
-    QString workspaceDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/Workspace/" + QString::fromStdString(uuid);
-
-    // Create the destination directory if it doesn't exist
-    QDir().mkpath(workspaceDir);
+    auto workspaceDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/Workspace/" + QString::fromStdString(uuid);
 
     // Set the source directory path (assuming it's located in the binary directory)
-    QString sourceDir = QCoreApplication::applicationDirPath() + "/files";
+    auto sourceDir = QCoreApplication::applicationDirPath() + "/files";
 
-    // Create a QDirIterator to iterate over the source directory and its contents
-    QDirIterator iterator(sourceDir, QDir::AllEntries | QDir::Hidden | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
-
-    while (iterator.hasNext()) {
-        iterator.next();
-
-        QString sourceFilePath = iterator.filePath();
-        QString relativeFilePath = iterator.fileInfo().absoluteFilePath().replace(sourceDir, "");
-        QString destinationFilePath = workspaceDir + relativeFilePath;
-
-        // Create the destination directory path if necessary
-        QDir().mkpath(QFileInfo(destinationFilePath).absolutePath());
-
-        // Copy the file or directory
-        if (iterator.fileInfo().isFile()) {
-            if (QFile::copy(sourceFilePath, destinationFilePath)) {
-//                qDebug() << "Copied file:" << relativeFilePath;
-            } else {
-//                qDebug() << "Failed to copy file:" << relativeFilePath;
-            }
-        } else if (iterator.fileInfo().isDir()) {
-            if (QDir().mkdir(destinationFilePath)) {
-//                qDebug() << "Created directory:" << relativeFilePath;
-            } else {
-//                qDebug() << "Failed to create directory:" << relativeFilePath;
-            }
-        }
+    if(Utils::copyDirectory(sourceDir, workspaceDir)) {
+        // fix this idk
+    } else {
+        qDebug() << "Error creating workspace directory";
     }
 
     setCurrentWorkspace(workspaceDir.toStdString());
@@ -80,8 +56,9 @@ const std::optional<std::string> DeviceManager::getCurrentWorkspace() const
 }
 
 std::vector<DeviceInfo> DeviceManager::loadDevices() {
-    std::vector<DeviceInfo> devices;
+    auto devices = std::vector<DeviceInfo>();
 
+    // cbs to do auto here
     char** device_list = nullptr;
     int device_count = 0;
     idevice_get_device_list(&device_list, &device_count);
@@ -172,11 +149,11 @@ void DeviceManager::setCurrentDeviceIndex(int index) {
         currentDevice = devices.at(index);
         // version check
         this->deviceAvailable = false;
-        size_t dotIndex = currentDevice->Version.find('.');
+        auto dotIndex = currentDevice->Version.find('.');
         if (dotIndex != std::string::npos) {
-            std::string majorVersionStr = currentDevice->Version.substr(0, dotIndex);
-            int majorVersion = std::stoi(majorVersionStr);
-            if (majorVersion >= 16) {
+            auto majorVersionStr = currentDevice->Version.substr(0, dotIndex);
+            auto majorVersion = std::stoi(majorVersionStr);
+            if (majorVersion >= 15) {
                 this->deviceAvailable = true;
             }
         }
@@ -188,10 +165,10 @@ void DeviceManager::setCurrentDeviceIndex(int index) {
 }
 
 void DeviceManager::resetCurrentDevice() {
-    this->currentWorkspace = std::nullopt;
+    this->currentWorkspace.reset();
     if (this->devices.empty()) {
         this->currentDeviceIndex = 0;
-        this->currentDevice = std::nullopt;
+        this->currentDevice.reset();
         this->deviceAvailable = false;
     } else {
         DeviceManager::setCurrentDeviceIndex(0);
@@ -222,4 +199,52 @@ const std::optional<std::string> DeviceManager::getCurrentName() const {
     }
 }
 
+void DeviceManager::setTweakEnabled(Tweak t, bool enabled = true) {
+    if (enabled) {
+        this->enabledTweaks.insert(t);
+        qDebug() << "Tweak added: " << Tweaks::getTweakData(t).description;
+    } else {
+        this->enabledTweaks.erase(t);
+        qDebug() << "Tweak removed: " << Tweaks::getTweakData(t).description;
+    }
+}
 
+bool DeviceManager::isTweakEnabled(Tweak t) {
+    return this->enabledTweaks.find(t) != this->enabledTweaks.end();
+}
+
+std::vector<Tweak> DeviceManager::getEnabledTweaks() {
+    auto tweaks = std::vector<Tweak>(this->enabledTweaks.begin(), this->enabledTweaks.end());
+
+    // Sort the vector based on the tweak description
+    std::sort(tweaks.begin(), tweaks.end(), [](auto a, auto b) {
+        return Tweaks::getTweakData(a).description < Tweaks::getTweakData(b).description;
+    });
+
+    return tweaks;
+}
+
+void DeviceManager::applyTweaks() {
+    auto workspace = DeviceManager::getCurrentWorkspace();
+    if (!workspace) {
+        qDebug() << "where da workspace??";
+        return;
+    }
+
+    // Erase backup folder
+    auto enabledTweaksDirectoryPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/EnabledTweaks";
+    auto enabledTweaksDirectory = QDir(enabledTweaksDirectoryPath);
+    if (enabledTweaksDirectory.exists()) {
+        enabledTweaksDirectory.removeRecursively();
+    }
+
+    for (auto t : DeviceManager::getEnabledTweaks()) {
+        auto folderName = Tweaks::getTweakData(t).folderName;
+        qDebug() << "Copying tweak " << Tweaks::getTweakData(t).description;
+        Utils::copyDirectory(QString::fromStdString(*workspace + "/" + folderName), enabledTweaksDirectoryPath);
+    }
+
+    auto backupDirectoryPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/Backup";
+
+    CreateBackup::createBackup(enabledTweaksDirectoryPath.toStdString(), backupDirectoryPath.toStdString());
+}

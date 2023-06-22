@@ -38,6 +38,10 @@
 	spacing: 0px;
 }
 
+QLabel {
+    font-size: 14px;
+}
+
 QToolButton {
     background-color: #3b3b3b;
     border: none;
@@ -72,12 +76,14 @@ QToolButton:checked {
 
 QCheckBox {
 	spacing: 8px;
+	font-size: 14px;
 }
 
 QLineEdit {
 	border: none;
 	background-color: transparent;
 	color: #FFFFFF;
+	font-size: 14px;
 }
 
 QScrollBar:vertical {
@@ -343,7 +349,7 @@ QScrollBar::sub-page:vertical {
         </widget>
        </item>
        <item>
-        <widget class="QToolButton" name="iconThemingBtn">
+        <widget class="QToolButton" name="iconThemingPageBtn">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -372,7 +378,7 @@ QScrollBar::sub-page:vertical {
         </widget>
        </item>
        <item>
-        <widget class="QToolButton" name="statusBarBtn">
+        <widget class="QToolButton" name="statusBarPageBtn">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -401,7 +407,7 @@ QScrollBar::sub-page:vertical {
         </widget>
        </item>
        <item>
-        <widget class="QToolButton" name="controlCenterBtn">
+        <widget class="QToolButton" name="controlCenterPageBtn">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -430,7 +436,7 @@ QScrollBar::sub-page:vertical {
         </widget>
        </item>
        <item>
-        <widget class="QToolButton" name="springboardOptionsBtn">
+        <widget class="QToolButton" name="springboardOptionsPageBtn">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -459,7 +465,7 @@ QScrollBar::sub-page:vertical {
         </widget>
        </item>
        <item>
-        <widget class="QToolButton" name="internalOptionsBtn">
+        <widget class="QToolButton" name="internalOptionsPageBtn">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -488,7 +494,7 @@ QScrollBar::sub-page:vertical {
         </widget>
        </item>
        <item>
-        <widget class="QToolButton" name="setupOptionsBtn">
+        <widget class="QToolButton" name="setupOptionsPageBtn">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -527,7 +533,7 @@ QScrollBar::sub-page:vertical {
         </widget>
        </item>
        <item>
-        <widget class="QToolButton" name="applyBtn">
+        <widget class="QToolButton" name="applyPageBtn">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -583,7 +589,7 @@ QScrollBar::sub-page:vertical {
        <item>
         <widget class="QStackedWidget" name="pages">
          <property name="currentIndex">
-          <number>1</number>
+          <number>2</number>
          </property>
          <widget class="QWidget" name="homePage">
           <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -661,6 +667,7 @@ QScrollBar::sub-page:vertical {
                   <widget class="QLabel" name="phoneNameLbl">
                    <property name="font">
                     <font>
+                     <pointsize>-1</pointsize>
                      <bold>true</bold>
                     </font>
                    </property>
@@ -847,7 +854,7 @@ QScrollBar::sub-page:vertical {
            <item>
             <widget class="QLabel" name="label">
              <property name="text">
-              <string>Cowabunga Lite C++ Edition - Version 0.1</string>
+              <string>Cowabunga Lite Universal - Version 0.1 Alpha</string>
              </property>
             </widget>
            </item>
@@ -930,7 +937,7 @@ QScrollBar::sub-page:vertical {
                   <widget class="QLabel" name="label_8">
                    <property name="font">
                     <font>
-                     <pointsize>9</pointsize>
+                     <pointsize>-1</pointsize>
                      <bold>true</bold>
                     </font>
                    </property>
@@ -1074,6 +1081,69 @@ QScrollBar::sub-page:vertical {
               </layout>
              </widget>
             </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QWidget" name="applyPage">
+          <layout class="QVBoxLayout" name="verticalLayout_6">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="label_2">
+             <property name="font">
+              <font>
+               <pointsize>-1</pointsize>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Enabled Tweaks:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="enabledTweaksLbl">
+             <property name="text">
+              <string>None</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QToolButton" name="applyTweaksBtn">
+             <property name="text">
+              <string>  Apply Tweaks</string>
+             </property>
+             <property name="icon">
+              <iconset resource="resources.qrc">
+               <normaloff>:/icon/check-circle.svg</normaloff>:/icon/check-circle.svg</iconset>
+             </property>
+             <property name="toolButtonStyle">
+              <enum>Qt::ToolButtonTextBesideIcon</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </widget>

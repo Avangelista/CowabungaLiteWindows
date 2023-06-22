@@ -29,6 +29,11 @@ set(PROJECT_SOURCES
         statusmanager/StatusSetter.h
         statusmanager/StatusSetter16_3.h
         statusmanager/StatusSetter16_3.cpp
+        tweaks.h
+        utils.h
+        utils.cpp
+        CreateBackup.h
+        CreateBackup.cpp
         ${TS_FILES}
         ${QRC_FILES}
 )
@@ -82,6 +87,8 @@ if(WIN32)
     file(COPY ${DLL_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     target_link_libraries(CowabungaLite PRIVATE "${DLL_PATH}/libimobiledevice-1.0.dll")
     target_link_libraries(CowabungaLite PRIVATE "${DLL_PATH}/libplist-2.0.dll")
+    target_link_libraries(CowabungaLite PRIVATE "${DLL_PATH}/libssl-3-x64.dll")
+    target_link_libraries(CowabungaLite PRIVATE "${DLL_PATH}/libcrypto-3-x64.dll")
 elseif(APPLE)
     file(GLOB DYLIB_FILES "${DLL_PATH}/*.dylib")
     file(COPY ${DYLIB_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
