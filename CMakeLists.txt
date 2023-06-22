@@ -81,10 +81,11 @@ file(COPY ${FILES_PATH} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 # Copy the DLL files to the output directory
 set(DLL_PATH "${CMAKE_CURRENT_SOURCE_DIR}/dll")
+set(EXE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/exe")
 target_include_directories(CowabungaLite PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
 if(WIN32)
-    file(GLOB DLL_FILES "${DLL_PATH}/*.dll")
-    file(COPY ${DLL_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+    file(GLOB EXE_FILES "${EXE_PATH}/*.exe")
+    file(COPY ${EXE_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     target_link_libraries(CowabungaLite PRIVATE "${DLL_PATH}/libimobiledevice-1.0.dll")
     target_link_libraries(CowabungaLite PRIVATE "${DLL_PATH}/libplist-2.0.dll")
     target_link_libraries(CowabungaLite PRIVATE "${DLL_PATH}/libssl-3-x64.dll")

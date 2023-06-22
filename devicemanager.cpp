@@ -3,14 +3,17 @@
 #include "utils.h"
 #include <libimobiledevice/libimobiledevice.h>
 #include <libimobiledevice/lockdown.h>
+#include <libimobiledevice/restore.h>
+#include <plist/plist.h>
+#include <iostream>
+#include <fstream>
 #include <QDebug>
 #include <QDir>
 #include <QFile>
 #include <QStandardPaths>
 #include <QCoreApplication>
 #include <QDirIterator>
-
-//DeviceManager DeviceManager::instance; // Initialize static instance
+#include <QMessageBox>
 
 DeviceManager::DeviceManager() {
     // Constructor implementation
@@ -247,4 +250,30 @@ void DeviceManager::applyTweaks() {
     auto backupDirectoryPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/Backup";
 
     CreateBackup::createBackup(enabledTweaksDirectoryPath.toStdString(), backupDirectoryPath.toStdString());
+
+    DeviceManager::restoreBackupToDevice(*DeviceManager::getCurrentUUID(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation).toStdString());
+}
+
+int DeviceManager::restoreBackupToDevice(const std::string& udid, const std::string& backupDirectory) {
+    std::string command = "idevicebackup2.exe -u " + udid + " -s Backup restore --system --skip-apps --no-reboot " + backupDirectory;
+    FILE* pipe = _popen(command.c_str(), "r");
+    if (pipe == nullptr) {
+        std::cerr << "Failed to execute command." << std::endl;
+        return 1;
+    }
+    char buffer[128];
+    char last[128];
+    while (fgets(buffer, 128, pipe) != nullptr) {
+        std::cout << buffer << std::endl;
+        strcpy(last, buffer);
+    }
+    _pclose(pipe);
+    auto result = std::string(last);
+    if (result == "Restore Successful.\n") {
+        QMessageBox::information(nullptr, "Success", "Tweaks applied! Your device will now restart.\n\nImportant: If you are presented with a setup, select \"Don't transfer apps and data\" and your phone should return to the homescreen as normal.");
+    } else {
+        QMessageBox::critical(nullptr, "Error", QString::fromStdString(result));
+    }
+
+    return 0;
 }

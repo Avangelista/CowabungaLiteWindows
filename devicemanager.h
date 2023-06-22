@@ -42,7 +42,7 @@ private:
     static DeviceManager instance;
 
     void setCurrentWorkspace(std::string);
-    void configureWorkspace(std::string uuid);
+    void configureWorkspace(std::string);
 
     std::optional<DeviceInfo> currentDevice;
     int currentDeviceIndex;
@@ -52,6 +52,7 @@ private:
     std::unordered_set<Tweak> enabledTweaks;
 
     std::optional<std::string> currentWorkspace;
+    int restoreBackupToDevice(const std::string&, const std::string&);
 };
 
 #endif // DEVICEMANAGER_H
