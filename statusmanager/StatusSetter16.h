@@ -2,7 +2,7 @@
 
 #include "StatusSetter.h"
 
-class StatusSetter16_3 : public StatusSetter
+class StatusSetter16 : public StatusSetter
 {
 public:
     bool isCarrierOverridden() override;

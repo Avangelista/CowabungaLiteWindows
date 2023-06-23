@@ -1,6 +1,5 @@
-#include "StatusSetter16_3.h"
+#include "StatusSetter15.h"
 #include "../devicemanager.h"
-#include <QDebug>
 
 enum class StatusBarItem : int
 {
@@ -46,9 +45,6 @@ enum class StatusBarItem : int
     VoiceControlStatusBarItem = 39,
     // 40
     // 41
-    // 42
-    // 43
-    Extra1StatusBarItem = 44
 };
 
 enum class BatteryState : unsigned int
@@ -58,9 +54,7 @@ enum class BatteryState : unsigned int
 
 struct StatusBarRawData
 {
-    bool itemIsEnabled[45];
-    char padding1;
-    char padding2;
+    bool itemIsEnabled[44];
     char timeString[64];
     char shortTimeString[64];
     char dateString[256];
@@ -115,13 +109,11 @@ struct StatusBarRawData
     char primaryServiceBadgeString[100];
     char secondaryServiceBadgeString[100];
     char quietModeImage[256];
-    unsigned int extra1 : 1;
 };
 
 struct StatusBarOverrideData
 {
-    bool overrideItemIsEnabled[45];
-    char padding;
+    bool overrideItemIsEnabled[44];
     unsigned int overrideTimeString : 1;
     unsigned int overrideDateString : 1;
     unsigned int overrideGSMSignalStrengthRaw : 1;
@@ -157,7 +149,6 @@ struct StatusBarOverrideData
     unsigned int overridePrimaryServiceBadgeString : 1;
     unsigned int overrideSecondaryServiceBadgeString : 1;
     unsigned int overrideQuietModeImage : 1;
-    unsigned int overrideExtra1 : 1;
     StatusBarRawData values;
 };
 
@@ -184,7 +175,6 @@ namespace
 
     StatusBarOverrideData *getOverrides()
     {
-        qDebug() << "bad bad";
         auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
         if (!workspace)
             return nullptr;
@@ -217,20 +207,20 @@ namespace
 
 // Override funcs
 
-bool StatusSetter16_3::isCarrierOverridden()
+bool StatusSetter15::isCarrierOverridden()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overrideServiceString == 1;
 }
 
-std::string StatusSetter16_3::getCarrierOverride()
+std::string StatusSetter15::getCarrierOverride()
 {
     StatusBarOverrideData *overrides = getOverrides();
     std::string text = std::string(overrides->values.serviceString);
     return text;
 }
 
-void StatusSetter16_3::setCarrier(std::string text)
+void StatusSetter15::setCarrier(std::string text)
 {
     StatusBarOverrideData *overrides = getOverrides();
     overrides->overrideServiceString = 1;
@@ -239,27 +229,27 @@ void StatusSetter16_3::setCarrier(std::string text)
     applyChanges(overrides);
 }
 
-void StatusSetter16_3::unsetCarrier()
+void StatusSetter15::unsetCarrier()
 {
     StatusBarOverrideData *overrides = getOverrides();
     overrides->overrideServiceString = 0;
     applyChanges(overrides);
 }
 
-bool StatusSetter16_3::isSecondaryCarrierOverridden()
+bool StatusSetter15::isSecondaryCarrierOverridden()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overrideSecondaryServiceString == 1;
 }
 
-std::string StatusSetter16_3::getSecondaryCarrierOverride()
+std::string StatusSetter15::getSecondaryCarrierOverride()
 {
     StatusBarOverrideData *overrides = getOverrides();
     std::string text = std::string(overrides->values.secondaryServiceString);
     return text;
 }
 
-void StatusSetter16_3::setSecondaryCarrier(std::string text)
+void StatusSetter15::setSecondaryCarrier(std::string text)
 {
     StatusBarOverrideData *overrides = getOverrides();
     overrides->overrideSecondaryServiceString = 1;
@@ -268,27 +258,27 @@ void StatusSetter16_3::setSecondaryCarrier(std::string text)
     applyChanges(overrides);
 }
 
-void StatusSetter16_3::unsetSecondaryCarrier()
+void StatusSetter15::unsetSecondaryCarrier()
 {
     StatusBarOverrideData *overrides = getOverrides();
     overrides->overrideSecondaryServiceString = 0;
     applyChanges(overrides);
 }
 
-bool StatusSetter16_3::isPrimaryServiceBadgeOverridden()
+bool StatusSetter15::isPrimaryServiceBadgeOverridden()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overridePrimaryServiceBadgeString == 1;
 }
 
-std::string StatusSetter16_3::getPrimaryServiceBadgeOverride()
+std::string StatusSetter15::getPrimaryServiceBadgeOverride()
 {
     StatusBarOverrideData *overrides = getOverrides();
     std::string text = std::string(overrides->values.primaryServiceBadgeString);
     return text;
 }
 
-void StatusSetter16_3::setPrimaryServiceBadge(std::string text)
+void StatusSetter15::setPrimaryServiceBadge(std::string text)
 {
     StatusBarOverrideData *overrides = getOverrides();
     overrides->overridePrimaryServiceBadgeString = 1;
@@ -296,27 +286,27 @@ void StatusSetter16_3::setPrimaryServiceBadge(std::string text)
     applyChanges(overrides);
 }
 
-void StatusSetter16_3::unsetPrimaryServiceBadge()
+void StatusSetter15::unsetPrimaryServiceBadge()
 {
     StatusBarOverrideData *overrides = getOverrides();
     overrides->overridePrimaryServiceBadgeString = 0;
     applyChanges(overrides);
 }
 
-bool StatusSetter16_3::isSecondaryServiceBadgeOverridden()
+bool StatusSetter15::isSecondaryServiceBadgeOverridden()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overrideSecondaryServiceBadgeString == 1;
 }
 
-std::string StatusSetter16_3::getSecondaryServiceBadgeOverride()
+std::string StatusSetter15::getSecondaryServiceBadgeOverride()
 {
     StatusBarOverrideData *overrides = getOverrides();
     std::string text = std::string(overrides->values.secondaryServiceBadgeString);
     return text;
 }
 
-void StatusSetter16_3::setSecondaryServiceBadge(std::string text)
+void StatusSetter15::setSecondaryServiceBadge(std::string text)
 {
     StatusBarOverrideData *overrides = getOverrides();
     overrides->overrideSecondaryServiceBadgeString = 1;
@@ -324,27 +314,27 @@ void StatusSetter16_3::setSecondaryServiceBadge(std::string text)
     applyChanges(overrides);
 }
 
-void StatusSetter16_3::unsetSecondaryServiceBadge()
+void StatusSetter15::unsetSecondaryServiceBadge()
 {
     StatusBarOverrideData *overrides = getOverrides();
     overrides->overrideSecondaryServiceBadgeString = 0;
     applyChanges(overrides);
 }
 
-bool StatusSetter16_3::isDateOverridden()
+bool StatusSetter15::isDateOverridden()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overrideDateString == 1;
 }
 
-std::string StatusSetter16_3::getDateOverride()
+std::string StatusSetter15::getDateOverride()
 {
     StatusBarOverrideData *overrides = getOverrides();
     std::string text = std::string(overrides->values.dateString);
     return text;
 }
 
-void StatusSetter16_3::setDate(std::string text)
+void StatusSetter15::setDate(std::string text)
 {
     StatusBarOverrideData *overrides = getOverrides();
     overrides->overrideDateString = 1;
@@ -352,27 +342,27 @@ void StatusSetter16_3::setDate(std::string text)
     applyChanges(overrides);
 }
 
-void StatusSetter16_3::unsetDate()
+void StatusSetter15::unsetDate()
 {
     StatusBarOverrideData *overrides = getOverrides();
     overrides->overrideDateString = 0;
     applyChanges(overrides);
 }
 
-bool StatusSetter16_3::isTimeOverridden()
+bool StatusSetter15::isTimeOverridden()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overrideTimeString == 1;
 }
 
-std::string StatusSetter16_3::getTimeOverride()
+std::string StatusSetter15::getTimeOverride()
 {
     StatusBarOverrideData *overrides = getOverrides();
     std::string text = std::string(overrides->values.timeString);
     return text;
 }
 
-void StatusSetter16_3::setTime(std::string text)
+void StatusSetter15::setTime(std::string text)
 {
     StatusBarOverrideData *overrides = getOverrides();
     overrides->overrideTimeString = 1;
@@ -380,27 +370,27 @@ void StatusSetter16_3::setTime(std::string text)
     applyChanges(overrides);
 }
 
-void StatusSetter16_3::unsetTime()
+void StatusSetter15::unsetTime()
 {
     StatusBarOverrideData *overrides = getOverrides();
     overrides->overrideTimeString = 0;
     applyChanges(overrides);
 }
 
-bool StatusSetter16_3::isBatteryDetailOverridden()
+bool StatusSetter15::isBatteryDetailOverridden()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overrideBatteryDetailString == 1;
 }
 
-std::string StatusSetter16_3::getBatteryDetailOverride()
+std::string StatusSetter15::getBatteryDetailOverride()
 {
     StatusBarOverrideData *overrides = getOverrides();
     std::string text = std::string(overrides->values.batteryDetailString);
     return text;
 }
 
-void StatusSetter16_3::setBatteryDetail(std::string text)
+void StatusSetter15::setBatteryDetail(std::string text)
 {
     StatusBarOverrideData *overrides = getOverrides();
     overrides->overrideBatteryDetailString = 1;
@@ -408,20 +398,20 @@ void StatusSetter16_3::setBatteryDetail(std::string text)
     applyChanges(overrides);
 }
 
-void StatusSetter16_3::unsetBatteryDetail()
+void StatusSetter15::unsetBatteryDetail()
 {
     StatusBarOverrideData *overrides = getOverrides();
     overrides->overrideBatteryDetailString = 0;
     applyChanges(overrides);
 }
 
-bool StatusSetter16_3::isCrumbOverridden()
+bool StatusSetter15::isCrumbOverridden()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overrideBreadcrumb == 1;
 }
 
-std::string StatusSetter16_3::getCrumbOverride()
+std::string StatusSetter15::getCrumbOverride()
 {
     StatusBarOverrideData *overrides = getOverrides();
     std::string text = std::string(overrides->values.breadcrumbTitle);
@@ -432,7 +422,7 @@ std::string StatusSetter16_3::getCrumbOverride()
     return "";
 }
 
-void StatusSetter16_3::setCrumb(std::string text)
+void StatusSetter15::setCrumb(std::string text)
 {
     StatusBarOverrideData *overrides = getOverrides();
     overrides->overrideBreadcrumb = 1;
@@ -440,7 +430,7 @@ void StatusSetter16_3::setCrumb(std::string text)
     applyChanges(overrides);
 }
 
-void StatusSetter16_3::unsetCrumb()
+void StatusSetter15::unsetCrumb()
 {
     StatusBarOverrideData *overrides = getOverrides();
     overrides->overrideBreadcrumb = 0;
@@ -448,13 +438,13 @@ void StatusSetter16_3::unsetCrumb()
     applyChanges(overrides);
 }
 
-bool StatusSetter16_3::isCellularServiceShown()
+bool StatusSetter15::isCellularServiceShown()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::CellularServiceStatusBarItem)] == 1;
 }
 
-void StatusSetter16_3::showCellularService(bool shown)
+void StatusSetter15::showCellularService(bool shown)
 {
     StatusBarOverrideData *overrides = getOverrides();
     if (shown)
@@ -470,13 +460,13 @@ void StatusSetter16_3::showCellularService(bool shown)
     applyChanges(overrides);
 }
 
-bool StatusSetter16_3::isSecondaryCellularServiceShown()
+bool StatusSetter15::isSecondaryCellularServiceShown()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::SecondaryCellularServiceStatusBarItem)] == 1;
 }
 
-void StatusSetter16_3::showSecondaryCellularService(bool shown)
+void StatusSetter15::showSecondaryCellularService(bool shown)
 {
     StatusBarOverrideData *overrides = getOverrides();
     if (shown)
@@ -492,20 +482,20 @@ void StatusSetter16_3::showSecondaryCellularService(bool shown)
     applyChanges(overrides);
 }
 
-bool StatusSetter16_3::isDataNetworkTypeOverridden()
+bool StatusSetter15::isDataNetworkTypeOverridden()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overrideDataNetworkType == 1;
 }
 
-int StatusSetter16_3::getDataNetworkTypeOverride()
+int StatusSetter15::getDataNetworkTypeOverride()
 {
     StatusBarOverrideData *overrides = getOverrides();
     int id = overrides->values.dataNetworkType;
     return id;
 }
 
-void StatusSetter16_3::setDataNetworkType(int id)
+void StatusSetter15::setDataNetworkType(int id)
 {
     StatusBarOverrideData *overrides = getOverrides();
     overrides->overrideDataNetworkType = 1;
@@ -513,27 +503,27 @@ void StatusSetter16_3::setDataNetworkType(int id)
     applyChanges(overrides);
 }
 
-void StatusSetter16_3::unsetDataNetworkType()
+void StatusSetter15::unsetDataNetworkType()
 {
     StatusBarOverrideData *overrides = getOverrides();
     overrides->overrideDataNetworkType = 0;
     applyChanges(overrides);
 }
 
-bool StatusSetter16_3::isSecondaryDataNetworkTypeOverridden()
+bool StatusSetter15::isSecondaryDataNetworkTypeOverridden()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overrideSecondaryDataNetworkType == 1;
 }
 
-int StatusSetter16_3::getSecondaryDataNetworkTypeOverride()
+int StatusSetter15::getSecondaryDataNetworkTypeOverride()
 {
     StatusBarOverrideData *overrides = getOverrides();
     int id = overrides->values.secondaryDataNetworkType;
     return id;
 }
 
-void StatusSetter16_3::setSecondaryDataNetworkType(int id)
+void StatusSetter15::setSecondaryDataNetworkType(int id)
 {
     StatusBarOverrideData *overrides = getOverrides();
     overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::SecondaryCellularDataNetworkStatusBarItem)] = 1;
@@ -543,7 +533,7 @@ void StatusSetter16_3::setSecondaryDataNetworkType(int id)
     applyChanges(overrides);
 }
 
-void StatusSetter16_3::unsetSecondaryDataNetworkType()
+void StatusSetter15::unsetSecondaryDataNetworkType()
 {
     StatusBarOverrideData *overrides = getOverrides();
     overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::SecondaryCellularDataNetworkStatusBarItem)] = 0;
@@ -551,20 +541,20 @@ void StatusSetter16_3::unsetSecondaryDataNetworkType()
     applyChanges(overrides);
 }
 
-bool StatusSetter16_3::isBatteryCapacityOverridden()
+bool StatusSetter15::isBatteryCapacityOverridden()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overrideBatteryCapacity == 1;
 }
 
-int StatusSetter16_3::getBatteryCapacityOverride()
+int StatusSetter15::getBatteryCapacityOverride()
 {
     StatusBarOverrideData *overrides = getOverrides();
     int id = overrides->values.batteryCapacity;
     return id;
 }
 
-void StatusSetter16_3::setBatteryCapacity(int id)
+void StatusSetter15::setBatteryCapacity(int id)
 {
     StatusBarOverrideData *overrides = getOverrides();
     overrides->overrideBatteryCapacity = 1;
@@ -572,27 +562,27 @@ void StatusSetter16_3::setBatteryCapacity(int id)
     applyChanges(overrides);
 }
 
-void StatusSetter16_3::unsetBatteryCapacity()
+void StatusSetter15::unsetBatteryCapacity()
 {
     StatusBarOverrideData *overrides = getOverrides();
     overrides->overrideBatteryCapacity = 0;
     applyChanges(overrides);
 }
 
-bool StatusSetter16_3::isWiFiSignalStrengthBarsOverridden()
+bool StatusSetter15::isWiFiSignalStrengthBarsOverridden()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overrideWiFiSignalStrengthBars == 1;
 }
 
-int StatusSetter16_3::getWiFiSignalStrengthBarsOverride()
+int StatusSetter15::getWiFiSignalStrengthBarsOverride()
 {
     StatusBarOverrideData *overrides = getOverrides();
     int id = overrides->values.WiFiSignalStrengthBars;
     return id;
 }
 
-void StatusSetter16_3::setWiFiSignalStrengthBars(int id)
+void StatusSetter15::setWiFiSignalStrengthBars(int id)
 {
     StatusBarOverrideData *overrides = getOverrides();
     overrides->overrideWiFiSignalStrengthBars = 1;
@@ -600,27 +590,27 @@ void StatusSetter16_3::setWiFiSignalStrengthBars(int id)
     applyChanges(overrides);
 }
 
-void StatusSetter16_3::unsetWiFiSignalStrengthBars()
+void StatusSetter15::unsetWiFiSignalStrengthBars()
 {
     StatusBarOverrideData *overrides = getOverrides();
     overrides->overrideWiFiSignalStrengthBars = 0;
     applyChanges(overrides);
 }
 
-bool StatusSetter16_3::isGSMSignalStrengthBarsOverridden()
+bool StatusSetter15::isGSMSignalStrengthBarsOverridden()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overrideGSMSignalStrengthBars == 1;
 }
 
-int StatusSetter16_3::getGSMSignalStrengthBarsOverride()
+int StatusSetter15::getGSMSignalStrengthBarsOverride()
 {
     StatusBarOverrideData *overrides = getOverrides();
     int id = overrides->values.GSMSignalStrengthBars;
     return id;
 }
 
-void StatusSetter16_3::setGSMSignalStrengthBars(int id)
+void StatusSetter15::setGSMSignalStrengthBars(int id)
 {
     StatusBarOverrideData *overrides = getOverrides();
     overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::CellularSignalStrengthStatusBarItem)] = 1;
@@ -630,7 +620,7 @@ void StatusSetter16_3::setGSMSignalStrengthBars(int id)
     applyChanges(overrides);
 }
 
-void StatusSetter16_3::unsetGSMSignalStrengthBars()
+void StatusSetter15::unsetGSMSignalStrengthBars()
 {
     StatusBarOverrideData *overrides = getOverrides();
     overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::CellularSignalStrengthStatusBarItem)] = 0;
@@ -638,20 +628,20 @@ void StatusSetter16_3::unsetGSMSignalStrengthBars()
     applyChanges(overrides);
 }
 
-bool StatusSetter16_3::isSecondaryGSMSignalStrengthBarsOverridden()
+bool StatusSetter15::isSecondaryGSMSignalStrengthBarsOverridden()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overrideSecondaryGSMSignalStrengthBars == 1;
 }
 
-int StatusSetter16_3::getSecondaryGSMSignalStrengthBarsOverride()
+int StatusSetter15::getSecondaryGSMSignalStrengthBarsOverride()
 {
     StatusBarOverrideData *overrides = getOverrides();
     int id = overrides->values.secondaryGSMSignalStrengthBars;
     return id;
 }
 
-void StatusSetter16_3::setSecondaryGSMSignalStrengthBars(int id)
+void StatusSetter15::setSecondaryGSMSignalStrengthBars(int id)
 {
     StatusBarOverrideData *overrides = getOverrides();
     overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::SecondaryCellularSignalStrengthStatusBarItem)] = 1;
@@ -661,7 +651,7 @@ void StatusSetter16_3::setSecondaryGSMSignalStrengthBars(int id)
     applyChanges(overrides);
 }
 
-void StatusSetter16_3::unsetSecondaryGSMSignalStrengthBars()
+void StatusSetter15::unsetSecondaryGSMSignalStrengthBars()
 {
     StatusBarOverrideData *overrides = getOverrides();
     overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::SecondaryCellularSignalStrengthStatusBarItem)] = 0;
@@ -669,13 +659,13 @@ void StatusSetter16_3::unsetSecondaryGSMSignalStrengthBars()
     applyChanges(overrides);
 }
 
-bool StatusSetter16_3::isRawWiFiSignalShown()
+bool StatusSetter15::isRawWiFiSignalShown()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overrideDisplayRawWiFiSignal == 1;
 }
 
-void StatusSetter16_3::showRawWiFiSignal(bool shown)
+void StatusSetter15::showRawWiFiSignal(bool shown)
 {
     StatusBarOverrideData *overrides = getOverrides();
     if (shown)
@@ -691,13 +681,13 @@ void StatusSetter16_3::showRawWiFiSignal(bool shown)
     applyChanges(overrides);
 }
 
-bool StatusSetter16_3::isRawGSMSignalShown()
+bool StatusSetter15::isRawGSMSignalShown()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overrideDisplayRawGSMSignal == 1;
 }
 
-void StatusSetter16_3::showRawGSMSignal(bool shown)
+void StatusSetter15::showRawGSMSignal(bool shown)
 {
     StatusBarOverrideData *overrides = getOverrides();
     if (shown)
@@ -713,13 +703,13 @@ void StatusSetter16_3::showRawGSMSignal(bool shown)
     applyChanges(overrides);
 }
 
-bool StatusSetter16_3::isDNDHidden()
+bool StatusSetter15::isDNDHidden()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::QuietModeStatusBarItem)] == 1;
 }
 
-void StatusSetter16_3::hideDND(bool hidden)
+void StatusSetter15::hideDND(bool hidden)
 {
     StatusBarOverrideData *overrides = getOverrides();
     if (hidden)
@@ -735,13 +725,13 @@ void StatusSetter16_3::hideDND(bool hidden)
     applyChanges(overrides);
 }
 
-bool StatusSetter16_3::isAirplaneHidden()
+bool StatusSetter15::isAirplaneHidden()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::AirplaneModeStatusBarItem)] == 1;
 }
 
-void StatusSetter16_3::hideAirplane(bool hidden)
+void StatusSetter15::hideAirplane(bool hidden)
 {
     StatusBarOverrideData *overrides = getOverrides();
     if (hidden)
@@ -757,13 +747,13 @@ void StatusSetter16_3::hideAirplane(bool hidden)
     applyChanges(overrides);
 }
 
-bool StatusSetter16_3::isCellHidden()
+bool StatusSetter15::isCellHidden()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::CellularServiceStatusBarItem)] == 1;
 }
 
-void StatusSetter16_3::hideCell(bool hidden)
+void StatusSetter15::hideCell(bool hidden)
 {
     StatusBarOverrideData *overrides = getOverrides();
     if (hidden)
@@ -782,13 +772,13 @@ void StatusSetter16_3::hideCell(bool hidden)
     applyChanges(overrides);
 }
 
-bool StatusSetter16_3::isWiFiHidden()
+bool StatusSetter15::isWiFiHidden()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::CellularDataNetworkStatusBarItem)] == 1;
 }
 
-void StatusSetter16_3::hideWiFi(bool hidden)
+void StatusSetter15::hideWiFi(bool hidden)
 {
     StatusBarOverrideData *overrides = getOverrides();
     if (hidden)
@@ -807,13 +797,13 @@ void StatusSetter16_3::hideWiFi(bool hidden)
     applyChanges(overrides);
 }
 
-bool StatusSetter16_3::isBatteryHidden()
+bool StatusSetter15::isBatteryHidden()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::MainBatteryStatusBarItem)] == 1;
 }
 
-void StatusSetter16_3::hideBattery(bool hidden)
+void StatusSetter15::hideBattery(bool hidden)
 {
     StatusBarOverrideData *overrides = getOverrides();
     if (hidden)
@@ -829,13 +819,13 @@ void StatusSetter16_3::hideBattery(bool hidden)
     applyChanges(overrides);
 }
 
-bool StatusSetter16_3::isBluetoothHidden()
+bool StatusSetter15::isBluetoothHidden()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::BluetoothStatusBarItem)] == 1;
 }
 
-void StatusSetter16_3::hideBluetooth(bool hidden)
+void StatusSetter15::hideBluetooth(bool hidden)
 {
     StatusBarOverrideData *overrides = getOverrides();
     if (hidden)
@@ -851,13 +841,13 @@ void StatusSetter16_3::hideBluetooth(bool hidden)
     applyChanges(overrides);
 }
 
-bool StatusSetter16_3::isAlarmHidden()
+bool StatusSetter15::isAlarmHidden()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::AlarmStatusBarItem)] == 1;
 }
 
-void StatusSetter16_3::hideAlarm(bool hidden)
+void StatusSetter15::hideAlarm(bool hidden)
 {
     StatusBarOverrideData *overrides = getOverrides();
     if (hidden)
@@ -873,13 +863,13 @@ void StatusSetter16_3::hideAlarm(bool hidden)
     applyChanges(overrides);
 }
 
-bool StatusSetter16_3::isLocationHidden()
+bool StatusSetter15::isLocationHidden()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::LocationStatusBarItem)] == 1;
 }
 
-void StatusSetter16_3::hideLocation(bool hidden)
+void StatusSetter15::hideLocation(bool hidden)
 {
     StatusBarOverrideData *overrides = getOverrides();
     if (hidden)
@@ -895,13 +885,13 @@ void StatusSetter16_3::hideLocation(bool hidden)
     applyChanges(overrides);
 }
 
-bool StatusSetter16_3::isRotationHidden()
+bool StatusSetter15::isRotationHidden()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::RotationLockStatusBarItem)] == 1;
 }
 
-void StatusSetter16_3::hideRotation(bool hidden)
+void StatusSetter15::hideRotation(bool hidden)
 {
     StatusBarOverrideData *overrides = getOverrides();
     if (hidden)
@@ -917,13 +907,13 @@ void StatusSetter16_3::hideRotation(bool hidden)
     applyChanges(overrides);
 }
 
-bool StatusSetter16_3::isAirPlayHidden()
+bool StatusSetter15::isAirPlayHidden()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::AirPlayStatusBarItem)] == 1;
 }
 
-void StatusSetter16_3::hideAirPlay(bool hidden)
+void StatusSetter15::hideAirPlay(bool hidden)
 {
     StatusBarOverrideData *overrides = getOverrides();
     if (hidden)
@@ -939,13 +929,13 @@ void StatusSetter16_3::hideAirPlay(bool hidden)
     applyChanges(overrides);
 }
 
-bool StatusSetter16_3::isCarPlayHidden()
+bool StatusSetter15::isCarPlayHidden()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::CarPlayStatusBarItem)] == 1;
 }
 
-void StatusSetter16_3::hideCarPlay(bool hidden)
+void StatusSetter15::hideCarPlay(bool hidden)
 {
     StatusBarOverrideData *overrides = getOverrides();
     if (hidden)
@@ -961,13 +951,13 @@ void StatusSetter16_3::hideCarPlay(bool hidden)
     applyChanges(overrides);
 }
 
-bool StatusSetter16_3::isVPNHidden()
+bool StatusSetter15::isVPNHidden()
 {
     StatusBarOverrideData *overrides = getOverrides();
     return overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::VPNStatusBarItem)] == 1;
 }
 
-void StatusSetter16_3::hideVPN(bool hidden)
+void StatusSetter15::hideVPN(bool hidden)
 {
     StatusBarOverrideData *overrides = getOverrides();
     if (hidden)

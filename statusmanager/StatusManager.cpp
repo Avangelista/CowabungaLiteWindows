@@ -1,6 +1,11 @@
 #include "StatusManager.h"
-#include "StatusSetter.h"
+#include "StatusSetter15.h"
+#include "StatusSetter16.h"
+#include "StatusSetter16_1.h"
 #include "StatusSetter16_3.h"
+#include "../utils.h"
+#include "../DeviceManager.h"
+#include <QDebug>
 
 StatusManager::StatusManager()
 {
@@ -14,10 +19,16 @@ StatusManager &StatusManager::getInstance()
 
 StatusSetter &StatusManager::getSetter()
 {
-    if (!setter)
-    {
-        // may have to check each time?
+    auto v = DeviceManager::getInstance().getCurrentVersion();
+    if (*v >= Version(16, 3)) {
         setter = new StatusSetter16_3();
+    } else if (*v >= Version(16, 1)) {
+        qDebug() << "16.1";
+        setter = new StatusSetter16_1();
+    } else if (*v >= Version(16)) {
+        setter = new StatusSetter16();
+    } else if (*v >= Version(15)) {
+        setter = new StatusSetter15();
     }
     return *setter;
 }
@@ -282,44 +293,44 @@ void StatusManager::unsetWiFiSignalStrengthBars()
     getSetter().unsetWiFiSignalStrengthBars();
 }
 
-bool StatusManager::isGsmSignalStrengthBarsOverridden()
+bool StatusManager::isGSMSignalStrengthBarsOverridden()
 {
-    return getSetter().isGsmSignalStrengthBarsOverridden();
+    return getSetter().isGSMSignalStrengthBarsOverridden();
 }
 
-int StatusManager::getGsmSignalStrengthBarsOverride()
+int StatusManager::getGSMSignalStrengthBarsOverride()
 {
-    return getSetter().getGsmSignalStrengthBarsOverride();
+    return getSetter().getGSMSignalStrengthBarsOverride();
 }
 
-void StatusManager::setGsmSignalStrengthBars(int id)
+void StatusManager::setGSMSignalStrengthBars(int id)
 {
-    getSetter().setGsmSignalStrengthBars(id);
+    getSetter().setGSMSignalStrengthBars(id);
 }
 
-void StatusManager::unsetGsmSignalStrengthBars()
+void StatusManager::unsetGSMSignalStrengthBars()
 {
-    getSetter().unsetGsmSignalStrengthBars();
+    getSetter().unsetGSMSignalStrengthBars();
 }
 
-bool StatusManager::isSecondaryGsmSignalStrengthBarsOverridden()
+bool StatusManager::isSecondaryGSMSignalStrengthBarsOverridden()
 {
-    return getSetter().isSecondaryGsmSignalStrengthBarsOverridden();
+    return getSetter().isSecondaryGSMSignalStrengthBarsOverridden();
 }
 
-int StatusManager::getSecondaryGsmSignalStrengthBarsOverride()
+int StatusManager::getSecondaryGSMSignalStrengthBarsOverride()
 {
-    return getSetter().getSecondaryGsmSignalStrengthBarsOverride();
+    return getSetter().getSecondaryGSMSignalStrengthBarsOverride();
 }
 
-void StatusManager::setSecondaryGsmSignalStrengthBars(int id)
+void StatusManager::setSecondaryGSMSignalStrengthBars(int id)
 {
-    getSetter().setSecondaryGsmSignalStrengthBars(id);
+    getSetter().setSecondaryGSMSignalStrengthBars(id);
 }
 
-void StatusManager::unsetSecondaryGsmSignalStrengthBars()
+void StatusManager::unsetSecondaryGSMSignalStrengthBars()
 {
-    getSetter().unsetSecondaryGsmSignalStrengthBars();
+    getSetter().unsetSecondaryGSMSignalStrengthBars();
 }
 
 bool StatusManager::isRawWiFiSignalShown()
@@ -332,14 +343,14 @@ void StatusManager::showRawWiFiSignal(bool shown)
     getSetter().showRawWiFiSignal(shown);
 }
 
-bool StatusManager::isRawGsmSignalShown()
+bool StatusManager::isRawGSMSignalShown()
 {
-    return getSetter().isRawGsmSignalShown();
+    return getSetter().isRawGSMSignalShown();
 }
 
-void StatusManager::showRawGsmSignal(bool shown)
+void StatusManager::showRawGSMSignal(bool shown)
 {
-    getSetter().showRawGsmSignal(shown);
+    getSetter().showRawGSMSignal(shown);
 }
 
 bool StatusManager::isDNDHidden()

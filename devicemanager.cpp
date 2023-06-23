@@ -1,6 +1,5 @@
 #include "DeviceManager.h"
 #include "CreateBackup.h"
-#include "utils.h"
 #include <libimobiledevice/libimobiledevice.h>
 #include <libimobiledevice/lockdown.h>
 #include <libimobiledevice/restore.h>
@@ -93,7 +92,7 @@ std::vector<DeviceInfo> DeviceManager::loadDevices() {
                         DeviceInfo deviceInfo;
                         deviceInfo.UUID = uuid;
                         deviceInfo.Name = (device_name != nullptr) ? device_name : "";
-                        deviceInfo.Version = (device_version != nullptr) ? device_version : "";
+                        deviceInfo.Version = (device_version != nullptr) ? Version(device_version) : Version();
 
                         devices.push_back(deviceInfo);
 
@@ -152,13 +151,8 @@ void DeviceManager::setCurrentDeviceIndex(int index) {
         currentDevice = devices.at(index);
         // version check
         this->deviceAvailable = false;
-        auto dotIndex = currentDevice->Version.find('.');
-        if (dotIndex != std::string::npos) {
-            auto majorVersionStr = currentDevice->Version.substr(0, dotIndex);
-            auto majorVersion = std::stoi(majorVersionStr);
-            if (majorVersion >= 15) {
-                this->deviceAvailable = true;
-            }
+        if (currentDevice->Version >= Version(15)) {
+            this->deviceAvailable = true;
         }
         // set up workspace
         DeviceManager::configureWorkspace(currentDevice->UUID);
@@ -186,7 +180,7 @@ const std::optional<std::string> DeviceManager::getCurrentUUID() const {
     }
 }
 
-const std::optional<std::string> DeviceManager::getCurrentVersion() const {
+const std::optional<Version> DeviceManager::getCurrentVersion() const {
     if (this->currentDevice) {
         return this->currentDevice->Version;
     } else {
@@ -255,7 +249,7 @@ void DeviceManager::applyTweaks() {
 }
 
 int DeviceManager::restoreBackupToDevice(const std::string& udid, const std::string& backupDirectory) {
-    std::string command = "idevicebackup2.exe -u " + udid + " -s Backup restore --system --skip-apps --no-reboot " + backupDirectory;
+    std::string command = "idevicebackup2.exe -u " + udid + " -s Backup restore --system --skip-apps " + backupDirectory;
     FILE* pipe = _popen(command.c_str(), "r");
     if (pipe == nullptr) {
         std::cerr << "Failed to execute command." << std::endl;

@@ -102,9 +102,9 @@ void MainWindow::updatePhoneInfo() {
     auto version = DeviceManager::getInstance().getCurrentVersion();
     if (version) {
         if (DeviceManager::getInstance().isDeviceAvailable()) {
-            ui->phoneVersionLbl->setText("<a style=\"text-decoration:none; color: white\" href=\"#\">" + QString::fromStdString(*version) + " (supported) </a>");
+            ui->phoneVersionLbl->setText("<a style=\"text-decoration:none; color: white\" href=\"#\">" + QString::fromStdString(version->toString()) + " (supported) </a>");
         } else {
-            ui->phoneVersionLbl->setText("<a style=\"text-decoration:none; color: white\" href=\"#\">" + QString::fromStdString(*version) + " (not supported) </a>");
+            ui->phoneVersionLbl->setText("<a style=\"text-decoration:none; color: white\" href=\"#\">" + QString::fromStdString(version->toString()) + " (not supported) </a>");
         }
 
     } else {

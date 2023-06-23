@@ -27,9 +27,14 @@ set(PROJECT_SOURCES
         statusmanager/StatusManager.h
         statusmanager/StatusManager.cpp
         statusmanager/StatusSetter.h
+        statusmanager/StatusSetter15.h
+        statusmanager/StatusSetter15.cpp
+        statusmanager/StatusSetter16.h
+        statusmanager/StatusSetter16.cpp
+        statusmanager/StatusSetter16_1.h
+        statusmanager/StatusSetter16_1.cpp
         statusmanager/StatusSetter16_3.h
         statusmanager/StatusSetter16_3.cpp
-        tweaks.h
         utils.h
         utils.cpp
         CreateBackup.h

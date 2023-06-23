@@ -1,7 +1,7 @@
 #ifndef DEVICEMANAGER_H
 #define DEVICEMANAGER_H
 
-#include "tweaks.h"
+#include "utils.h"
 #include <vector>
 #include <unordered_set>
 #include <string>
@@ -10,7 +10,7 @@
 struct DeviceInfo {
     std::string UUID;
     std::string Name;
-    std::string Version;
+    Version Version;
 };
 
 class DeviceManager {
@@ -26,7 +26,7 @@ public:
     const std::optional<std::string> getCurrentWorkspace() const;
 
     const std::optional<std::string> getCurrentUUID() const;
-    const std::optional<std::string> getCurrentVersion() const;
+    const std::optional<Version> getCurrentVersion() const;
     const std::optional<std::string> getCurrentName() const;
 
     bool isDeviceAvailable();
