@@ -91,18 +91,23 @@ QScrollBar:vertical {
     width: 8px;
 }
 
-QScrollBar::handle:vertical {
+QScrollBar:horizontal {
+    background: transparent;
+    height: 8px;
+}
+
+QScrollBar::handle {
     background: #3b3b3b;
     border-radius: 4px;
 }
 
-QScrollBar::add-line:vertical,
-QScrollBar::sub-line:vertical {
+QScrollBar::add-line,
+QScrollBar::sub-line {
     background: none;
 }
 
-QScrollBar::add-page:vertical,
-QScrollBar::sub-page:vertical {
+QScrollBar::add-page,
+QScrollBar::sub-page {
     background: none;
 }
 </string>
@@ -733,6 +738,13 @@ QScrollBar::sub-page:vertical {
             </widget>
            </item>
            <item>
+            <widget class="QLabel" name="label_4">
+             <property name="text">
+              <string>Credits</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QWidget" name="horizontalWidget_2" native="true">
              <layout class="QHBoxLayout" name="horizontalLayout_2">
               <property name="leftMargin">
@@ -748,45 +760,125 @@ QScrollBar::sub-page:vertical {
                <number>9</number>
               </property>
               <item>
-               <widget class="QToolButton" name="toolButton_2">
-                <property name="text">
-                 <string>  Avangelista - Main Dev</string>
+               <widget class="QScrollArea" name="scrollArea_2">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
                 </property>
-                <property name="icon">
-                 <iconset resource="resources.qrc">
-                  <normaloff>:/credits/Avangelista.png</normaloff>:/credits/Avangelista.png</iconset>
-                </property>
-                <property name="toolButtonStyle">
-                 <enum>Qt::ToolButtonTextBesideIcon</enum>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QToolButton" name="toolButton">
-                <property name="text">
-                 <string>  LeminLimez - Main Dev</string>
-                </property>
-                <property name="icon">
-                 <iconset resource="resources.qrc">
-                  <normaloff>:/credits/LeminLimez.png</normaloff>:/credits/LeminLimez.png</iconset>
-                </property>
-                <property name="toolButtonStyle">
-                 <enum>Qt::ToolButtonTextBesideIcon</enum>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <spacer name="horizontalSpacer">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
+                <property name="minimumSize">
                  <size>
-                  <width>40</width>
-                  <height>20</height>
+                  <width>0</width>
+                  <height>0</height>
                  </size>
                 </property>
-               </spacer>
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>55</height>
+                 </size>
+                </property>
+                <property name="frameShape">
+                 <enum>QFrame::NoFrame</enum>
+                </property>
+                <property name="frameShadow">
+                 <enum>QFrame::Plain</enum>
+                </property>
+                <property name="lineWidth">
+                 <number>0</number>
+                </property>
+                <property name="verticalScrollBarPolicy">
+                 <enum>Qt::ScrollBarAlwaysOff</enum>
+                </property>
+                <property name="sizeAdjustPolicy">
+                 <enum>QAbstractScrollArea::AdjustToContentsOnFirstShow</enum>
+                </property>
+                <widget class="QWidget" name="scrollAreaWidgetContents_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>0</x>
+                   <y>0</y>
+                   <width>820</width>
+                   <height>67</height>
+                  </rect>
+                 </property>
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_6">
+                  <property name="leftMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="topMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="rightMargin">
+                   <number>0</number>
+                  </property>
+                  <property name="bottomMargin">
+                   <number>28</number>
+                  </property>
+                  <item>
+                   <widget class="QToolButton" name="toolButton_2">
+                    <property name="text">
+                     <string>  Avangelista - Main Dev</string>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="resources.qrc">
+                      <normaloff>:/credits/Avangelista.png</normaloff>:/credits/Avangelista.png</iconset>
+                    </property>
+                    <property name="toolButtonStyle">
+                     <enum>Qt::ToolButtonTextBesideIcon</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QToolButton" name="toolButton">
+                    <property name="text">
+                     <string>  LeminLimez - Main Dev</string>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="resources.qrc">
+                      <normaloff>:/credits/LeminLimez.png</normaloff>:/credits/LeminLimez.png</iconset>
+                    </property>
+                    <property name="toolButtonStyle">
+                     <enum>Qt::ToolButtonTextBesideIcon</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QToolButton" name="toolButton_5">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>35</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string>  iTech Expert - AirDrop Everyone, Known Wi-Fi Networks</string>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="resources.qrc">
+                      <normaloff>:/credits/LeminLimez.png</normaloff>:/credits/LeminLimez.png</iconset>
+                    </property>
+                    <property name="toolButtonStyle">
+                     <enum>Qt::ToolButtonTextBesideIcon</enum>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </widget>
               </item>
              </layout>
             </widget>

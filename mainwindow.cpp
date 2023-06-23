@@ -26,8 +26,12 @@ void MainWindow::updateInterfaceForNewDevice() {
     // Update names
     MainWindow::updatePhoneInfo();
 
-    // Load status bar overrides
-    MainWindow::loadStatusBar();
+    if (DeviceManager::getInstance().isDeviceAvailable()) {
+        // Load status bar overrides
+        MainWindow::loadStatusBar();
+    } else {
+        // reset all options and disable the pages
+    }
 }
 
 // Sidebar
