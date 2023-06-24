@@ -31,16 +31,32 @@ private slots:
 
     // Home
     void on_toolButton_3_clicked();
+    void on_phoneVersionLbl_linkActivated(const QString &link);
 
     // Status Bar
     void on_statusBarEnabledChk_toggled(bool checked);
-    void on_primaryCarrierTextChk_clicked(bool checked);
-    void on_primaryCarrierTextTxt_textEdited(const QString &arg1);
-    void on_hideBatteryChk_clicked(bool checked);
 
+    void on_pDefaultRdo_clicked();
+    void on_pShowRdo_clicked();
+    void on_pHideRdo_clicked();
+    void on_pCarrierChk_clicked(bool checked);
+    void on_pCarrierTxt_textEdited(const QString &text);
+    void on_pBadgeChk_clicked(bool checked);
+    void on_pBadgeTxt_textEdited(const QString &text);
+    void on_pStrengthChk_clicked(bool checked);
+    void on_pStrengthSld_sliderMoved(int pos);
+    void on_sDefaultRdo_clicked();
+    void on_sShowRdo_clicked();
+    void on_sHideRdo_clicked();
+    void on_sCarrierChk_clicked(bool checked);
+    void on_sCarrierTxt_textEdited(const QString &text);
+    void on_sBadgeChk_clicked(bool checked);
+    void on_sBadgeTxt_textEdited(const QString &text);
+    void on_sStrengthChk_clicked(bool checked);
+    void on_sStrengthSld_sliderMoved(int pos);
+
+    // Apply
     void on_applyTweaksBtn_clicked();
-
-    void on_phoneVersionLbl_linkActivated(const QString &link);
 
 private:
     Ui::CowabungaLite *ui;

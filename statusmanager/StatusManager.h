@@ -40,10 +40,14 @@ public:
     std::string getCrumbOverride();
     void setCrumb(std::string text);
     void unsetCrumb();
-    bool isCellularServiceShown();
-    void showCellularService(bool shown);
-    bool isSecondaryCellularServiceShown();
-    void showSecondaryCellularService(bool shown);
+    bool isCellularServiceOverridden();
+    bool getCellularServiceOverride();
+    void setCellularService(bool shown);
+    void unsetCellularService();
+    bool isSecondaryCellularServiceOverridden();
+    bool getSecondaryCellularServiceOverride();
+    void setSecondaryCellularService(bool shown);
+    void unsetSecondaryCellularService();
     bool isDataNetworkTypeOverridden();
     int getDataNetworkTypeOverride();
     void setDataNetworkType(int id);

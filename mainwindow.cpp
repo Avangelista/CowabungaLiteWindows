@@ -120,8 +120,8 @@ void MainWindow::on_toolButton_3_clicked()
 // Status Bar Page
 
 void MainWindow::loadStatusBar() {
-    ui->primaryCarrierTextChk->setCheckState(Qt::CheckState(StatusManager::getInstance().isCarrierOverridden() ? Qt::Checked : Qt::Unchecked));
-    ui->primaryCarrierTextTxt->setText(QString::fromStdString(StatusManager::getInstance().getCarrierOverride()));
+    ui->pCarrierChk->setCheckState(Qt::CheckState(StatusManager::getInstance().isCarrierOverridden() ? Qt::Checked : Qt::Unchecked));
+    ui->pCarrierTxt->setText(QString::fromStdString(StatusManager::getInstance().getCarrierOverride()));
     ui->hideBatteryChk->setCheckState(Qt::CheckState(StatusManager::getInstance().isBatteryHidden() ? Qt::Checked : Qt::Unchecked));
 }
 
@@ -132,27 +132,152 @@ void MainWindow::on_statusBarEnabledChk_toggled(bool checked)
     MainWindow::updateEnabledTweaks();
 }
 
-void MainWindow::on_primaryCarrierTextChk_clicked(bool checked)
+void MainWindow::on_pDefaultRdo_clicked()
+{
+    StatusManager::getInstance().unsetCellularService();
+}
+
+void MainWindow::on_pShowRdo_clicked()
+{
+    StatusManager::getInstance().setCellularService(true);
+}
+
+void MainWindow::on_pHideRdo_clicked()
+{
+    StatusManager::getInstance().setCellularService(false);
+}
+
+void MainWindow::on_pCarrierChk_clicked(bool checked)
 {
     if (checked) {
-        StatusManager::getInstance().setCarrier(ui->primaryCarrierTextTxt->text().toStdString());
+        StatusManager::getInstance().setCarrier(ui->pCarrierTxt->text().toStdString());
     } else {
         StatusManager::getInstance().unsetCarrier();
     }
 
 }
 
-void MainWindow::on_primaryCarrierTextTxt_textEdited(const QString &arg1)
+void MainWindow::on_pCarrierTxt_textEdited(const QString &text)
 {
-    if (ui->primaryCarrierTextChk->checkState()) {
-        StatusManager::getInstance().setCarrier(ui->primaryCarrierTextTxt->text().toStdString());
+    if (ui->pCarrierChk->checkState()) {
+        StatusManager::getInstance().setCarrier(ui->pCarrierTxt->text().toStdString());
     }
 }
 
-void MainWindow::on_hideBatteryChk_clicked(bool checked)
+void MainWindow::on_pBadgeChk_clicked(bool checked)
 {
-    StatusManager::getInstance().hideBattery(checked);
+    if (checked) {
+        StatusManager::getInstance().setPrimaryServiceBadge(ui->pBadgeTxt->text().toStdString());
+    } else {
+        StatusManager::getInstance().unsetPrimaryServiceBadge();
+    }
+
 }
+
+void MainWindow::on_pBadgeTxt_textEdited(const QString &text)
+{
+    if (ui->pBadgeChk->checkState()) {
+        StatusManager::getInstance().setPrimaryServiceBadge(ui->pBadgeTxt->text().toStdString());
+    }
+}
+
+void MainWindow::on_pStrengthChk_clicked(bool checked)
+{
+    if (checked) {
+        StatusManager::getInstance().setGSMSignalStrengthBars(ui->pStrengthSld->value());
+    } else {
+        StatusManager::getInstance().unsetGSMSignalStrengthBars();
+    }
+
+}
+
+void MainWindow::on_pStrengthSld_sliderMoved(int pos)
+{
+    if (ui->pStrengthChk->checkState()) {
+        StatusManager::getInstance().setGSMSignalStrengthBars(ui->pStrengthSld->value());
+    }
+}
+
+void MainWindow::on_sDefaultRdo_clicked()
+{
+    StatusManager::getInstance().unsetSecondaryCellularService();
+}
+
+void MainWindow::on_sShowRdo_clicked()
+{
+    StatusManager::getInstance().setSecondaryCellularService(true);
+}
+
+void MainWindow::on_sHideRdo_clicked()
+{
+    StatusManager::getInstance().setSecondaryCellularService(false);
+}
+
+void MainWindow::on_sCarrierChk_clicked(bool checked)
+{
+    if (checked) {
+        StatusManager::getInstance().setSecondaryCarrier(ui->sCarrierTxt->text().toStdString());
+    } else {
+        StatusManager::getInstance().unsetSecondaryCarrier();
+    }
+
+}
+
+void MainWindow::on_sCarrierTxt_textEdited(const QString &text)
+{
+    if (ui->sCarrierChk->checkState()) {
+        StatusManager::getInstance().setSecondaryCarrier(ui->sCarrierTxt->text().toStdString());
+    }
+}
+
+void MainWindow::on_sBadgeChk_clicked(bool checked)
+{
+    if (checked) {
+        StatusManager::getInstance().setSecondaryServiceBadge(ui->sBadgeTxt->text().toStdString());
+    } else {
+        StatusManager::getInstance().unsetSecondaryServiceBadge();
+    }
+
+}
+
+void MainWindow::on_sBadgeTxt_textEdited(const QString &text)
+{
+    if (ui->sBadgeChk->checkState()) {
+        StatusManager::getInstance().setSecondaryServiceBadge(ui->sBadgeTxt->text().toStdString());
+    }
+}
+
+void MainWindow::on_sStrengthChk_clicked(bool checked)
+{
+    if (checked) {
+        StatusManager::getInstance().setSecondaryGSMSignalStrengthBars(ui->sStrengthSld->value());
+    } else {
+        StatusManager::getInstance().unsetSecondaryGSMSignalStrengthBars();
+    }
+
+}
+
+void MainWindow::on_sStrengthSld_sliderMoved(int pos)
+{
+    if (ui->sStrengthChk->checkState()) {
+        StatusManager::getInstance().setSecondaryGSMSignalStrengthBars(ui->sStrengthSld->value());
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+//void MainWindow::on_hideBatteryChk_clicked(bool checked)
+//{
+//    StatusManager::getInstance().hideBattery(checked);
+//}
 
 // Apply Page
 

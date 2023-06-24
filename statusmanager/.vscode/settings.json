@@ -52,6 +52,12 @@
         "xstddef": "cpp",
         "xstring": "cpp",
         "xtr1common": "cpp",
-        "xutility": "cpp"
+        "xutility": "cpp",
+        "list": "cpp",
+        "optional": "cpp",
+        "sstream": "cpp",
+        "unordered_set": "cpp",
+        "vector": "cpp",
+        "xhash": "cpp"
     }
 }

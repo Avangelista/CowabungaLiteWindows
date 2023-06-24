@@ -193,24 +193,44 @@ void StatusManager::unsetCrumb()
     getSetter().unsetCrumb();
 }
 
-bool StatusManager::isCellularServiceShown()
+bool StatusManager::isCellularServiceOverridden()
 {
-    return getSetter().isCellularServiceShown();
+    return getSetter().isCellularServiceOverridden();
 }
 
-void StatusManager::showCellularService(bool shown)
+bool StatusManager::getCellularServiceOverride()
 {
-    getSetter().showCellularService(shown);
+    return getSetter().getCellularServiceOverride();
 }
 
-bool StatusManager::isSecondaryCellularServiceShown()
+void StatusManager::setCellularService(bool shown)
 {
-    return getSetter().isSecondaryCellularServiceShown();
+    getSetter().setCellularService(shown);
 }
 
-void StatusManager::showSecondaryCellularService(bool shown)
+void StatusManager::unsetCellularService()
 {
-    getSetter().showSecondaryCellularService(shown);
+    getSetter().unsetCellularService();
+}
+
+bool StatusManager::isSecondaryCellularServiceOverridden()
+{
+    return getSetter().isSecondaryCellularServiceOverridden();
+}
+
+bool StatusManager::getSecondaryCellularServiceOverride()
+{
+    return getSetter().getSecondaryCellularServiceOverride();
+}
+
+void StatusManager::setSecondaryCellularService(bool shown)
+{
+    getSetter().setSecondaryCellularService(shown);
+}
+
+void StatusManager::unsetSecondaryCellularService()
+{
+    getSetter().unsetSecondaryCellularService();
 }
 
 bool StatusManager::isDataNetworkTypeOverridden()
