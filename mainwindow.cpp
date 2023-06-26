@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     ui->pages->setCurrentIndex(static_cast<int>(Page::Home));
     refreshDevices();
+    qDebug() << sizeof(unsigned int) << " " << sizeof(int);
 }
 
 MainWindow::~MainWindow()
@@ -193,8 +194,9 @@ void MainWindow::on_pStrengthChk_clicked(bool checked)
 
 void MainWindow::on_pStrengthSld_sliderMoved(int pos)
 {
+    ui->pStrengthLbl->setText(QString::number(pos) + (pos == 1 ? " Bar" : " Bars"));
     if (ui->pStrengthChk->checkState()) {
-        StatusManager::getInstance().setGSMSignalStrengthBars(ui->pStrengthSld->value());
+        StatusManager::getInstance().setGSMSignalStrengthBars(pos);
     }
 }
 
@@ -259,25 +261,168 @@ void MainWindow::on_sStrengthChk_clicked(bool checked)
 
 void MainWindow::on_sStrengthSld_sliderMoved(int pos)
 {
+    ui->sStrengthLbl->setText(QString::number(pos) + (pos == 1 ? " Bar" : " Bars"));
     if (ui->sStrengthChk->checkState()) {
-        StatusManager::getInstance().setSecondaryGSMSignalStrengthBars(ui->sStrengthSld->value());
+        StatusManager::getInstance().setSecondaryGSMSignalStrengthBars(pos);
     }
 }
 
+void MainWindow::on_timeChk_clicked(bool checked)
+{
+    if (checked) {
+        StatusManager::getInstance().setTime(ui->timeTxt->text().toStdString());
+    } else {
+        StatusManager::getInstance().unsetTime();
+    }
 
+}
 
+void MainWindow::on_timeTxt_textEdited(const QString &text)
+{
+    if (ui->timeChk->checkState()) {
+        StatusManager::getInstance().setTime(ui->timeTxt->text().toStdString());
+    }
+}
 
+void MainWindow::on_breadcrumbChk_clicked(bool checked)
+{
+    if (checked) {
+        StatusManager::getInstance().setCrumb(ui->breadcrumbTxt->text().toStdString());
+    } else {
+        StatusManager::getInstance().unsetCrumb();
+    }
 
+}
 
+void MainWindow::on_breadcrumbTxt_textEdited(const QString &text)
+{
+    if (ui->breadcrumbChk->checkState()) {
+        StatusManager::getInstance().setCrumb(ui->breadcrumbTxt->text().toStdString());
+    }
+}
 
+void MainWindow::on_batteryDetailChk_clicked(bool checked)
+{
+    if (checked) {
+        StatusManager::getInstance().setBatteryDetail(ui->batteryDetailTxt->text().toStdString());
+    } else {
+        StatusManager::getInstance().unsetBatteryDetail();
+    }
 
+}
 
+void MainWindow::on_batteryDetailTxt_textEdited(const QString &text)
+{
+    if (ui->batteryDetailChk->checkState()) {
+        StatusManager::getInstance().setBatteryDetail(ui->batteryDetailTxt->text().toStdString());
+    }
+}
 
+void MainWindow::on_batteryCapacityChk_clicked(bool checked)
+{
+    if (checked) {
+        StatusManager::getInstance().setBatteryCapacity(ui->batteryCapacitySld->value());
+    } else {
+        StatusManager::getInstance().unsetBatteryCapacity();
+    }
 
-//void MainWindow::on_hideBatteryChk_clicked(bool checked)
-//{
-//    StatusManager::getInstance().hideBattery(checked);
-//}
+}
+
+void MainWindow::on_batteryCapacitySld_sliderMoved(int pos)
+{
+    ui->batteryCapacityLbl->setText(QString::number(pos) + "%");
+    if (ui->batteryCapacityChk->checkState()) {
+        StatusManager::getInstance().setBatteryCapacity(pos);
+    }
+}
+
+void MainWindow::on_wifiStrengthChk_clicked(bool checked)
+{
+    if (checked) {
+        StatusManager::getInstance().setWiFiSignalStrengthBars(ui->wifiStrengthSld->value());
+    } else {
+        StatusManager::getInstance().unsetWiFiSignalStrengthBars();
+    }
+
+}
+
+void MainWindow::on_wifiStrengthSld_sliderMoved(int pos)
+{
+    ui->wifiStrengthLbl->setText(QString::number(pos) + (pos == 1 ? " Bar" : " Bars"));
+    if (ui->wifiStrengthChk->checkState()) {
+        StatusManager::getInstance().setWiFiSignalStrengthBars(pos);
+    }
+}
+
+void MainWindow::on_numericWifiChk_clicked(bool checked)
+{
+   StatusManager::getInstance().showRawWiFiSignal(checked);
+}
+
+void MainWindow::on_numericCellChk_clicked(bool checked)
+{
+   StatusManager::getInstance().showRawGSMSignal(checked);
+}
+
+void MainWindow::on_hideDNDChk_clicked(bool checked)
+{
+   StatusManager::getInstance().hideDND(checked);
+}
+
+void MainWindow::on_hideAirplaneChk_clicked(bool checked)
+{
+   StatusManager::getInstance().hideAirplane(checked);
+}
+
+void MainWindow::on_hideCellChk_clicked(bool checked)
+{
+   StatusManager::getInstance().hideCell(checked);
+}
+
+void MainWindow::on_hideWifiChk_clicked(bool checked)
+{
+   StatusManager::getInstance().hideWiFi(checked);
+}
+
+void MainWindow::on_hideBatteryChk_clicked(bool checked)
+{
+   StatusManager::getInstance().hideBattery(checked);
+}
+
+void MainWindow::on_hideBluetoothChk_clicked(bool checked)
+{
+   StatusManager::getInstance().hideBluetooth(checked);
+}
+
+void MainWindow::on_hideAlarmChk_clicked(bool checked)
+{
+   StatusManager::getInstance().hideAlarm(checked);
+}
+
+void MainWindow::on_hideLocationChk_clicked(bool checked)
+{
+   StatusManager::getInstance().hideLocation(checked);
+}
+
+void MainWindow::on_hideRotationChk_clicked(bool checked)
+{
+   StatusManager::getInstance().hideRotation(checked);
+}
+
+void MainWindow::on_hideAirPlayChk_clicked(bool checked)
+{
+   StatusManager::getInstance().hideAirPlay(checked);
+}
+
+void MainWindow::on_hideCarPlayChk_clicked(bool checked)
+{
+   StatusManager::getInstance().hideCarPlay(checked);
+}
+
+void MainWindow::on_hideVPNChk_clicked(bool checked)
+{
+   StatusManager::getInstance().hideVPN(checked);
+}
 
 // Apply Page
 

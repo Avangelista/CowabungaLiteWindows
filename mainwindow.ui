@@ -1180,7 +1180,7 @@ QScrollBar::sub-page {
                      </font>
                     </property>
                     <property name="text">
-                     <string>Primary Carrier</string>
+                     <string>Primary Cellular</string>
                     </property>
                    </widget>
                   </item>
@@ -1286,7 +1286,7 @@ QScrollBar::sub-page {
                   <item>
                    <widget class="QCheckBox" name="pStrengthChk">
                     <property name="text">
-                     <string>Change Cellular Signal Strength Bars</string>
+                     <string>Change Signal Strength Bars</string>
                     </property>
                    </widget>
                   </item>
@@ -1314,7 +1314,7 @@ QScrollBar::sub-page {
                         </size>
                        </property>
                        <property name="text">
-                        <string>3 Bars</string>
+                        <string>0 Bars</string>
                        </property>
                       </widget>
                      </item>
@@ -1323,8 +1323,11 @@ QScrollBar::sub-page {
                        <property name="maximum">
                         <number>3</number>
                        </property>
+                       <property name="singleStep">
+                        <number>0</number>
+                       </property>
                        <property name="pageStep">
-                        <number>1</number>
+                        <number>0</number>
                        </property>
                        <property name="orientation">
                         <enum>Qt::Horizontal</enum>
@@ -1361,7 +1364,7 @@ QScrollBar::sub-page {
                      </font>
                     </property>
                     <property name="text">
-                     <string>Secondary Carrier</string>
+                     <string>Secondary Cellular</string>
                     </property>
                    </widget>
                   </item>
@@ -1461,24 +1464,55 @@ QScrollBar::sub-page {
                   <item>
                    <widget class="QCheckBox" name="sStrengthChk">
                     <property name="text">
-                     <string>Change Cellular Signal Strength Bars</string>
+                     <string>Change Signal Strength Bars</string>
                     </property>
                    </widget>
                   </item>
                   <item>
-                   <widget class="QSlider" name="sStrengthSld">
-                    <property name="maximum">
-                     <number>3</number>
-                    </property>
-                    <property name="pageStep">
-                     <number>1</number>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="tickPosition">
-                     <enum>QSlider::TicksBelow</enum>
-                    </property>
+                   <widget class="QWidget" name="horizontalWidget" native="true">
+                    <layout class="QHBoxLayout" name="horizontalLayout_10">
+                     <property name="leftMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>0</number>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="sStrengthLbl">
+                       <property name="minimumSize">
+                        <size>
+                         <width>50</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="text">
+                        <string>0 Bars</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QSlider" name="sStrengthSld">
+                       <property name="maximum">
+                        <number>3</number>
+                       </property>
+                       <property name="singleStep">
+                        <number>0</number>
+                       </property>
+                       <property name="pageStep">
+                        <number>0</number>
+                       </property>
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="tickPosition">
+                        <enum>QSlider::TicksBelow</enum>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
                    </widget>
                   </item>
                   <item>
@@ -1518,7 +1552,7 @@ QScrollBar::sub-page {
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLineEdit" name="breakcrumbTxt">
+                   <widget class="QLineEdit" name="breadcrumbTxt">
                     <property name="placeholderText">
                      <string>Breadcrumb Text</string>
                     </property>
@@ -1546,25 +1580,62 @@ QScrollBar::sub-page {
                    </widget>
                   </item>
                   <item>
-                   <widget class="QSlider" name="batteryCapacitySld">
-                    <property name="maximum">
-                     <number>100</number>
-                    </property>
-                    <property name="tracking">
-                     <bool>true</bool>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="invertedAppearance">
-                     <bool>false</bool>
-                    </property>
-                    <property name="invertedControls">
-                     <bool>false</bool>
-                    </property>
-                    <property name="tickPosition">
-                     <enum>QSlider::TicksBelow</enum>
-                    </property>
+                   <widget class="QWidget" name="horizontalWidget" native="true">
+                    <layout class="QHBoxLayout" name="horizontalLayout_11">
+                     <property name="leftMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>0</number>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="batteryCapacityLbl">
+                       <property name="minimumSize">
+                        <size>
+                         <width>50</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="text">
+                        <string>0%</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QSlider" name="batteryCapacitySld">
+                       <property name="maximum">
+                        <number>100</number>
+                       </property>
+                       <property name="singleStep">
+                        <number>0</number>
+                       </property>
+                       <property name="pageStep">
+                        <number>0</number>
+                       </property>
+                       <property name="tracking">
+                        <bool>true</bool>
+                       </property>
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="invertedAppearance">
+                        <bool>false</bool>
+                       </property>
+                       <property name="invertedControls">
+                        <bool>false</bool>
+                       </property>
+                       <property name="tickPosition">
+                        <enum>QSlider::TicksBelow</enum>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
                    </widget>
                   </item>
                   <item>
@@ -1575,19 +1646,53 @@ QScrollBar::sub-page {
                    </widget>
                   </item>
                   <item>
-                   <widget class="QSlider" name="wifiStrengthSld">
-                    <property name="maximum">
-                     <number>3</number>
-                    </property>
-                    <property name="pageStep">
-                     <number>1</number>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                    <property name="tickPosition">
-                     <enum>QSlider::TicksBelow</enum>
-                    </property>
+                   <widget class="QWidget" name="horizontalWidget" native="true">
+                    <layout class="QHBoxLayout" name="horizontalLayout_12">
+                     <property name="leftMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="topMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="rightMargin">
+                      <number>0</number>
+                     </property>
+                     <property name="bottomMargin">
+                      <number>0</number>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="wifiStrengthLbl">
+                       <property name="minimumSize">
+                        <size>
+                         <width>50</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="text">
+                        <string>0 Bars</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QSlider" name="wifiStrengthSld">
+                       <property name="maximum">
+                        <number>3</number>
+                       </property>
+                       <property name="singleStep">
+                        <number>0</number>
+                       </property>
+                       <property name="pageStep">
+                        <number>0</number>
+                       </property>
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="tickPosition">
+                        <enum>QSlider::TicksBelow</enum>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
                    </widget>
                   </item>
                   <item>
@@ -1637,13 +1742,6 @@ QScrollBar::sub-page {
                    <widget class="QCheckBox" name="hideAirplaneChk">
                     <property name="text">
                      <string>Hide Airplane Mode</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QCheckBox" name="hideCellChk">
-                    <property name="text">
-                     <string>Hide Cellular*</string>
                     </property>
                    </widget>
                   </item>
@@ -1711,18 +1809,24 @@ QScrollBar::sub-page {
                    </widget>
                   </item>
                   <item>
-                   <widget class="QLabel" name="label_11">
-                    <property name="text">
-                     <string>*Will also hide carrier name.</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
                    <widget class="QLabel" name="label_12">
                     <property name="text">
                      <string>^Will also hide cellular data indicator.</string>
                     </property>
                    </widget>
+                  </item>
+                  <item>
+                   <spacer name="verticalSpacer_3">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>20</width>
+                      <height>40</height>
+                     </size>
+                    </property>
+                   </spacer>
                   </item>
                  </layout>
                 </widget>

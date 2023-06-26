@@ -1,6 +1,7 @@
 #include "StatusSetter16_1.h"
 #include "../devicemanager.h"
 #include <QDebug>
+#include <QtGlobal>
 
 enum class StatusBarItem : int
 {
@@ -55,8 +56,6 @@ enum class BatteryState : unsigned int
 {
     BatteryStateUnplugged = 0
 };
-
-#pragma pack(push, 1)
 
 struct StatusBarRawData
 {
@@ -122,7 +121,7 @@ struct StatusBarRawData
 struct StatusBarOverrideData
 {
     bool overrideItemIsEnabled[45];
-    char padding1;
+    char padding;
     unsigned int overrideTimeString : 1;
     unsigned int overrideDateString : 1;
     unsigned int overrideGSMSignalStrengthRaw : 1;
@@ -159,11 +158,8 @@ struct StatusBarOverrideData
     unsigned int overrideSecondaryServiceBadgeString : 1;
     unsigned int overrideQuietModeImage : 1;
     unsigned int overrideExtra1 : 1;
-    unsigned long long padding2;
     StatusBarRawData values;
 };
-
-#pragma pack(pop)
 
 // Getting setting
 
@@ -180,7 +176,7 @@ namespace
         if (!outfile)
             return;
 
-        char padding[250] = {'\0'};
+        char padding[256] = {'\0'};
 
         outfile.write(reinterpret_cast<char *>(overrides), sizeof(StatusBarOverrideData));
         outfile.write(padding, sizeof(padding));
@@ -188,7 +184,6 @@ namespace
 
     StatusBarOverrideData *getOverrides()
     {
-        qDebug() << "good good";
         auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
         if (!workspace)
             return nullptr;
@@ -207,7 +202,7 @@ namespace
         infile.seekg(0, std::ifstream::beg);
 
         // Check if the file size matches the structure size + padding
-        if (fileSize != sizeof(StatusBarOverrideData) + 250)
+        if (fileSize != sizeof(StatusBarOverrideData) + 256)
         {
             StatusBarOverrideData *overrides = new StatusBarOverrideData();
             return overrides;
@@ -496,20 +491,23 @@ bool StatusSetter16_1::isSecondaryCellularServiceOverridden()
 bool StatusSetter16_1::getSecondaryCellularServiceOverride()
 {
     StatusBarOverrideData *overrides = getOverrides();
-    return overrides->values.itemIsEnabled[static_cast<int>(StatusBarItem::SecondaryCellularDataNetworkStatusBarItem)] == 1;
+    return overrides->values.itemIsEnabled[static_cast<int>(StatusBarItem::SecondaryCellularServiceStatusBarItem)] == 1;
 }
 
 void StatusSetter16_1::setSecondaryCellularService(bool shown)
 {
     StatusBarOverrideData *overrides = getOverrides();
-    overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::SecondaryCellularDataNetworkStatusBarItem)] = 1;
+    overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::SecondaryCellularServiceStatusBarItem)] = 1;
+    overrides->overrideSecondaryCellularConfigured = 1;
     if (shown)
     {
-        overrides->values.itemIsEnabled[static_cast<int>(StatusBarItem::SecondaryCellularDataNetworkStatusBarItem)] = 1;
+        overrides->values.itemIsEnabled[static_cast<int>(StatusBarItem::SecondaryCellularServiceStatusBarItem)] = 1;
+        overrides->values.secondaryCellularConfigured = 1;
     }
     else
     {
-        overrides->values.itemIsEnabled[static_cast<int>(StatusBarItem::SecondaryCellularDataNetworkStatusBarItem)] = 0;
+        overrides->values.itemIsEnabled[static_cast<int>(StatusBarItem::SecondaryCellularServiceStatusBarItem)] = 0;
+        overrides->values.secondaryCellularConfigured = 1;
     }
 
     applyChanges(overrides);
@@ -518,7 +516,8 @@ void StatusSetter16_1::setSecondaryCellularService(bool shown)
 void StatusSetter16_1::unsetSecondaryCellularService()
 {
     StatusBarOverrideData *overrides = getOverrides();
-    overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::SecondaryCellularDataNetworkStatusBarItem)] = 0;
+    overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::SecondaryCellularServiceStatusBarItem)] = 0;
+    overrides->overrideSecondaryCellularConfigured = 0;
     applyChanges(overrides);
 }
 

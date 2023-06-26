@@ -35,7 +35,6 @@ private slots:
 
     // Status Bar
     void on_statusBarEnabledChk_toggled(bool checked);
-
     void on_pDefaultRdo_clicked();
     void on_pShowRdo_clicked();
     void on_pHideRdo_clicked();
@@ -54,6 +53,30 @@ private slots:
     void on_sBadgeTxt_textEdited(const QString &text);
     void on_sStrengthChk_clicked(bool checked);
     void on_sStrengthSld_sliderMoved(int pos);
+    void on_timeChk_clicked(bool checked);
+    void on_timeTxt_textEdited(const QString &text);
+    void on_breadcrumbChk_clicked(bool checked);
+    void on_breadcrumbTxt_textEdited(const QString &text);
+    void on_batteryDetailChk_clicked(bool checked);
+    void on_batteryDetailTxt_textEdited(const QString &text);
+    void on_batteryCapacityChk_clicked(bool checked);
+    void on_batteryCapacitySld_sliderMoved(int pos);
+    void on_wifiStrengthChk_clicked(bool checked);
+    void on_wifiStrengthSld_sliderMoved(int pos);
+    void on_numericWifiChk_clicked(bool checked);
+    void on_numericCellChk_clicked(bool checked);
+    void on_hideDNDChk_clicked(bool checked);
+    void on_hideAirplaneChk_clicked(bool checked);
+    void on_hideCellChk_clicked(bool checked);
+    void on_hideWifiChk_clicked(bool checked);
+    void on_hideBatteryChk_clicked(bool checked);
+    void on_hideBluetoothChk_clicked(bool checked);
+    void on_hideAlarmChk_clicked(bool checked);
+    void on_hideLocationChk_clicked(bool checked);
+    void on_hideRotationChk_clicked(bool checked);
+    void on_hideAirPlayChk_clicked(bool checked);
+    void on_hideCarPlayChk_clicked(bool checked);
+    void on_hideVPNChk_clicked(bool checked);
 
     // Apply
     void on_applyTweaksBtn_clicked();

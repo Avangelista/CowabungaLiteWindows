@@ -43,6 +43,8 @@ set(PROJECT_SOURCES
         ${QRC_FILES}
 )
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mno-ms-bitfields -malign-double")
+
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(CowabungaLite
         MANUAL_FINALIZATION
