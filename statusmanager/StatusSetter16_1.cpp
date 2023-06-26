@@ -1,7 +1,5 @@
 #include "StatusSetter16_1.h"
 #include "../devicemanager.h"
-#include <QDebug>
-#include <QtGlobal>
 
 enum class StatusBarItem : int
 {

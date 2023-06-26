@@ -492,20 +492,23 @@ bool StatusSetter16_3::isSecondaryCellularServiceOverridden()
 bool StatusSetter16_3::getSecondaryCellularServiceOverride()
 {
     StatusBarOverrideData *overrides = getOverrides();
-    return overrides->values.itemIsEnabled[static_cast<int>(StatusBarItem::SecondaryCellularDataNetworkStatusBarItem)] == 1;
+    return overrides->values.itemIsEnabled[static_cast<int>(StatusBarItem::SecondaryCellularServiceStatusBarItem)] == 1;
 }
 
 void StatusSetter16_3::setSecondaryCellularService(bool shown)
 {
     StatusBarOverrideData *overrides = getOverrides();
-    overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::SecondaryCellularDataNetworkStatusBarItem)] = 1;
+    overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::SecondaryCellularServiceStatusBarItem)] = 1;
+    overrides->overrideSecondaryCellularConfigured = 1;
     if (shown)
     {
-        overrides->values.itemIsEnabled[static_cast<int>(StatusBarItem::SecondaryCellularDataNetworkStatusBarItem)] = 1;
+        overrides->values.itemIsEnabled[static_cast<int>(StatusBarItem::SecondaryCellularServiceStatusBarItem)] = 1;
+        overrides->values.secondaryCellularConfigured = 1;
     }
     else
     {
-        overrides->values.itemIsEnabled[static_cast<int>(StatusBarItem::SecondaryCellularDataNetworkStatusBarItem)] = 0;
+        overrides->values.itemIsEnabled[static_cast<int>(StatusBarItem::SecondaryCellularServiceStatusBarItem)] = 0;
+        overrides->values.secondaryCellularConfigured = 1;
     }
 
     applyChanges(overrides);
@@ -514,7 +517,8 @@ void StatusSetter16_3::setSecondaryCellularService(bool shown)
 void StatusSetter16_3::unsetSecondaryCellularService()
 {
     StatusBarOverrideData *overrides = getOverrides();
-    overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::SecondaryCellularDataNetworkStatusBarItem)] = 0;
+    overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::SecondaryCellularServiceStatusBarItem)] = 0;
+    overrides->overrideSecondaryCellularConfigured = 0;
     applyChanges(overrides);
 }
 
