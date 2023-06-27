@@ -31,6 +31,7 @@ void MainWindow::updateInterfaceForNewDevice()
     {
         // Load status bar overrides
         MainWindow::loadStatusBar();
+        MainWindow::loadSpringboardOptions();
     }
     else
     {
@@ -141,7 +142,7 @@ void MainWindow::on_toolButton_3_clicked()
         return;
     auto location = *workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.UIKit.plist";
     auto value = PlistManager::getPlistValue(location, "UIAnimationDragCoefficient");
-    qDebug() << "Value: " << dynamic_cast<PList::Real*>(value)->GetValue();
+    qDebug() << "Value: " << dynamic_cast<PList::Real *>(value)->GetValue();
 }
 
 // Status Bar Page
@@ -486,6 +487,45 @@ void MainWindow::on_hideVPNChk_clicked(bool checked)
 
 // Springboard Options Page
 
+void MainWindow::loadSpringboardOptions()
+{
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    // fix this
+
+    auto location = *workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.UIKit.plist";
+    auto value = PlistManager::getPlistValue(location, "UIAnimationDragCoefficient");
+    double speed = dynamic_cast<PList::Real *>(value)->GetValue();
+    ui->UIAnimSpeedLbl->setText(QString::number(speed) + (speed == 1 ? " (Default)" : speed > 1 ? " (Slow)"
+                                                                                                : " (Fast)"));
+    ui->UIAnimSpeedSld->setValue(speed * 100);
+    location = *workspace + "/SpringboardOptions/ConfigProfileDomain/Library/ConfigurationProfiles/SharedDeviceConfiguration.plist";
+    value = PlistManager::getPlistValue(location, "LockScreenFootnote");
+    ui->footnoteTxt->setText(QString::fromStdString(dynamic_cast<PList::String *>(value)->GetValue()));
+    location = *workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.springboard.plist";
+    value = PlistManager::getPlistValue(location, "SBDontLockAfterCrash");
+    ui->disableLockRespringChk->setCheckState(
+        Qt::CheckState(dynamic_cast<PList::Boolean *>(value)->GetValue() ? Qt::Checked : Qt::Unchecked));
+    value = PlistManager::getPlistValue(location, "SBDontDimOrLockOnAC");
+    ui->disableDimmingChk->setCheckState(
+        Qt::CheckState(dynamic_cast<PList::Boolean *>(value)->GetValue() ? Qt::Checked : Qt::Unchecked));
+    value = PlistManager::getPlistValue(location, "SBHideLowPowerAlerts");
+    ui->disableBatteryAlertsChk->setCheckState(
+        Qt::CheckState(dynamic_cast<PList::Boolean *>(value)->GetValue() ? Qt::Checked : Qt::Unchecked));
+    value = PlistManager::getPlistValue(location, "SBControlCenterEnabledInLockScreen");
+    ui->enableLSCCChk->setCheckState(
+        Qt::CheckState(dynamic_cast<PList::Boolean *>(value)->GetValue() ? Qt::Checked : Qt::Unchecked));
+    location = *workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.Accessibility.plist";
+    value = PlistManager::getPlistValue(location, "StartupSoundEnabled");
+    ui->enableShutdownSoundChk->setCheckState(
+        Qt::CheckState(dynamic_cast<PList::Boolean *>(value)->GetValue() ? Qt::Checked : Qt::Unchecked));
+    location = *workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.sharingd.plist";
+    value = PlistManager::getPlistValue(location, "DiscoverableMode");
+    ui->allowAirDropEveryoneChk->setCheckState(
+        Qt::CheckState(dynamic_cast<PList::Boolean *>(value)->GetValue() ? Qt::Checked : Qt::Unchecked));
+}
+
 void MainWindow::on_springboardOptionsEnabledChk_toggled(bool checked)
 {
     ui->springboardOptionsPageContent->setDisabled(!checked);
@@ -493,10 +533,21 @@ void MainWindow::on_springboardOptionsEnabledChk_toggled(bool checked)
     MainWindow::updateEnabledTweaks();
 }
 
+void MainWindow::on_footnoteTxt_textEdited(const QString &text)
+{
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    auto location = *workspace + "/SpringboardOptions/ConfigProfileDomain/Library/ConfigurationProfiles/SharedDeviceConfiguration.plist";
+    auto node = PList::String(text.toStdString());
+    PlistManager::setPlistValue(location, "LockScreenFootnote", node);
+}
+
 void MainWindow::on_UIAnimSpeedSld_sliderMoved(int pos)
 {
     double speed = pos / 100.0;
-    ui->UIAnimSpeedLbl->setText(QString::number(speed) + (speed == 1 ? " (Default)" : speed > 1 ? " (Slow)" : " (Fast)"));
+    ui->UIAnimSpeedLbl->setText(QString::number(speed) + (speed == 1 ? " (Default)" : speed > 1 ? " (Slow)"
+                                                                                                : " (Fast)"));
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;

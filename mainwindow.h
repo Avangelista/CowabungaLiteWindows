@@ -83,6 +83,7 @@ private slots:
     // Springboard Options
     void on_springboardOptionsEnabledChk_toggled(bool checked);
     void on_UIAnimSpeedSld_sliderMoved(int pos);
+    void on_footnoteTxt_textEdited(const QString &text);
     void on_disableLockRespringChk_clicked(bool checked);
     void on_disableDimmingChk_clicked(bool checked);
     void on_disableBatteryAlertsChk_clicked(bool checked);
@@ -107,6 +108,9 @@ private:
 
     // Status Bar
     void loadStatusBar();
+
+    // Springboard Options
+    void loadSpringboardOptions();
 
     // Apply
     void updateEnabledTweaks();

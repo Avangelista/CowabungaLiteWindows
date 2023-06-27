@@ -1323,6 +1323,12 @@ QScrollBar::sub-page {
                          <height>0</height>
                         </size>
                        </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>50</width>
+                         <height>16777215</height>
+                        </size>
+                       </property>
                        <property name="text">
                         <string>0 Bars</string>
                        </property>
@@ -2023,12 +2029,18 @@ QScrollBar::sub-page {
                   <widget class="QLabel" name="UIAnimSpeedLbl">
                    <property name="minimumSize">
                     <size>
-                     <width>100</width>
+                     <width>75</width>
                      <height>0</height>
                     </size>
                    </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>75</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
                    <property name="text">
-                    <string>1.00 (Default)</string>
+                    <string>1 (Default)</string>
                    </property>
                   </widget>
                  </item>
@@ -2098,7 +2110,7 @@ QScrollBar::sub-page {
               <item>
                <widget class="QCheckBox" name="enableLSCCChk">
                 <property name="text">
-                 <string>Enable Control Center On Lock Screen</string>
+                 <string>Enable Control Center on Lock Screen</string>
                 </property>
                </widget>
               </item>
