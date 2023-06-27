@@ -48,10 +48,10 @@ QToolButton {
     color: #e8e8e8;
     font-size: 14px;
 	min-height: 35px;
-	border-radius: 8px;
 	icon-size: 16px;
 	padding-left: 10px;
 	padding-right: 10px;
+	border-radius: 8px;
 }
 
 QToolButton[cls=sidebarBtn] {
@@ -59,13 +59,8 @@ QToolButton[cls=sidebarBtn] {
 	icon-size: 24px;
 }
 
-QToolButton:hover {
-    background-color: #535353;
-    color: #FFFFFF;
-}
-
 QToolButton:pressed {
-    background-color: #3b82f7;
+    background-color: #535353;
     color: #FFFFFF;
 }
 
@@ -114,6 +109,27 @@ QScrollBar::sub-line {
 QScrollBar::add-page,
 QScrollBar::sub-page {
     background: none;
+}
+
+QSlider::groove:horizontal {
+    background-color: #3b3b3b;
+    height: 4px;
+}
+
+QSlider::handle:horizontal {
+    background-color: #535353;
+    width: 8px;
+    margin: -8px 0;
+    border-radius: 4px;
+}
+
+QSlider::handle:horizontal:pressed {
+    background-color: #3b82f7;
+}
+
+QSlider::tick:horizontal {
+    background-color: #535353;
+    width: 1px;
 }
 </string>
   </property>
@@ -167,7 +183,7 @@ QScrollBar::sub-page {
         <widget class="QWidget" name="deviceBar" native="true">
          <layout class="QHBoxLayout" name="horizontalLayout_4">
           <property name="spacing">
-           <number>6</number>
+           <number>1</number>
           </property>
           <property name="leftMargin">
            <number>0</number>
@@ -182,24 +198,19 @@ QScrollBar::sub-page {
            <number>0</number>
           </property>
           <item>
-           <widget class="QLabel" name="label_6">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+           <widget class="QToolButton" name="toolButton_6">
+            <property name="enabled">
+             <bool>false</bool>
             </property>
-            <property name="minimumSize">
-             <size>
-              <width>24</width>
-              <height>24</height>
-             </size>
+            <property name="styleSheet">
+             <string notr="true">QToolButton {
+	border-top-right-radius: 0px;
+	border-bottom-right-radius: 0px;
+}</string>
             </property>
-            <property name="pixmap">
-             <pixmap resource="resources.qrc">:/icon/phone.svg</pixmap>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
+            <property name="icon">
+             <iconset resource="resources.qrc">
+              <normaloff>:/icon/phone.svg</normaloff>:/icon/phone.svg</iconset>
             </property>
            </widget>
           </item>
@@ -213,13 +224,7 @@ QScrollBar::sub-page {
     font-size: 14px;
     min-height: 38px;
 	min-width: 35px;
-	border-radius: 8px;
 	padding-left: 8px;
-}
-
-#devicePicker:hover {
-	background-color: #535353;
-    color: #FFFFFF;
 }
 
 #devicePicker::drop-down {
@@ -230,9 +235,9 @@ QScrollBar::sub-page {
 }
 
 #devicePicker QAbstractItemView {
-	background-color: transparent;
+	background-color: #3b3b3b;
     outline: none;
-	margin-top: -10px;
+	margin-top: 1px;
 }
 
 #devicePicker QAbstractItemView::item {
@@ -257,6 +262,12 @@ QScrollBar::sub-page {
           </item>
           <item>
            <widget class="QToolButton" name="refreshBtn">
+            <property name="styleSheet">
+             <string notr="true">QToolButton {
+	border-top-left-radius: 0px;
+	border-bottom-left-radius: 0px;
+}</string>
+            </property>
             <property name="icon">
              <iconset resource="resources.qrc">
               <normaloff>:/icon/arrow-clockwise.svg</normaloff>:/icon/arrow-clockwise.svg</iconset>
@@ -638,36 +649,34 @@ QScrollBar::sub-page {
                <number>10</number>
               </property>
               <property name="leftMargin">
-               <number>9</number>
+               <number>0</number>
               </property>
               <property name="topMargin">
                <number>9</number>
               </property>
               <property name="rightMargin">
-               <number>9</number>
+               <number>0</number>
               </property>
               <property name="bottomMargin">
                <number>9</number>
               </property>
               <item>
-               <widget class="QLabel" name="label_3">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
+               <widget class="QToolButton" name="toolButton_9">
+                <property name="enabled">
+                 <bool>false</bool>
                 </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
+                <property name="styleSheet">
+                 <string notr="true">QToolButton {
+	icon-size: 24px;
+	background-color: transparent;
+	padding-left: 0px;
+	padding-right: 5px;
+	border-radius: 0px;
+}</string>
                 </property>
-                <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/icon/phone.svg</pixmap>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                <property name="icon">
+                 <iconset resource="resources.qrc">
+                  <normaloff>:/icon/phone.svg</normaloff>:/icon/phone.svg</iconset>
                 </property>
                </widget>
               </item>
@@ -1021,25 +1030,29 @@ QScrollBar::sub-page {
               <property name="spacing">
                <number>10</number>
               </property>
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
               <item>
-               <widget class="QLabel" name="label_7">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
+               <widget class="QToolButton" name="toolButton_8">
+                <property name="enabled">
+                 <bool>false</bool>
                 </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
+                <property name="styleSheet">
+                 <string notr="true">QToolButton {
+	icon-size: 24px;
+	background-color: transparent;
+	padding-left: 0px;
+	padding-right: 5px;
+	border-radius: 0px;
+}</string>
                 </property>
-                <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/icon/wifi.svg</pixmap>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                <property name="icon">
+                 <iconset resource="resources.qrc">
+                  <normaloff>:/icon/wifi.svg</normaloff>:/icon/wifi.svg</iconset>
                 </property>
                </widget>
               </item>
@@ -1133,7 +1146,7 @@ QScrollBar::sub-page {
               <property name="geometry">
                <rect>
                 <x>0</x>
-                <y>0</y>
+                <y>-27</y>
                 <width>450</width>
                 <height>1250</height>
                </rect>
@@ -1348,9 +1361,6 @@ QScrollBar::sub-page {
                        <property name="orientation">
                         <enum>Qt::Horizontal</enum>
                        </property>
-                       <property name="tickPosition">
-                        <enum>QSlider::TicksBelow</enum>
-                       </property>
                       </widget>
                      </item>
                     </layout>
@@ -1523,9 +1533,6 @@ QScrollBar::sub-page {
                        <property name="orientation">
                         <enum>Qt::Horizontal</enum>
                        </property>
-                       <property name="tickPosition">
-                        <enum>QSlider::TicksBelow</enum>
-                       </property>
                       </widget>
                      </item>
                     </layout>
@@ -1646,8 +1653,8 @@ QScrollBar::sub-page {
                        <property name="invertedControls">
                         <bool>false</bool>
                        </property>
-                       <property name="tickPosition">
-                        <enum>QSlider::TicksBelow</enum>
+                       <property name="tickInterval">
+                        <number>5</number>
                        </property>
                       </widget>
                      </item>
@@ -1702,9 +1709,6 @@ QScrollBar::sub-page {
                        </property>
                        <property name="orientation">
                         <enum>Qt::Horizontal</enum>
-                       </property>
-                       <property name="tickPosition">
-                        <enum>QSlider::TicksBelow</enum>
                        </property>
                       </widget>
                      </item>
@@ -1874,36 +1878,34 @@ QScrollBar::sub-page {
                <number>10</number>
               </property>
               <property name="leftMargin">
-               <number>9</number>
+               <number>0</number>
               </property>
               <property name="topMargin">
                <number>9</number>
               </property>
               <property name="rightMargin">
-               <number>9</number>
+               <number>0</number>
               </property>
               <property name="bottomMargin">
                <number>9</number>
               </property>
               <item>
-               <widget class="QLabel" name="label_11">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
+               <widget class="QToolButton" name="toolButton_7">
+                <property name="enabled">
+                 <bool>false</bool>
                 </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>24</width>
-                  <height>24</height>
-                 </size>
+                <property name="styleSheet">
+                 <string notr="true">QToolButton {
+	icon-size: 24px;
+	background-color: transparent;
+	padding-left: 0px;
+	padding-right: 5px;
+	border-radius: 0px;
+}</string>
                 </property>
-                <property name="pixmap">
-                 <pixmap resource="resources.qrc">:/icon/app-indicator.svg</pixmap>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignCenter</set>
+                <property name="icon">
+                 <iconset resource="resources.qrc">
+                  <normaloff>:/icon/app-indicator.svg</normaloff>:/icon/app-indicator.svg</iconset>
                 </property>
                </widget>
               </item>
@@ -2060,9 +2062,6 @@ QScrollBar::sub-page {
                    </property>
                    <property name="orientation">
                     <enum>Qt::Horizontal</enum>
-                   </property>
-                   <property name="tickPosition">
-                    <enum>QSlider::TicksBelow</enum>
                    </property>
                    <property name="tickInterval">
                     <number>5</number>

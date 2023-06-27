@@ -122,11 +122,11 @@ void MainWindow::updatePhoneInfo()
     {
         if (DeviceManager::getInstance().isDeviceAvailable())
         {
-            ui->phoneVersionLbl->setText("<a style=\"text-decoration:none; color: white\" href=\"#\">" + QString::fromStdString(version->toString()) + " (supported) </a>");
+            ui->phoneVersionLbl->setText("<a style=\"text-decoration:none; color: white;\" href=\"#\">" + QString::fromStdString(version->toString()) + " <span style=\"color: #32d74b;\">Supported!</span></a>");
         }
         else
         {
-            ui->phoneVersionLbl->setText("<a style=\"text-decoration:none; color: white\" href=\"#\">" + QString::fromStdString(version->toString()) + " (not supported) </a>");
+            ui->phoneVersionLbl->setText("<a style=\"text-decoration:none; color: white;\" href=\"#\">" + QString::fromStdString(version->toString()) + " <span style=\"color: #ff453a;\">Not Supported.</span></a>");
         }
     }
     else
