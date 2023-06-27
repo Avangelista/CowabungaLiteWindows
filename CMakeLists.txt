@@ -39,6 +39,8 @@ set(PROJECT_SOURCES
         utils.cpp
         CreateBackup.h
         CreateBackup.cpp
+        plistmanager.h
+        plistmanager.cpp
         ${TS_FILES}
         ${QRC_FILES}
 )
@@ -95,6 +97,7 @@ if(WIN32)
     file(COPY ${EXE_FILES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
     target_link_libraries(CowabungaLite PRIVATE "${DLL_PATH}/libimobiledevice-1.0.dll")
     target_link_libraries(CowabungaLite PRIVATE "${DLL_PATH}/libplist-2.0.dll")
+    target_link_libraries(CowabungaLite PRIVATE "${DLL_PATH}/libplist++-2.0.dll")
     target_link_libraries(CowabungaLite PRIVATE "${DLL_PATH}/libssl-3-x64.dll")
     target_link_libraries(CowabungaLite PRIVATE "${DLL_PATH}/libcrypto-3-x64.dll")
 elseif(APPLE)

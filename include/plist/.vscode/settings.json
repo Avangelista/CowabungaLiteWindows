@@ -1,0 +1,14 @@
+{
+    "files.associations": {
+        "legit-add": "shellscript",
+        "legit-commit": "shellscript",
+        "legit-init": "shellscript",
+        "legit-log": "shellscript",
+        "legit-rm": "shellscript",
+        "legit-show": "shellscript",
+        "legit-status": "shellscript",
+        "legit-branch": "perl",
+        "*.h": "c",
+        "xstring": "c"
+    }
+}

@@ -10,7 +10,8 @@ QT_END_NAMESPACE
 enum class Page {
     Home = 0,
     StatusBar = 1,
-    Apply = 2
+    SpringboardOptions = 2,
+    Apply = 3
 };
 
 class MainWindow : public QMainWindow
@@ -27,6 +28,7 @@ private slots:
     void on_devicePicker_activated(int index);
     void on_homePageBtn_clicked();
     void on_statusBarPageBtn_clicked();
+    void on_springboardOptionsPageBtn_clicked();
     void on_applyPageBtn_clicked();
 
     // Home
@@ -77,6 +79,10 @@ private slots:
     void on_hideAirPlayChk_clicked(bool checked);
     void on_hideCarPlayChk_clicked(bool checked);
     void on_hideVPNChk_clicked(bool checked);
+
+    // Springboard Options
+    void on_UIAnimSpeedSld_sliderMoved(int pos);
+    void on_disableLockRespringChk_clicked(bool checked);
 
     // Apply
     void on_applyTweaksBtn_clicked();
