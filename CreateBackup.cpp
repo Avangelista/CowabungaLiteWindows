@@ -111,7 +111,12 @@ void processFiles(const std::string &path, const std::string &domainString, cons
     fileString = std::regex_replace(fileString, std::regex("\\\\"), "/");
 
     std::ofstream output_file(outputDir + "/Manifest.mbdb", std::ios::app | std::ios::binary);
-    writeStringWithLength(output_file, domainString);
+    if (domainString == "ConfigProfileDomain")
+    {
+        writeStringWithLength(output_file, "SysSharedContainerDomain-systemgroup.com.apple.configurationprofiles");
+    } else {
+        writeStringWithLength(output_file, domainString);
+    }
     writeStringWithLength(output_file, fileString);
 
     if (std::filesystem::is_regular_file(path))
@@ -140,7 +145,13 @@ void processFiles(const std::string &path, const std::string &domainString, cons
         output_file.close();
 
         // Rename file to its domain-path hash
-        std::string hash = calculateSHA1(domainString + "-" + fileString);
+        std::string hash;
+        if (domainString == "ConfigProfileDomain")
+        {
+            hash = calculateSHA1("SysSharedContainerDomain-systemgroup.com.apple.configurationprofiles-" + fileString);
+        } else {
+            hash = calculateSHA1(domainString + "-" + fileString);
+        }
         std::string newFile = outputDir + "/" + hash;
         copyFile(path, newFile);
     }
@@ -230,11 +241,6 @@ bool CreateBackup::createBackup(std::string indir, std::string outdir)
         {
             std::string domain = domainEntry.path().string();
             std::string domainString = basename(domain);
-            if (domainString == "ConfigProfileDomain")
-            {
-                domainString = "SysSharedContainerDomain-systemgroup.com.apple.configurationprofiles";
-            }
-            std::cout << domainString << std::endl;
 
             processFiles(domain, domainString, outdir);
         }

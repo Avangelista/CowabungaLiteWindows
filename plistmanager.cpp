@@ -1,6 +1,6 @@
 #include "plistmanager.h"
 #include <fstream>
-#include <plist/plist++.h>
+#include <QDebug>
 
 bool PlistManager::isBinaryPlist(const std::vector<char>& data) {
     if (data.size() < 8) {
@@ -18,7 +18,29 @@ bool PlistManager::isBinaryPlist(const std::vector<char>& data) {
     return true;
 }
 
-void PlistManager::setPlistKey(const std::string& plistPath, const std::string& key, bool value) {
+PList::Node* PlistManager::getPlistValue(const std::string& plistPath, const std::string& key) {
+    std::ifstream input(plistPath, std::ios::binary);
+    if (!input.is_open()) {
+        return nullptr;
+    }
+    std::vector<char> in((std::istreambuf_iterator<char>(input)), (std::istreambuf_iterator<char>()));
+    input.close();
+
+    auto bplist = isBinaryPlist(in);
+    plist_t root = NULL;
+
+    if (bplist) {
+        plist_from_bin(&in[0], in.size(), &root);
+    } else {
+        plist_from_xml(&in[0], in.size(), &root);
+    }
+
+    plist_t value = plist_dict_get_item(root, key.c_str());
+
+    return PList::Node::FromPlist(value);
+}
+
+void PlistManager::setPlistValue(const std::string& plistPath, const std::string& key, PList::Node& value) {
     std::ifstream input(plistPath, std::ios::binary);
     if (!input.is_open()) {
         return;
@@ -27,21 +49,30 @@ void PlistManager::setPlistKey(const std::string& plistPath, const std::string& 
     input.close();
 
     auto bplist = isBinaryPlist(in);
-    auto plist = PList::Dictionary();
+    plist_t root = NULL;
 
     if (bplist) {
-        plist = PList::Dictionary::FromBin(in);
+        plist_from_bin(&in[0], in.size(), &root);
     } else {
-        plist = PList::Dictionary::FromXml(std::string(in.begin(), in.end()));
+        plist_from_xml(&in[0], in.size(), &root);
     }
 
-    plist.Set(key, PList::Boolean(value));
+    plist_dict_set_item(root, key.c_str(), value.GetPlist());
 
     auto out = std::vector<char>();
     if (bplist) {
-        out = plist.ToBin();
+        char* bin = NULL;
+        uint32_t length = 0;
+        plist_to_bin(root, &bin, &length);
+        std::vector<char> tmp(bin, bin+length);
+        delete bin;
+        out = tmp;
     } else {
-        auto tmp = plist.ToXml();
+        char* xml = NULL;
+        uint32_t length = 0;
+        plist_to_xml(root, &xml, &length);
+        std::string tmp(xml, xml+length);
+        delete xml;
         out = std::vector<char>(tmp.begin(), tmp.end());
     }
 

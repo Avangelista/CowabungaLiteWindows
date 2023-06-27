@@ -1975,6 +1975,9 @@ QScrollBar::sub-page {
            </item>
            <item>
             <widget class="QWidget" name="springboardOptionsPageContent" native="true">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="maximumSize">
               <size>
                <width>450</width>
@@ -2103,13 +2106,6 @@ QScrollBar::sub-page {
                <widget class="QCheckBox" name="enableShutdownSoundChk">
                 <property name="text">
                  <string>Enable Shutdown Sound</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QCheckBox" name="showWifiDebugChk">
-                <property name="text">
-                 <string>Show Wi-Fi Debugger</string>
                 </property>
                </widget>
               </item>

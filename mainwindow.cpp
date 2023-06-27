@@ -136,7 +136,12 @@ void MainWindow::updatePhoneInfo()
 
 void MainWindow::on_toolButton_3_clicked()
 {
-    qDebug() << "Clicked";
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    auto location = *workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.UIKit.plist";
+    auto value = PlistManager::getPlistValue(location, "UIAnimationDragCoefficient");
+    qDebug() << "Value: " << dynamic_cast<PList::Real*>(value)->GetValue();
 }
 
 // Status Bar Page
@@ -481,10 +486,23 @@ void MainWindow::on_hideVPNChk_clicked(bool checked)
 
 // Springboard Options Page
 
+void MainWindow::on_springboardOptionsEnabledChk_toggled(bool checked)
+{
+    ui->springboardOptionsPageContent->setDisabled(!checked);
+    DeviceManager::getInstance().setTweakEnabled(Tweak::SpringboardOptions, checked);
+    MainWindow::updateEnabledTweaks();
+}
+
 void MainWindow::on_UIAnimSpeedSld_sliderMoved(int pos)
 {
     double speed = pos / 100.0;
     ui->UIAnimSpeedLbl->setText(QString::number(speed) + (speed == 1 ? " (Default)" : speed > 1 ? " (Slow)" : " (Fast)"));
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    auto location = *workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.UIKit.plist";
+    auto node = PList::Real(speed);
+    PlistManager::setPlistValue(location, "UIAnimationDragCoefficient", node);
 }
 
 void MainWindow::on_disableLockRespringChk_clicked(bool checked)
@@ -493,7 +511,58 @@ void MainWindow::on_disableLockRespringChk_clicked(bool checked)
     if (!workspace)
         return;
     auto location = *workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.springboard.plist";
-    PlistManager::setPlistKey(location, "SBDontLockAfterCrash", checked);
+    auto node = PList::Boolean(checked);
+    PlistManager::setPlistValue(location, "SBDontLockAfterCrash", node);
+}
+
+void MainWindow::on_disableDimmingChk_clicked(bool checked)
+{
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    auto location = *workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.springboard.plist";
+    auto node = PList::Boolean(checked);
+    PlistManager::setPlistValue(location, "SBDontDimOrLockOnAC", node);
+}
+
+void MainWindow::on_disableBatteryAlertsChk_clicked(bool checked)
+{
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    auto location = *workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.springboard.plist";
+    auto node = PList::Boolean(checked);
+    PlistManager::setPlistValue(location, "SBHideLowPowerAlerts", node);
+}
+
+void MainWindow::on_enableLSCCChk_clicked(bool checked)
+{
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    auto location = *workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.springboard.plist";
+    auto node = PList::Boolean(checked);
+    PlistManager::setPlistValue(location, "SBControlCenterEnabledInLockScreen", node);
+}
+
+void MainWindow::on_enableShutdownSoundChk_clicked(bool checked)
+{
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    auto location = *workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.Accessibility.plist";
+    auto node = PList::Boolean(checked);
+    PlistManager::setPlistValue(location, "StartupSoundEnabled", node);
+}
+
+void MainWindow::on_allowAirDropEveryoneChk_clicked(bool checked)
+{
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    auto location = *workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.sharingd.plist";
+    auto node = PList::Boolean(checked);
+    PlistManager::setPlistValue(location, "DiscoverableMode", node);
 }
 
 // Apply Page

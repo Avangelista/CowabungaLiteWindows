@@ -81,8 +81,14 @@ private slots:
     void on_hideVPNChk_clicked(bool checked);
 
     // Springboard Options
+    void on_springboardOptionsEnabledChk_toggled(bool checked);
     void on_UIAnimSpeedSld_sliderMoved(int pos);
     void on_disableLockRespringChk_clicked(bool checked);
+    void on_disableDimmingChk_clicked(bool checked);
+    void on_disableBatteryAlertsChk_clicked(bool checked);
+    void on_enableLSCCChk_clicked(bool checked);
+    void on_enableShutdownSoundChk_clicked(bool checked);
+    void on_allowAirDropEveryoneChk_clicked(bool checked);
 
     // Apply
     void on_applyTweaksBtn_clicked();
