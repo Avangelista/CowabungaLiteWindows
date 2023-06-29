@@ -12,7 +12,8 @@ enum class Page {
     StatusBar = 1,
     SpringboardOptions = 2,
     InternalOptions = 3,
-    Apply = 4
+    SetupOptions = 4,
+    Apply = 5
 };
 
 class MainWindow : public QMainWindow
@@ -31,6 +32,7 @@ private slots:
     void on_statusBarPageBtn_clicked();
     void on_springboardOptionsPageBtn_clicked();
     void on_internalOptionsPageBtn_clicked();
+    void on_setupOptionsPageBtn_clicked();
     void on_applyPageBtn_clicked();
 
     // Home

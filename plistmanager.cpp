@@ -84,3 +84,48 @@ void PlistManager::setPlistValue(const std::string& plistPath, const std::string
     output.write(out.data(), out.size());
     output.close();
 }
+
+void PlistManager::deletePlistKey(const std::string& plistPath, const std::string& key) {
+    std::ifstream input(plistPath, std::ios::binary);
+    if (!input.is_open()) {
+        return;
+    }
+    std::vector<char> in((std::istreambuf_iterator<char>(input)), (std::istreambuf_iterator<char>()));
+    input.close();
+
+    auto bplist = isBinaryPlist(in);
+    plist_t root = NULL;
+
+    if (bplist) {
+        plist_from_bin(&in[0], in.size(), &root);
+    } else {
+        plist_from_xml(&in[0], in.size(), &root);
+    }
+
+    plist_dict_remove_item(root, key.c_str());
+
+    auto out = std::vector<char>();
+    if (bplist) {
+        char* bin = NULL;
+        uint32_t length = 0;
+        plist_to_bin(root, &bin, &length);
+        std::vector<char> tmp(bin, bin+length);
+        delete bin;
+        out = tmp;
+    } else {
+        char* xml = NULL;
+        uint32_t length = 0;
+        plist_to_xml(root, &xml, &length);
+        std::string tmp(xml, xml+length);
+        delete xml;
+        out = std::vector<char>(tmp.begin(), tmp.end());
+    }
+
+    std::ofstream output(plistPath, std::ios::binary);
+    if (!output.is_open()) {
+        return;
+    }
+
+    output.write(out.data(), out.size());
+    output.close();
+}

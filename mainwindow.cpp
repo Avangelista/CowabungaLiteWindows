@@ -97,6 +97,11 @@ void MainWindow::on_internalOptionsPageBtn_clicked()
     ui->pages->setCurrentIndex(static_cast<int>(Page::InternalOptions));
 }
 
+void MainWindow::on_setupOptionsPageBtn_clicked()
+{
+    ui->pages->setCurrentIndex(static_cast<int>(Page::SetupOptions));
+}
+
 void MainWindow::on_applyPageBtn_clicked()
 {
     ui->pages->setCurrentIndex(static_cast<int>(Page::Apply));
@@ -144,6 +149,15 @@ void MainWindow::updatePhoneInfo()
     }
 }
 
+void MainWindow::on_phoneVersionLbl_linkActivated(const QString &link)
+{
+    auto uuid = DeviceManager::getInstance().getCurrentUUID();
+    if (uuid)
+    {
+        ui->phoneVersionLbl->setText("<a style=\"text-decoration:none; color: white\" href=\"#\">" + QString::fromStdString(*uuid) + "</a>");
+    }
+}
+
 void MainWindow::on_toolButton_3_clicked()
 {
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
@@ -158,9 +172,9 @@ void MainWindow::on_toolButton_3_clicked()
 
 void MainWindow::loadStatusBar()
 {
-    ui->pCarrierChk->setCheckState(Qt::CheckState(StatusManager::getInstance().isCarrierOverridden() ? Qt::Checked : Qt::Unchecked));
+    ui->pCarrierChk->setCheckState(StatusManager::getInstance().isCarrierOverridden() ? Qt::Checked : Qt::Unchecked);
     ui->pCarrierTxt->setText(QString::fromStdString(StatusManager::getInstance().getCarrierOverride()));
-    ui->hideBatteryChk->setCheckState(Qt::CheckState(StatusManager::getInstance().isBatteryHidden() ? Qt::Checked : Qt::Unchecked));
+    ui->hideBatteryChk->setCheckState(StatusManager::getInstance().isBatteryHidden() ? Qt::Checked : Qt::Unchecked);
 }
 
 void MainWindow::on_statusBarEnabledChk_toggled(bool checked)
@@ -505,34 +519,91 @@ void MainWindow::loadSpringboardOptions()
 
     auto location = *workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.UIKit.plist";
     auto value = PlistManager::getPlistValue(location, "UIAnimationDragCoefficient");
-    double speed = dynamic_cast<PList::Real *>(value)->GetValue();
-    ui->UIAnimSpeedLbl->setText(QString::number(speed) + (speed == 1 ? " (Default)" : speed > 1 ? " (Slow)"
-                                                                                                : " (Fast)"));
-    ui->UIAnimSpeedSld->setValue(speed * 100);
+    if (value)
+    {
+        double speed = dynamic_cast<PList::Real *>(value)->GetValue();
+        ui->UIAnimSpeedLbl->setText(QString::number(speed) + (speed == 1 ? " (Default)" : speed > 1 ? " (Slow)"
+                                                                                                    : " (Fast)"));
+        ui->UIAnimSpeedSld->setValue(speed * 100);
+    }
+    else
+    {
+        ui->UIAnimSpeedLbl->setText("1 (Default)");
+        ui->UIAnimSpeedSld->setValue(100);
+    }
     location = *workspace + "/SpringboardOptions/ConfigProfileDomain/Library/ConfigurationProfiles/SharedDeviceConfiguration.plist";
     value = PlistManager::getPlistValue(location, "LockScreenFootnote");
-    ui->footnoteTxt->setText(QString::fromStdString(dynamic_cast<PList::String *>(value)->GetValue()));
+    if (value)
+    {
+        ui->footnoteTxt->setText(QString::fromStdString(dynamic_cast<PList::String *>(value)->GetValue()));
+    }
+    else
+    {
+        ui->footnoteTxt->setText("");
+    }
     location = *workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.springboard.plist";
     value = PlistManager::getPlistValue(location, "SBDontLockAfterCrash");
-    ui->disableLockRespringChk->setCheckState(
-        Qt::CheckState(dynamic_cast<PList::Boolean *>(value)->GetValue() ? Qt::Checked : Qt::Unchecked));
+    if (value)
+    {
+        ui->disableLockRespringChk->setCheckState(
+            dynamic_cast<PList::Boolean *>(value)->GetValue() ? Qt::Checked : Qt::Unchecked);
+    }
+    else
+    {
+        ui->disableLockRespringChk->setCheckState(Qt::Unchecked);
+    }
     value = PlistManager::getPlistValue(location, "SBDontDimOrLockOnAC");
-    ui->disableDimmingChk->setCheckState(
-        Qt::CheckState(dynamic_cast<PList::Boolean *>(value)->GetValue() ? Qt::Checked : Qt::Unchecked));
+    if (value)
+    {
+        ui->disableDimmingChk->setCheckState(
+            dynamic_cast<PList::Boolean *>(value)->GetValue() ? Qt::Checked : Qt::Unchecked);
+    }
+    else
+    {
+        ui->disableDimmingChk->setCheckState(Qt::Unchecked);
+    }
     value = PlistManager::getPlistValue(location, "SBHideLowPowerAlerts");
-    ui->disableBatteryAlertsChk->setCheckState(
-        Qt::CheckState(dynamic_cast<PList::Boolean *>(value)->GetValue() ? Qt::Checked : Qt::Unchecked));
+    if (value)
+    {
+        ui->disableBatteryAlertsChk->setCheckState(
+            dynamic_cast<PList::Boolean *>(value)->GetValue() ? Qt::Checked : Qt::Unchecked);
+    }
+    else
+    {
+        ui->disableBatteryAlertsChk->setCheckState(Qt::Unchecked);
+    }
     value = PlistManager::getPlistValue(location, "SBControlCenterEnabledInLockScreen");
-    ui->enableLSCCChk->setCheckState(
-        Qt::CheckState(dynamic_cast<PList::Boolean *>(value)->GetValue() ? Qt::Checked : Qt::Unchecked));
+    if (value)
+    {
+        ui->enableLSCCChk->setCheckState(
+            dynamic_cast<PList::Boolean *>(value)->GetValue() ? Qt::Checked : Qt::Unchecked);
+    }
+    else
+    {
+        ui->enableLSCCChk->setCheckState(Qt::Unchecked);
+    }
     location = *workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.Accessibility.plist";
     value = PlistManager::getPlistValue(location, "StartupSoundEnabled");
-    ui->enableShutdownSoundChk->setCheckState(
-        Qt::CheckState(dynamic_cast<PList::Boolean *>(value)->GetValue() ? Qt::Checked : Qt::Unchecked));
+    if (value)
+    {
+        ui->enableShutdownSoundChk->setCheckState(
+            dynamic_cast<PList::Boolean *>(value)->GetValue() ? Qt::Checked : Qt::Unchecked);
+    }
+    else
+    {
+        ui->enableShutdownSoundChk->setCheckState(Qt::Unchecked);
+    }
     location = *workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.sharingd.plist";
     value = PlistManager::getPlistValue(location, "DiscoverableMode");
-    ui->allowAirDropEveryoneChk->setCheckState(
-        Qt::CheckState(dynamic_cast<PList::Boolean *>(value)->GetValue() ? Qt::Checked : Qt::Unchecked));
+    if (value)
+    {
+        ui->allowAirDropEveryoneChk->setCheckState(
+            dynamic_cast<PList::String *>(value)->GetValue() == "Everyone" ? Qt::Checked : Qt::Unchecked);
+    }
+    else
+    {
+        ui->allowAirDropEveryoneChk->setCheckState(Qt::Unchecked);
+    }
 }
 
 void MainWindow::on_springboardOptionsEnabledChk_toggled(bool checked)
@@ -548,8 +619,12 @@ void MainWindow::on_footnoteTxt_textEdited(const QString &text)
     if (!workspace)
         return;
     auto location = *workspace + "/SpringboardOptions/ConfigProfileDomain/Library/ConfigurationProfiles/SharedDeviceConfiguration.plist";
-    auto node = PList::String(text.toStdString());
-    PlistManager::setPlistValue(location, "LockScreenFootnote", node);
+    if (!text.isEmpty()) {
+        auto node = PList::String(text.toStdString());
+        PlistManager::setPlistValue(location, "LockScreenFootnote", node);
+    } else {
+        PlistManager::deletePlistKey(location, "LockScreenFootnote");
+    }
 }
 
 void MainWindow::on_UIAnimSpeedSld_sliderMoved(int pos)
@@ -561,8 +636,13 @@ void MainWindow::on_UIAnimSpeedSld_sliderMoved(int pos)
     if (!workspace)
         return;
     auto location = *workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.UIKit.plist";
-    auto node = PList::Real(speed);
-    PlistManager::setPlistValue(location, "UIAnimationDragCoefficient", node);
+    if (speed != 1) {
+        auto node = PList::Real(speed);
+        PlistManager::setPlistValue(location, "UIAnimationDragCoefficient", node);
+    } else {
+        PlistManager::deletePlistKey(location, "UIAnimationDragCoefficient");
+    }
+
 }
 
 void MainWindow::on_disableLockRespringChk_clicked(bool checked)
@@ -571,8 +651,12 @@ void MainWindow::on_disableLockRespringChk_clicked(bool checked)
     if (!workspace)
         return;
     auto location = *workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.springboard.plist";
-    auto node = PList::Boolean(checked);
-    PlistManager::setPlistValue(location, "SBDontLockAfterCrash", node);
+    if (checked) {
+        auto node = PList::Boolean(checked);
+        PlistManager::setPlistValue(location, "SBDontLockAfterCrash", node);
+    } else {
+        PlistManager::deletePlistKey(location, "SBDontLockAfterCrash");
+    }
 }
 
 void MainWindow::on_disableDimmingChk_clicked(bool checked)
@@ -581,8 +665,12 @@ void MainWindow::on_disableDimmingChk_clicked(bool checked)
     if (!workspace)
         return;
     auto location = *workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.springboard.plist";
-    auto node = PList::Boolean(checked);
-    PlistManager::setPlistValue(location, "SBDontDimOrLockOnAC", node);
+    if (checked) {
+        auto node = PList::Boolean(checked);
+        PlistManager::setPlistValue(location, "SBDontDimOrLockOnAC", node);
+    } else {
+        PlistManager::deletePlistKey(location, "SBDontDimOrLockOnAC");
+    }
 }
 
 void MainWindow::on_disableBatteryAlertsChk_clicked(bool checked)
@@ -591,8 +679,12 @@ void MainWindow::on_disableBatteryAlertsChk_clicked(bool checked)
     if (!workspace)
         return;
     auto location = *workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.springboard.plist";
-    auto node = PList::Boolean(checked);
-    PlistManager::setPlistValue(location, "SBHideLowPowerAlerts", node);
+    if (checked) {
+        auto node = PList::Boolean(checked);
+        PlistManager::setPlistValue(location, "SBHideLowPowerAlerts", node);
+    } else {
+        PlistManager::deletePlistKey(location, "SBHideLowPowerAlerts");
+    }
 }
 
 void MainWindow::on_enableLSCCChk_clicked(bool checked)
@@ -601,8 +693,12 @@ void MainWindow::on_enableLSCCChk_clicked(bool checked)
     if (!workspace)
         return;
     auto location = *workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.springboard.plist";
-    auto node = PList::Boolean(checked);
-    PlistManager::setPlistValue(location, "SBControlCenterEnabledInLockScreen", node);
+    if (checked) {
+        auto node = PList::Boolean(checked);
+        PlistManager::setPlistValue(location, "SBControlCenterEnabledInLockScreen", node);
+    } else {
+        PlistManager::deletePlistKey(location, "SBControlCenterEnabledInLockScreen");
+    }
 }
 
 void MainWindow::on_enableShutdownSoundChk_clicked(bool checked)
@@ -611,8 +707,12 @@ void MainWindow::on_enableShutdownSoundChk_clicked(bool checked)
     if (!workspace)
         return;
     auto location = *workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.Accessibility.plist";
-    auto node = PList::Boolean(checked);
-    PlistManager::setPlistValue(location, "StartupSoundEnabled", node);
+    if (checked) {
+        auto node = PList::Boolean(checked);
+        PlistManager::setPlistValue(location, "StartupSoundEnabled", node);
+    } else {
+        PlistManager::deletePlistKey(location, "StartupSoundEnabled");
+    }
 }
 
 void MainWindow::on_allowAirDropEveryoneChk_clicked(bool checked)
@@ -621,8 +721,13 @@ void MainWindow::on_allowAirDropEveryoneChk_clicked(bool checked)
     if (!workspace)
         return;
     auto location = *workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.sharingd.plist";
-    auto node = PList::Boolean(checked);
-    PlistManager::setPlistValue(location, "DiscoverableMode", node);
+    if (checked) {
+        auto node = PList::String("Everyone");
+        PlistManager::setPlistValue(location, "DiscoverableMode", node);
+    } else {
+        PlistManager::deletePlistKey(location, "DiscoverableMode");
+    }
+
 }
 
 // Apply Page
@@ -650,15 +755,6 @@ void MainWindow::on_applyTweaksBtn_clicked()
     DeviceManager::getInstance().applyTweaks();
 }
 
-void MainWindow::on_phoneVersionLbl_linkActivated(const QString &link)
-{
-    auto uuid = DeviceManager::getInstance().getCurrentUUID();
-    if (uuid)
-    {
-        ui->phoneVersionLbl->setText("<a style=\"text-decoration:none; color: white\" href=\"#\">" + QString::fromStdString(*uuid) + "</a>");
-    }
-}
-
 // Window
 
 void MainWindow::on_titleBar_pressed()
@@ -670,5 +766,3 @@ void MainWindow::on_closeBtn_clicked()
 {
     close();
 }
-
-

@@ -1,0 +1,22 @@
+{
+    "files.associations": {
+        "legit-add": "shellscript",
+        "legit-commit": "shellscript",
+        "legit-init": "shellscript",
+        "legit-log": "shellscript",
+        "legit-rm": "shellscript",
+        "legit-show": "shellscript",
+        "legit-status": "shellscript",
+        "legit-branch": "perl",
+        "*.h": "c",
+        "algorithm": "cpp",
+        "chrono": "cpp",
+        "optional": "cpp",
+        "regex": "cpp",
+        "system_error": "cpp",
+        "type_traits": "cpp",
+        "xlocmon": "cpp",
+        "xtr1common": "cpp",
+        "xutility": "cpp"
+    }
+}
