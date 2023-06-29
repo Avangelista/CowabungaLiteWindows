@@ -11,7 +11,8 @@ enum class Page {
     Home = 0,
     StatusBar = 1,
     SpringboardOptions = 2,
-    Apply = 3
+    InternalOptions = 3,
+    Apply = 4
 };
 
 class MainWindow : public QMainWindow
@@ -29,6 +30,7 @@ private slots:
     void on_homePageBtn_clicked();
     void on_statusBarPageBtn_clicked();
     void on_springboardOptionsPageBtn_clicked();
+    void on_internalOptionsPageBtn_clicked();
     void on_applyPageBtn_clicked();
 
     // Home
@@ -93,6 +95,10 @@ private slots:
 
     // Apply
     void on_applyTweaksBtn_clicked();
+
+    // Window
+    void on_titleBar_pressed();
+    void on_closeBtn_clicked();
 
 private:
     Ui::CowabungaLite *ui;

@@ -4,12 +4,15 @@
 #include "statusmanager/StatusManager.h"
 #include "plistmanager.h"
 #include <QDebug>
+#include <QWindow>
 
 // Boilerplate
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::CowabungaLite)
 {
+    setWindowFlag(Qt::FramelessWindowHint);
+    setAttribute(Qt::WA_TranslucentBackground);
     ui->setupUi(this);
     ui->pages->setCurrentIndex(static_cast<int>(Page::Home));
     refreshDevices();
@@ -53,7 +56,8 @@ void MainWindow::refreshDevices()
     {
         ui->devicePicker->setEnabled(false);
         ui->devicePicker->addItem(QString("None"), QVariant::fromValue(NULL));
-        DeviceManager::getInstance().resetCurrentDevice();
+        // shouldn't need this
+        // DeviceManager::getInstance().resetCurrentDevice();
     }
     else
     {
@@ -88,6 +92,11 @@ void MainWindow::on_springboardOptionsPageBtn_clicked()
     ui->pages->setCurrentIndex(static_cast<int>(Page::SpringboardOptions));
 }
 
+void MainWindow::on_internalOptionsPageBtn_clicked()
+{
+    ui->pages->setCurrentIndex(static_cast<int>(Page::InternalOptions));
+}
+
 void MainWindow::on_applyPageBtn_clicked()
 {
     ui->pages->setCurrentIndex(static_cast<int>(Page::Apply));
@@ -115,7 +124,7 @@ void MainWindow::updatePhoneInfo()
     }
     else
     {
-        ui->phoneNameLbl->setText("None");
+        ui->phoneNameLbl->setText("No Device");
     }
     auto version = DeviceManager::getInstance().getCurrentVersion();
     if (version)
@@ -131,7 +140,7 @@ void MainWindow::updatePhoneInfo()
     }
     else
     {
-        ui->phoneVersionLbl->setText("None");
+        ui->phoneVersionLbl->setText("Please connect a device.");
     }
 }
 
@@ -649,3 +658,17 @@ void MainWindow::on_phoneVersionLbl_linkActivated(const QString &link)
         ui->phoneVersionLbl->setText("<a style=\"text-decoration:none; color: white\" href=\"#\">" + QString::fromStdString(*uuid) + "</a>");
     }
 }
+
+// Window
+
+void MainWindow::on_titleBar_pressed()
+{
+    windowHandle()->startSystemMove();
+}
+
+void MainWindow::on_closeBtn_clicked()
+{
+    close();
+}
+
+
