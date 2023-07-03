@@ -35,6 +35,7 @@ void MainWindow::updateInterfaceForNewDevice()
         // Load status bar overrides
         MainWindow::loadStatusBar();
         MainWindow::loadSpringboardOptions();
+        MainWindow::loadSetupOptions();
     }
     else
     {
@@ -85,6 +86,11 @@ void MainWindow::on_homePageBtn_clicked()
 void MainWindow::on_statusBarPageBtn_clicked()
 {
     ui->pages->setCurrentIndex(static_cast<int>(Page::StatusBar));
+}
+
+void MainWindow::on_controlCenterPageBtn_clicked()
+{
+    ui->pages->setCurrentIndex(static_cast<int>(Page::ControlCenter));
 }
 
 void MainWindow::on_springboardOptionsPageBtn_clicked()
@@ -619,10 +625,13 @@ void MainWindow::on_footnoteTxt_textEdited(const QString &text)
     if (!workspace)
         return;
     auto location = *workspace + "/SpringboardOptions/ConfigProfileDomain/Library/ConfigurationProfiles/SharedDeviceConfiguration.plist";
-    if (!text.isEmpty()) {
+    if (!text.isEmpty())
+    {
         auto node = PList::String(text.toStdString());
         PlistManager::setPlistValue(location, "LockScreenFootnote", node);
-    } else {
+    }
+    else
+    {
         PlistManager::deletePlistKey(location, "LockScreenFootnote");
     }
 }
@@ -636,13 +645,15 @@ void MainWindow::on_UIAnimSpeedSld_sliderMoved(int pos)
     if (!workspace)
         return;
     auto location = *workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.UIKit.plist";
-    if (speed != 1) {
+    if (speed != 1)
+    {
         auto node = PList::Real(speed);
         PlistManager::setPlistValue(location, "UIAnimationDragCoefficient", node);
-    } else {
+    }
+    else
+    {
         PlistManager::deletePlistKey(location, "UIAnimationDragCoefficient");
     }
-
 }
 
 void MainWindow::on_disableLockRespringChk_clicked(bool checked)
@@ -651,10 +662,13 @@ void MainWindow::on_disableLockRespringChk_clicked(bool checked)
     if (!workspace)
         return;
     auto location = *workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.springboard.plist";
-    if (checked) {
+    if (checked)
+    {
         auto node = PList::Boolean(checked);
         PlistManager::setPlistValue(location, "SBDontLockAfterCrash", node);
-    } else {
+    }
+    else
+    {
         PlistManager::deletePlistKey(location, "SBDontLockAfterCrash");
     }
 }
@@ -665,10 +679,13 @@ void MainWindow::on_disableDimmingChk_clicked(bool checked)
     if (!workspace)
         return;
     auto location = *workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.springboard.plist";
-    if (checked) {
+    if (checked)
+    {
         auto node = PList::Boolean(checked);
         PlistManager::setPlistValue(location, "SBDontDimOrLockOnAC", node);
-    } else {
+    }
+    else
+    {
         PlistManager::deletePlistKey(location, "SBDontDimOrLockOnAC");
     }
 }
@@ -679,10 +696,13 @@ void MainWindow::on_disableBatteryAlertsChk_clicked(bool checked)
     if (!workspace)
         return;
     auto location = *workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.springboard.plist";
-    if (checked) {
+    if (checked)
+    {
         auto node = PList::Boolean(checked);
         PlistManager::setPlistValue(location, "SBHideLowPowerAlerts", node);
-    } else {
+    }
+    else
+    {
         PlistManager::deletePlistKey(location, "SBHideLowPowerAlerts");
     }
 }
@@ -693,10 +713,13 @@ void MainWindow::on_enableLSCCChk_clicked(bool checked)
     if (!workspace)
         return;
     auto location = *workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.springboard.plist";
-    if (checked) {
+    if (checked)
+    {
         auto node = PList::Boolean(checked);
         PlistManager::setPlistValue(location, "SBControlCenterEnabledInLockScreen", node);
-    } else {
+    }
+    else
+    {
         PlistManager::deletePlistKey(location, "SBControlCenterEnabledInLockScreen");
     }
 }
@@ -707,10 +730,13 @@ void MainWindow::on_enableShutdownSoundChk_clicked(bool checked)
     if (!workspace)
         return;
     auto location = *workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.Accessibility.plist";
-    if (checked) {
+    if (checked)
+    {
         auto node = PList::Boolean(checked);
         PlistManager::setPlistValue(location, "StartupSoundEnabled", node);
-    } else {
+    }
+    else
+    {
         PlistManager::deletePlistKey(location, "StartupSoundEnabled");
     }
 }
@@ -721,13 +747,175 @@ void MainWindow::on_allowAirDropEveryoneChk_clicked(bool checked)
     if (!workspace)
         return;
     auto location = *workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.sharingd.plist";
-    if (checked) {
+    if (checked)
+    {
         auto node = PList::String("Everyone");
         PlistManager::setPlistValue(location, "DiscoverableMode", node);
-    } else {
+    }
+    else
+    {
         PlistManager::deletePlistKey(location, "DiscoverableMode");
     }
+}
 
+// Setup Options Page
+
+void MainWindow::loadSetupOptions()
+{
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    // fix this
+
+    auto location = *workspace + "/SkipSetup/ConfigProfileDomain/Library/ConfigurationProfiles/CloudConfigurationDetails.plist";
+    auto value = PlistManager::getPlistValue(location, "CloudConfigurationUIComplete");
+    if (value)
+    {
+        ui->skipSetupChk->setCheckState(
+            dynamic_cast<PList::Boolean *>(value)->GetValue() ? Qt::Checked : Qt::Unchecked);
+    }
+    else
+    {
+        ui->skipSetupChk->setCheckState(Qt::Unchecked);
+    }
+    value = PlistManager::getPlistValue(location, "IsSupervised");
+    if (value)
+    {
+        ui->enableSupervisionChk->setCheckState(
+            dynamic_cast<PList::Boolean *>(value)->GetValue() ? Qt::Checked : Qt::Unchecked);
+    }
+    else
+    {
+        ui->enableSupervisionChk->setCheckState(Qt::Unchecked);
+    }
+    value = PlistManager::getPlistValue(location, "OrganizationName");
+    if (value)
+    {
+        ui->organizationNameTxt->setText(QString::fromStdString(dynamic_cast<PList::String *>(value)->GetValue()));
+    }
+    else
+    {
+        ui->organizationNameTxt->setText("");
+    }
+    location = *workspace + "/SkipSetup/ManagedPreferencesDomain/mobile/com.apple.MobileAsset.plist";
+    value = PlistManager::getPlistValue(location, "MobileAssetAssetAudience");
+    if (value)
+    {
+        ui->disableUpdatesChk->setCheckState(Qt::Checked);
+    }
+    else
+    {
+        ui->disableUpdatesChk->setCheckState(Qt::Unchecked);
+    }
+}
+
+void MainWindow::on_setupOptionsEnabledChk_toggled(bool checked)
+{
+    ui->setupOptionsPageContent->setDisabled(!checked);
+    DeviceManager::getInstance().setTweakEnabled(Tweak::SkipSetup, checked);
+    MainWindow::updateEnabledTweaks();
+}
+
+void MainWindow::on_skipSetupChk_clicked(bool checked)
+{
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    auto location = *workspace + "/SkipSetup/ConfigProfileDomain/Library/ConfigurationProfiles/CloudConfigurationDetails.plist";
+    if (checked)
+    {
+        auto node1 = PList::Boolean(checked);
+        PlistManager::setPlistValue(location, "CloudConfigurationUIComplete", node1);
+
+        auto strings = {
+            "Diagnostics",
+            "WiFi",
+            "AppleID",
+            "Siri",
+            "Restore",
+            "SoftwareUpdate",
+            "Welcome",
+            "Appearance",
+            "Privacy",
+            "SIMSetup",
+            "OnBoarding",
+            "Zoom",
+            "Biometric",
+            "ScreenTime",
+            "Payment",
+            "Passcode",
+            "Display"};
+
+        auto node2 = PList::Array();
+        for (const auto &str : strings)
+        {
+            node2.Append(new PList::String(str));
+        }
+
+        PlistManager::setPlistValue(location, "SkipSetup", node2);
+    }
+    else
+    {
+        PlistManager::deletePlistKey(location, "CloudConfigurationUIComplete");
+        PlistManager::deletePlistKey(location, "SkipSetup");
+    }
+}
+
+void MainWindow::on_disableUpdatesChk_clicked(bool checked)
+{
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    auto location = *workspace + "/SkipSetup/ManagedPreferencesDomain/mobile/com.apple.MobileAsset.plist";
+    if (checked)
+    {
+        auto node = PList::String("");
+        PlistManager::setPlistValue(location, "MobileAssetAssetAudience", node);
+    }
+    else
+    {
+        PlistManager::deletePlistKey(location, "MobileAssetSUAllowOSVersionChange");
+        PlistManager::deletePlistKey(location, "MobileAssetSUAllowSameVersionFullReplacement");
+        PlistManager::deletePlistKey(location, "MobileAssetServerURL-com.apple.MobileAsset.MobileSoftwareUpdate.UpdateBrain");
+        PlistManager::deletePlistKey(location, "MobileAssetServerURL-com.apple.MobileAsset.SoftwareUpdate");
+        PlistManager::deletePlistKey(location, "MobileAssetServerURL-com.apple.MobileAsset.RecoveryOSUpdateBrain");
+        PlistManager::deletePlistKey(location, "MobileAssetServerURL-com.apple.MobileAsset.RecoveryOSUpdate");
+        PlistManager::deletePlistKey(location, "MobileAssetAssetAudience");
+    }
+}
+
+void MainWindow::on_enableSupervisionChk_clicked(bool checked)
+{
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    auto location = *workspace + "/SkipSetup/ConfigProfileDomain/Library/ConfigurationProfiles/CloudConfigurationDetails.plist";
+    if (checked)
+    {
+        auto node = PList::Boolean(checked);
+        PlistManager::setPlistValue(location, "IsSupervised", node);
+    }
+    else
+    {
+        PlistManager::deletePlistKey(location, "IsSupervised");
+    }
+}
+
+void MainWindow::on_organizationNameTxt_textEdited(const QString &text)
+{
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    auto location = *workspace + "/SkipSetup/ConfigProfileDomain/Library/ConfigurationProfiles/CloudConfigurationDetails.plist";
+    if (!text.isEmpty())
+    {
+        auto node = PList::String(text.toStdString());
+        PlistManager::setPlistValue(location, "OrganizationName", node);
+    }
+    else
+    {
+        PlistManager::deletePlistKey(location, "OrganizationName");
+    }
 }
 
 // Apply Page

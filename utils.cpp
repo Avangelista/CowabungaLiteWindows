@@ -22,11 +22,11 @@ bool Utils::copyDirectory(QString source, QString dest) {
         // Copy the file or directory
         if (iterator.fileInfo().isFile()) {
             if (!QFile::copy(sourceFilePath, destinationFilePath)) {
-                return false;
+//                return false;
             }
         } else if (iterator.fileInfo().isDir()) {
             if (!QDir().mkdir(destinationFilePath)) {
-                return false;
+//                return false;
             }
         }
     }

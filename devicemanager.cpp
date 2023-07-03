@@ -13,6 +13,9 @@
 #include <QCoreApplication>
 #include <QDirIterator>
 #include <QMessageBox>
+#include <QPlainTextEdit>
+#include <QPushButton>
+#include <QLayout>
 
 DeviceManager::DeviceManager()
 {
@@ -306,20 +309,31 @@ int DeviceManager::restoreBackupToDevice(const std::string &udid, const std::str
     }
     char buffer[128];
     char last[128];
+    char prev[128];
+    auto everything = std::string();
     while (fgets(buffer, 128, pipe) != nullptr)
     {
         std::cout << buffer << std::endl;
-        strcpy(last, buffer);
+        everything += std::string(buffer);
+        strncpy(prev, last, 128);
+        strncpy(last, buffer, 128);
     }
     _pclose(pipe);
     auto result = std::string(last);
+    auto details = std::string(prev);
     if (result == "Restore Successful.\n")
     {
-        QMessageBox::information(nullptr, "Success", "Tweaks applied! Your device will now restart.\n\nImportant: If you are presented with a setup, select \"Don't transfer apps and data\" and your phone should return to the homescreen as normal.");
+        QMessageBox::information(nullptr, "Success", "Tweaks applied! Your device will now restart.\n\nImportant: If you are presented with a setup, select \"Customize\" > \"Don't transfer apps and data\" and your phone should return to the homescreen as normal.");
     }
     else
     {
-        QMessageBox::critical(nullptr, "Error", QString::fromStdString(result));
+        QMessageBox detailsMessageBox;
+        detailsMessageBox.setWindowTitle("Error");
+        detailsMessageBox.setIcon(QMessageBox::Critical);
+        detailsMessageBox.setText(QString::fromStdString(result) + "\n" + QString::fromStdString(details));
+        detailsMessageBox.setTextInteractionFlags(Qt::TextSelectableByMouse);
+        detailsMessageBox.setDetailedText(QString::fromStdString(everything));
+        detailsMessageBox.exec();
     }
 
     return 0;

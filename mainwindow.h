@@ -10,10 +10,11 @@ QT_END_NAMESPACE
 enum class Page {
     Home = 0,
     StatusBar = 1,
-    SpringboardOptions = 2,
-    InternalOptions = 3,
-    SetupOptions = 4,
-    Apply = 5
+    ControlCenter = 2,
+    SpringboardOptions = 3,
+    InternalOptions = 4,
+    SetupOptions = 5,
+    Apply = 6
 };
 
 class MainWindow : public QMainWindow
@@ -30,6 +31,7 @@ private slots:
     void on_devicePicker_activated(int index);
     void on_homePageBtn_clicked();
     void on_statusBarPageBtn_clicked();
+    void on_controlCenterPageBtn_clicked();
     void on_springboardOptionsPageBtn_clicked();
     void on_internalOptionsPageBtn_clicked();
     void on_setupOptionsPageBtn_clicked();
@@ -95,6 +97,14 @@ private slots:
     void on_enableShutdownSoundChk_clicked(bool checked);
     void on_allowAirDropEveryoneChk_clicked(bool checked);
 
+    // Setup Options
+
+    void on_setupOptionsEnabledChk_toggled(bool checked);
+    void on_skipSetupChk_clicked(bool checked);
+    void on_disableUpdatesChk_clicked(bool checked);
+    void on_enableSupervisionChk_clicked(bool checked);
+    void on_organizationNameTxt_textEdited(const QString &text);
+
     // Apply
     void on_applyTweaksBtn_clicked();
 
@@ -119,6 +129,9 @@ private:
 
     // Springboard Options
     void loadSpringboardOptions();
+
+    // Setup Options
+    void loadSetupOptions();
 
     // Apply
     void updateEnabledTweaks();

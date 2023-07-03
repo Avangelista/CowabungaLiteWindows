@@ -742,7 +742,7 @@ QToolButton:pressed {
           <item>
            <widget class="QStackedWidget" name="pages">
             <property name="currentIndex">
-             <number>3</number>
+             <number>5</number>
             </property>
             <widget class="QWidget" name="homePage">
              <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -1976,6 +1976,170 @@ QToolButton:pressed {
               </item>
              </layout>
             </widget>
+            <widget class="QWidget" name="controlCenterPage">
+             <layout class="QVBoxLayout" name="verticalLayout_20">
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QWidget" name="horizontalWidget_7" native="true">
+                <layout class="QHBoxLayout" name="horizontalLayout_22">
+                 <property name="spacing">
+                  <number>10</number>
+                 </property>
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>9</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>9</number>
+                 </property>
+                 <item>
+                  <widget class="QToolButton" name="toolButton_12">
+                   <property name="enabled">
+                    <bool>false</bool>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QToolButton {
+	icon-size: 24px;
+	background-color: transparent;
+	padding-left: 0px;
+	padding-right: 5px;
+	border-radius: 0px;
+}</string>
+                   </property>
+                   <property name="icon">
+                    <iconset resource="resources.qrc">
+                     <normaloff>:/icon/toggles.svg</normaloff>:/icon/toggles.svg</iconset>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QWidget" name="verticalWidget_6" native="true">
+                   <layout class="QVBoxLayout" name="verticalLayout_18">
+                    <property name="spacing">
+                     <number>6</number>
+                    </property>
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QLabel" name="setupOptionsLbl_2">
+                      <property name="font">
+                       <font>
+                        <pointsize>-1</pointsize>
+                        <bold>false</bold>
+                       </font>
+                      </property>
+                      <property name="text">
+                       <string>Control Center</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QCheckBox" name="setupOptionsEnabledChk_2">
+                      <property name="text">
+                       <string>Enabled</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="horizontalSpacer_9">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="Line" name="line_14">
+                <property name="styleSheet">
+                 <string notr="true">QFrame {
+	color: #414141;
+}</string>
+                </property>
+                <property name="frameShadow">
+                 <enum>QFrame::Plain</enum>
+                </property>
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QWidget" name="setupOptionsPageContent_2" native="true">
+                <layout class="QVBoxLayout" name="verticalLayout_19">
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="QCheckBox" name="skipSetupChk_2">
+                   <property name="text">
+                    <string>Beans</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="verticalSpacer_8">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>20</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+             </layout>
+            </widget>
             <widget class="QWidget" name="springboardOptionsPage">
              <layout class="QVBoxLayout" name="verticalLayout_10">
               <property name="leftMargin">
@@ -2167,6 +2331,9 @@ QToolButton:pressed {
                     </item>
                     <item>
                      <widget class="QSlider" name="UIAnimSpeedSld">
+                      <property name="minimum">
+                       <number>1</number>
+                      </property>
                       <property name="maximum">
                        <number>200</number>
                       </property>
@@ -2390,6 +2557,9 @@ QToolButton:pressed {
               </item>
               <item>
                <widget class="QWidget" name="internalOptionsPageContent" native="true">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <layout class="QVBoxLayout" name="verticalLayout_13">
                  <property name="leftMargin">
                   <number>0</number>
@@ -2414,6 +2584,55 @@ QToolButton:pressed {
                   <widget class="QCheckBox" name="checkBox_2">
                    <property name="text">
                     <string>Force Right-to-Left Layout</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="checkBox_3">
+                   <property name="text">
+                    <string>Enable Metal HUD Debug</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="checkBox_4">
+                   <property name="text">
+                    <string>Enable Accessory Diagnostics</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="checkBox_5">
+                   <property name="text">
+                    <string>Enable iMessage Diagnostics</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="checkBox_6">
+                   <property name="text">
+                    <string>Enable IDS Diagnostics</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="checkBox_7">
+                   <property name="text">
+                    <string>Enable VC Diagnostics</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="checkBox_8">
+                   <property name="text">
+                    <string>Enable App Store Debug Gesture</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="checkBox_9">
+                   <property name="text">
+                    <string>Enable Notes Debug Mode</string>
                    </property>
                   </widget>
                  </item>
@@ -2561,6 +2780,9 @@ QToolButton:pressed {
               </item>
               <item>
                <widget class="QWidget" name="setupOptionsPageContent" native="true">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <layout class="QVBoxLayout" name="verticalLayout_16">
                  <property name="leftMargin">
                   <number>0</number>
