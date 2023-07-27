@@ -742,7 +742,7 @@ QToolButton:pressed {
           <item>
            <widget class="QStackedWidget" name="pages">
             <property name="currentIndex">
-             <number>5</number>
+             <number>1</number>
             </property>
             <widget class="QWidget" name="homePage">
              <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -1312,12 +1312,6 @@ QToolButton:pressed {
                      </property>
                      <item>
                       <widget class="QLabel" name="label_9">
-                       <property name="font">
-                        <font>
-                         <pointsize>-1</pointsize>
-                         <bold>true</bold>
-                        </font>
-                       </property>
                        <property name="text">
                         <string>Primary Cellular</string>
                        </property>
@@ -1499,12 +1493,6 @@ QToolButton:pressed {
                      </item>
                      <item>
                       <widget class="QLabel" name="label_10">
-                       <property name="font">
-                        <font>
-                         <pointsize>-1</pointsize>
-                         <bold>true</bold>
-                        </font>
-                       </property>
                        <property name="text">
                         <string>Secondary Cellular</string>
                        </property>
@@ -2574,63 +2562,63 @@ QToolButton:pressed {
                   <number>0</number>
                  </property>
                  <item>
-                  <widget class="QCheckBox" name="checkBox">
+                  <widget class="QCheckBox" name="buildVersionChk">
                    <property name="text">
-                    <string>Display Build Version in Status Bar</string>
+                    <string>Show Build Version in Status Bar</string>
                    </property>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QCheckBox" name="checkBox_2">
+                  <widget class="QCheckBox" name="RTLChk">
                    <property name="text">
                     <string>Force Right-to-Left Layout</string>
                    </property>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QCheckBox" name="checkBox_3">
+                  <widget class="QCheckBox" name="metalHUDChk">
                    <property name="text">
                     <string>Enable Metal HUD Debug</string>
                    </property>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QCheckBox" name="checkBox_4">
+                  <widget class="QCheckBox" name="accessoryChk">
                    <property name="text">
                     <string>Enable Accessory Diagnostics</string>
                    </property>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QCheckBox" name="checkBox_5">
+                  <widget class="QCheckBox" name="iMessageChk">
                    <property name="text">
                     <string>Enable iMessage Diagnostics</string>
                    </property>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QCheckBox" name="checkBox_6">
+                  <widget class="QCheckBox" name="IDSChk">
                    <property name="text">
                     <string>Enable IDS Diagnostics</string>
                    </property>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QCheckBox" name="checkBox_7">
+                  <widget class="QCheckBox" name="VCChk">
                    <property name="text">
                     <string>Enable VC Diagnostics</string>
                    </property>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QCheckBox" name="checkBox_8">
+                  <widget class="QCheckBox" name="appStoreChk">
                    <property name="text">
                     <string>Enable App Store Debug Gesture</string>
                    </property>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QCheckBox" name="checkBox_9">
+                  <widget class="QCheckBox" name="notesChk">
                    <property name="text">
                     <string>Enable Notes Debug Mode</string>
                    </property>

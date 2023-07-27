@@ -41,6 +41,7 @@ set(PROJECT_SOURCES
         CreateBackup.cpp
         plistmanager.h
         plistmanager.cpp
+        HomeScreenApps.cpp
         ${TS_FILES}
         ${QRC_FILES}
 )

@@ -98,12 +98,23 @@ private slots:
     void on_allowAirDropEveryoneChk_clicked(bool checked);
 
     // Setup Options
-
     void on_setupOptionsEnabledChk_toggled(bool checked);
     void on_skipSetupChk_clicked(bool checked);
     void on_disableUpdatesChk_clicked(bool checked);
     void on_enableSupervisionChk_clicked(bool checked);
     void on_organizationNameTxt_textEdited(const QString &text);
+
+    // Internal Options
+    void on_internalOptionsEnabledChk_toggled(bool checked);
+    void on_buildVersionChk_toggled(bool checked);
+    void on_RTLChk_toggled(bool checked);
+    void on_metalHUDChk_toggled(bool checked);
+    void on_accessoryChk_toggled(bool checked);
+    void on_iMessageChk_toggled(bool checked);
+    void on_IDSChk_toggled(bool checked);
+    void on_VCChk_toggled(bool checked);
+    void on_appStoreChk_toggled(bool checked);
+    void on_notesChk_toggled(bool checked);
 
     // Apply
     void on_applyTweaksBtn_clicked();
@@ -132,6 +143,9 @@ private:
 
     // Setup Options
     void loadSetupOptions();
+
+    // Internal Options
+    void loadInternalOptions();
 
     // Apply
     void updateEnabledTweaks();

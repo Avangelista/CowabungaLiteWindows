@@ -1,5 +1,6 @@
 #include "StatusSetter16_1.h"
 #include "../devicemanager.h"
+#include <iostream>
 
 enum class StatusBarItem : int
 {
@@ -424,7 +425,7 @@ std::string StatusSetter16_1::getCrumbOverride()
     std::string text = std::string(overrides->values.breadcrumbTitle);
     if (text.size() > 1)
     {
-        return text.substr(0, text.size() - 2);
+        return text.substr(0, text.size() - 4);
     }
     return "";
 }

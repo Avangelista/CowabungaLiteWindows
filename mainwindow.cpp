@@ -32,9 +32,9 @@ void MainWindow::updateInterfaceForNewDevice()
 
     if (DeviceManager::getInstance().isDeviceAvailable())
     {
-        // Load status bar overrides
         MainWindow::loadStatusBar();
         MainWindow::loadSpringboardOptions();
+        MainWindow::loadInternalOptions();
         MainWindow::loadSetupOptions();
     }
     else
@@ -178,9 +178,70 @@ void MainWindow::on_toolButton_3_clicked()
 
 void MainWindow::loadStatusBar()
 {
-    ui->pCarrierChk->setCheckState(StatusManager::getInstance().isCarrierOverridden() ? Qt::Checked : Qt::Unchecked);
+    auto sm = StatusManager::getInstance();
+
+    // Primary Cellular
+    if (sm.isCellularServiceOverridden()) {
+        if (sm.getCellularServiceOverride()) {
+            ui->pShowRdo->setChecked(true);
+        } else {
+            ui->pHideRdo->setChecked(true);
+        }
+    } else {
+        ui->pDefaultRdo->setChecked(true);
+    }
+    ui->pCarrierChk->setChecked(StatusManager::getInstance().isCarrierOverridden());
     ui->pCarrierTxt->setText(QString::fromStdString(StatusManager::getInstance().getCarrierOverride()));
-    ui->hideBatteryChk->setCheckState(StatusManager::getInstance().isBatteryHidden() ? Qt::Checked : Qt::Unchecked);
+    ui->pBadgeChk->setChecked(StatusManager::getInstance().isPrimaryServiceBadgeOverridden());
+    ui->pBadgeTxt->setText(QString::fromStdString(StatusManager::getInstance().getPrimaryServiceBadgeOverride()));
+    // data network type
+    ui->pStrengthChk->setChecked(StatusManager::getInstance().isGSMSignalStrengthBarsOverridden());
+    ui->pStrengthSld->setValue(StatusManager::getInstance().getGSMSignalStrengthBarsOverride());
+
+    // Secondary Cellular
+    if (sm.isSecondaryCellularServiceOverridden()) {
+        if (sm.getSecondaryCellularServiceOverride()) {
+            ui->sShowRdo->setChecked(true);
+        } else {
+            ui->sHideRdo->setChecked(true);
+        }
+    } else {
+        ui->sDefaultRdo->setChecked(true);
+    }
+    ui->sCarrierChk->setChecked(StatusManager::getInstance().isSecondaryCarrierOverridden());
+    ui->sCarrierTxt->setText(QString::fromStdString(StatusManager::getInstance().getSecondaryCarrierOverride()));
+    ui->sBadgeChk->setChecked(StatusManager::getInstance().isSecondaryServiceBadgeOverridden());
+    ui->sBadgeTxt->setText(QString::fromStdString(StatusManager::getInstance().getSecondaryServiceBadgeOverride()));
+    // data network type
+    ui->sStrengthChk->setChecked(StatusManager::getInstance().isSecondaryGSMSignalStrengthBarsOverridden());
+    ui->sStrengthSld->setValue(StatusManager::getInstance().getSecondaryGSMSignalStrengthBarsOverride());
+
+    // Time etc.
+    ui->timeChk->setChecked(StatusManager::getInstance().isTimeOverridden());
+    ui->timeTxt->setText(QString::fromStdString(StatusManager::getInstance().getTimeOverride()));
+    ui->breadcrumbChk->setChecked(StatusManager::getInstance().isCrumbOverridden());
+    ui->breadcrumbTxt->setText(QString::fromStdString(StatusManager::getInstance().getCrumbOverride()));
+    ui->batteryDetailChk->setChecked(StatusManager::getInstance().isBatteryDetailOverridden());
+    ui->batteryDetailTxt->setText(QString::fromStdString(StatusManager::getInstance().getBatteryDetailOverride()));
+    ui->batteryCapacityChk->setChecked(StatusManager::getInstance().isBatteryCapacityOverridden());
+    ui->batteryCapacitySld->setValue(StatusManager::getInstance().getBatteryCapacityOverride());
+    ui->wifiStrengthChk->setChecked(StatusManager::getInstance().isWiFiSignalStrengthBarsOverridden());
+    ui->wifiStrengthSld->setValue(StatusManager::getInstance().getWiFiSignalStrengthBarsOverride());
+    ui->numericWifiChk->setChecked(StatusManager::getInstance().isRawWiFiSignalShown());
+    ui->numericCellChk->setChecked(StatusManager::getInstance().isRawGSMSignalShown());
+
+    // Hiding
+    ui->hideDNDChk->setChecked(StatusManager::getInstance().isDNDHidden());
+    ui->hideAirplaneChk->setChecked(StatusManager::getInstance().isAirplaneHidden());
+    ui->hideWifiChk->setChecked(StatusManager::getInstance().isWiFiHidden());
+    ui->hideBatteryChk->setChecked(StatusManager::getInstance().isBatteryHidden());
+    ui->hideBluetoothChk->setChecked(StatusManager::getInstance().isBluetoothHidden());
+    ui->hideAlarmChk->setChecked(StatusManager::getInstance().isAlarmHidden());
+    ui->hideLocationChk->setChecked(StatusManager::getInstance().isLocationHidden());
+    ui->hideRotationChk->setChecked(StatusManager::getInstance().isRotationHidden());
+    ui->hideAirPlayChk->setChecked(StatusManager::getInstance().isAirPlayHidden());
+    ui->hideCarPlayChk->setChecked(StatusManager::getInstance().isCarPlayHidden());
+    ui->hideVPNChk->setChecked(StatusManager::getInstance().isVPNHidden());
 }
 
 void MainWindow::on_statusBarEnabledChk_toggled(bool checked)
@@ -551,64 +612,64 @@ void MainWindow::loadSpringboardOptions()
     value = PlistManager::getPlistValue(location, "SBDontLockAfterCrash");
     if (value)
     {
-        ui->disableLockRespringChk->setCheckState(
-            dynamic_cast<PList::Boolean *>(value)->GetValue() ? Qt::Checked : Qt::Unchecked);
+        ui->disableLockRespringChk->setChecked(
+            dynamic_cast<PList::Boolean *>(value)->GetValue());
     }
     else
     {
-        ui->disableLockRespringChk->setCheckState(Qt::Unchecked);
+        ui->disableLockRespringChk->setChecked(false);
     }
     value = PlistManager::getPlistValue(location, "SBDontDimOrLockOnAC");
     if (value)
     {
-        ui->disableDimmingChk->setCheckState(
-            dynamic_cast<PList::Boolean *>(value)->GetValue() ? Qt::Checked : Qt::Unchecked);
+        ui->disableDimmingChk->setChecked(
+            dynamic_cast<PList::Boolean *>(value)->GetValue());
     }
     else
     {
-        ui->disableDimmingChk->setCheckState(Qt::Unchecked);
+        ui->disableDimmingChk->setChecked(false);
     }
     value = PlistManager::getPlistValue(location, "SBHideLowPowerAlerts");
     if (value)
     {
-        ui->disableBatteryAlertsChk->setCheckState(
-            dynamic_cast<PList::Boolean *>(value)->GetValue() ? Qt::Checked : Qt::Unchecked);
+        ui->disableBatteryAlertsChk->setChecked(
+            dynamic_cast<PList::Boolean *>(value)->GetValue());
     }
     else
     {
-        ui->disableBatteryAlertsChk->setCheckState(Qt::Unchecked);
+        ui->disableBatteryAlertsChk->setChecked(false);
     }
     value = PlistManager::getPlistValue(location, "SBControlCenterEnabledInLockScreen");
     if (value)
     {
-        ui->enableLSCCChk->setCheckState(
-            dynamic_cast<PList::Boolean *>(value)->GetValue() ? Qt::Checked : Qt::Unchecked);
+        ui->enableLSCCChk->setChecked(
+            dynamic_cast<PList::Boolean *>(value)->GetValue());
     }
     else
     {
-        ui->enableLSCCChk->setCheckState(Qt::Unchecked);
+        ui->enableLSCCChk->setChecked(false);
     }
     location = *workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.Accessibility.plist";
     value = PlistManager::getPlistValue(location, "StartupSoundEnabled");
     if (value)
     {
-        ui->enableShutdownSoundChk->setCheckState(
-            dynamic_cast<PList::Boolean *>(value)->GetValue() ? Qt::Checked : Qt::Unchecked);
+        ui->enableShutdownSoundChk->setChecked(
+            dynamic_cast<PList::Boolean *>(value)->GetValue());
     }
     else
     {
-        ui->enableShutdownSoundChk->setCheckState(Qt::Unchecked);
+        ui->enableShutdownSoundChk->setChecked(false);
     }
     location = *workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.sharingd.plist";
     value = PlistManager::getPlistValue(location, "DiscoverableMode");
     if (value)
     {
-        ui->allowAirDropEveryoneChk->setCheckState(
-            dynamic_cast<PList::String *>(value)->GetValue() == "Everyone" ? Qt::Checked : Qt::Unchecked);
+        ui->allowAirDropEveryoneChk->setChecked(
+            dynamic_cast<PList::String *>(value)->GetValue() == "Everyone");
     }
     else
     {
-        ui->allowAirDropEveryoneChk->setCheckState(Qt::Unchecked);
+        ui->allowAirDropEveryoneChk->setChecked(false);
     }
 }
 
@@ -771,22 +832,22 @@ void MainWindow::loadSetupOptions()
     auto value = PlistManager::getPlistValue(location, "CloudConfigurationUIComplete");
     if (value)
     {
-        ui->skipSetupChk->setCheckState(
-            dynamic_cast<PList::Boolean *>(value)->GetValue() ? Qt::Checked : Qt::Unchecked);
+        ui->skipSetupChk->setChecked(
+            dynamic_cast<PList::Boolean *>(value)->GetValue());
     }
     else
     {
-        ui->skipSetupChk->setCheckState(Qt::Unchecked);
+        ui->skipSetupChk->setChecked(false);
     }
     value = PlistManager::getPlistValue(location, "IsSupervised");
     if (value)
     {
-        ui->enableSupervisionChk->setCheckState(
-            dynamic_cast<PList::Boolean *>(value)->GetValue() ? Qt::Checked : Qt::Unchecked);
+        ui->enableSupervisionChk->setChecked(
+            dynamic_cast<PList::Boolean *>(value)->GetValue());
     }
     else
     {
-        ui->enableSupervisionChk->setCheckState(Qt::Unchecked);
+        ui->enableSupervisionChk->setChecked(false);
     }
     value = PlistManager::getPlistValue(location, "OrganizationName");
     if (value)
@@ -801,11 +862,11 @@ void MainWindow::loadSetupOptions()
     value = PlistManager::getPlistValue(location, "MobileAssetAssetAudience");
     if (value)
     {
-        ui->disableUpdatesChk->setCheckState(Qt::Checked);
+        ui->disableUpdatesChk->setChecked(true);
     }
     else
     {
-        ui->disableUpdatesChk->setCheckState(Qt::Unchecked);
+        ui->disableUpdatesChk->setChecked(false);
     }
 }
 
@@ -915,6 +976,270 @@ void MainWindow::on_organizationNameTxt_textEdited(const QString &text)
     else
     {
         PlistManager::deletePlistKey(location, "OrganizationName");
+    }
+}
+
+// Internal Options Page
+
+void MainWindow::loadInternalOptions()
+{
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    // fix this
+
+    auto location = *workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/hiddendotGlobalPreferences.plist";
+    auto value = PlistManager::getPlistValue(location, "UIStatusBarShowBuildVersion");
+    if (value)
+    {
+        ui->buildVersionChk->setChecked(
+            dynamic_cast<PList::Boolean *>(value)->GetValue());
+    }
+    else
+    {
+        ui->buildVersionChk->setChecked(false);
+    }
+    value = PlistManager::getPlistValue(location, "NSForceRightToLeftWritingDirection");
+    if (value)
+    {
+        ui->RTLChk->setChecked(
+            dynamic_cast<PList::Boolean *>(value)->GetValue());
+    }
+    else
+    {
+        ui->RTLChk->setChecked(false);
+    }
+    value = PlistManager::getPlistValue(location, "MetalForceHudEnabled");
+    if (value)
+    {
+        ui->metalHUDChk->setChecked(
+            dynamic_cast<PList::Boolean *>(value)->GetValue());
+    }
+    else
+    {
+        ui->metalHUDChk->setChecked(false);
+    }
+    value = PlistManager::getPlistValue(location, "AccessoryDeveloperEnabled");
+    if (value)
+    {
+        ui->accessoryChk->setChecked(
+            dynamic_cast<PList::Boolean *>(value)->GetValue());
+    }
+    else
+    {
+        ui->accessoryChk->setChecked(false);
+    }
+    value = PlistManager::getPlistValue(location, "iMessageDiagnosticsEnabled");
+    if (value)
+    {
+        ui->iMessageChk->setChecked(
+            dynamic_cast<PList::Boolean *>(value)->GetValue());
+    }
+    else
+    {
+        ui->iMessageChk->setChecked(false);
+    }
+    value = PlistManager::getPlistValue(location, "IDSDiagnosticsEnabled");
+    if (value)
+    {
+        ui->IDSChk->setChecked(
+            dynamic_cast<PList::Boolean *>(value)->GetValue());
+    }
+    else
+    {
+        ui->IDSChk->setChecked(false);
+    }
+    value = PlistManager::getPlistValue(location, "VCDiagnosticsEnabled");
+    if (value)
+    {
+        ui->VCChk->setChecked(
+            dynamic_cast<PList::Boolean *>(value)->GetValue());
+    }
+    else
+    {
+        ui->VCChk->setChecked(false);
+    }
+    location = *workspace + "/InternalOptions/HomeDomain/Library/Preferences/com.apple.AppStore.plist";
+    value = PlistManager::getPlistValue(location, "debugGestureEnabled");
+    if (value)
+    {
+        ui->appStoreChk->setChecked(
+            dynamic_cast<PList::Boolean *>(value)->GetValue());
+    }
+    else
+    {
+        ui->appStoreChk->setChecked(false);
+    }
+    location = *workspace + "/InternalOptions/HomeDomain/Library/Preferences/com.apple.mobilenotes.plist";
+    value = PlistManager::getPlistValue(location, "DebugModeEnabled");
+    if (value)
+    {
+        ui->notesChk->setChecked(
+            dynamic_cast<PList::Boolean *>(value)->GetValue());
+    }
+    else
+    {
+        ui->notesChk->setChecked(false);
+    }
+}
+
+void MainWindow::on_internalOptionsEnabledChk_toggled(bool checked)
+{
+    ui->internalOptionsPageContent->setDisabled(!checked);
+    DeviceManager::getInstance().setTweakEnabled(Tweak::InternalOptions, checked);
+    MainWindow::updateEnabledTweaks();
+}
+
+void MainWindow::on_buildVersionChk_toggled(bool checked)
+{
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    auto location = *workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/hiddendotGlobalPreferences.plist";
+    if (checked)
+    {
+        auto node = PList::Boolean(checked);
+        PlistManager::setPlistValue(location, "UIStatusBarShowBuildVersion", node);
+    }
+    else
+    {
+        PlistManager::deletePlistKey(location, "UIStatusBarShowBuildVersion");
+    }
+}
+
+void MainWindow::on_RTLChk_toggled(bool checked)
+{
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    auto location = *workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/hiddendotGlobalPreferences.plist";
+    if (checked)
+    {
+        auto node = PList::Boolean(checked);
+        PlistManager::setPlistValue(location, "NSForceRightToLeftWritingDirection", node);
+    }
+    else
+    {
+        PlistManager::deletePlistKey(location, "NSForceRightToLeftWritingDirection");
+    }
+}
+
+void MainWindow::on_metalHUDChk_toggled(bool checked)
+{
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    auto location = *workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/hiddendotGlobalPreferences.plist";
+    if (checked)
+    {
+        auto node = PList::Boolean(checked);
+        PlistManager::setPlistValue(location, "MetalForceHudEnabled", node);
+    }
+    else
+    {
+        PlistManager::deletePlistKey(location, "MetalForceHudEnabled");
+    }
+}
+
+void MainWindow::on_accessoryChk_toggled(bool checked)
+{
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    auto location = *workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/hiddendotGlobalPreferences.plist";
+    if (checked)
+    {
+        auto node = PList::Boolean(checked);
+        PlistManager::setPlistValue(location, "AccessoryDeveloperEnabled", node);
+    }
+    else
+    {
+        PlistManager::deletePlistKey(location, "AccessoryDeveloperEnabled");
+    }
+}
+
+void MainWindow::on_iMessageChk_toggled(bool checked)
+{
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    auto location = *workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/hiddendotGlobalPreferences.plist";
+    if (checked)
+    {
+        auto node = PList::Boolean(checked);
+        PlistManager::setPlistValue(location, "iMessageDiagnosticsEnabled", node);
+    }
+    else
+    {
+        PlistManager::deletePlistKey(location, "iMessageDiagnosticsEnabled");
+    }
+}
+
+void MainWindow::on_IDSChk_toggled(bool checked)
+{
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    auto location = *workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/hiddendotGlobalPreferences.plist";
+    if (checked)
+    {
+        auto node = PList::Boolean(checked);
+        PlistManager::setPlistValue(location, "IDSDiagnosticsEnabled", node);
+    }
+    else
+    {
+        PlistManager::deletePlistKey(location, "IDSDiagnosticsEnabled");
+    }
+}
+
+void MainWindow::on_VCChk_toggled(bool checked)
+{
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    auto location = *workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/hiddendotGlobalPreferences.plist";
+    if (checked)
+    {
+        auto node = PList::Boolean(checked);
+        PlistManager::setPlistValue(location, "VCDiagnosticsEnabled", node);
+    }
+    else
+    {
+        PlistManager::deletePlistKey(location, "VCDiagnosticsEnabled");
+    }
+}
+
+void MainWindow::on_appStoreChk_toggled(bool checked)
+{
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    auto location = *workspace + "/InternalOptions/HomeDomain/Library/Preferences/com.apple.AppStore.plist";
+    if (checked)
+    {
+        auto node = PList::Boolean(checked);
+        PlistManager::setPlistValue(location, "debugGestureEnabled", node);
+    }
+    else
+    {
+        PlistManager::deletePlistKey(location, "debugGestureEnabled");
+    }
+}
+
+void MainWindow::on_notesChk_toggled(bool checked)
+{
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    auto location = *workspace + "/InternalOptions/HomeDomain/Library/Preferences/com.apple.mobilenotes.plist";
+    if (checked)
+    {
+        auto node = PList::Boolean(checked);
+        PlistManager::setPlistValue(location, "DebugModeEnabled", node);
+    }
+    else
+    {
+        PlistManager::deletePlistKey(location, "DebugModeEnabled");
     }
 }
 

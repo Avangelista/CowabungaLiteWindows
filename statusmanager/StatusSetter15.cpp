@@ -417,7 +417,7 @@ std::string StatusSetter15::getCrumbOverride()
     std::string text = std::string(overrides->values.breadcrumbTitle);
     if (text.size() > 1)
     {
-        return text.substr(0, text.size() - 2);
+        return text.substr(0, text.size() - 4);
     }
     return "";
 }
