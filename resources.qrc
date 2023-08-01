@@ -15,5 +15,6 @@
         <file>icon/toggles.svg</file>
         <file>icon/wifi.svg</file>
         <file>icon/x-lg.svg</file>
+        <file>background.png</file>
     </qresource>
 </RCC>

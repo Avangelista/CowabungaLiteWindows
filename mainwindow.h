@@ -9,12 +9,13 @@ QT_END_NAMESPACE
 
 enum class Page {
     Home = 0,
-    StatusBar = 1,
-    ControlCenter = 2,
-    SpringboardOptions = 3,
-    InternalOptions = 4,
-    SetupOptions = 5,
-    Apply = 6
+    Themes = 1,
+    StatusBar = 2,
+    ControlCenter = 3,
+    SpringboardOptions = 4,
+    InternalOptions = 5,
+    SetupOptions = 6,
+    Apply = 7
 };
 
 class MainWindow : public QMainWindow
@@ -30,6 +31,7 @@ private slots:
     void on_refreshBtn_clicked();
     void on_devicePicker_activated(int index);
     void on_homePageBtn_clicked();
+    void on_themesPageBtn_clicked();
     void on_statusBarPageBtn_clicked();
     void on_controlCenterPageBtn_clicked();
     void on_springboardOptionsPageBtn_clicked();
@@ -75,7 +77,6 @@ private slots:
     void on_numericCellChk_clicked(bool checked);
     void on_hideDNDChk_clicked(bool checked);
     void on_hideAirplaneChk_clicked(bool checked);
-    void on_hideCellChk_clicked(bool checked);
     void on_hideWifiChk_clicked(bool checked);
     void on_hideBatteryChk_clicked(bool checked);
     void on_hideBluetoothChk_clicked(bool checked);
@@ -134,6 +135,10 @@ private:
 
     // Home
     void updatePhoneInfo();
+
+    // Themes
+    QPixmap createRoundedPixmap(const QPixmap& pixmap, double roundnessPercentage);
+    void loadThemes();
 
     // Status Bar
     void loadStatusBar();

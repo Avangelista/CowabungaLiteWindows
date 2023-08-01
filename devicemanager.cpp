@@ -70,7 +70,6 @@ std::vector<DeviceInfo> DeviceManager::loadDevices()
 {
     auto devices = std::vector<DeviceInfo>();
 
-    // cbs to do auto here
     char **device_list = nullptr;
     int device_count = 0;
     idevice_get_device_list(&device_list, &device_count);
@@ -180,12 +179,11 @@ void DeviceManager::setCurrentDeviceIndex(int index)
     else
     {
         this->deviceAvailable = false;
-        // shouldn't need to do this
-        // this->currentWorkspace.reset();
     }
 
 }
 
+// fix: do something to blank all pages?
 void DeviceManager::resetCurrentDevice()
 {
     this->currentWorkspace.reset();
@@ -270,11 +268,6 @@ std::vector<Tweak> DeviceManager::getEnabledTweaks()
 void DeviceManager::applyTweaks()
 {
     auto workspace = DeviceManager::getCurrentWorkspace();
-    if (!workspace)
-    {
-        qDebug() << "where da workspace??";
-        return;
-    }
 
     // Erase backup folder
     auto enabledTweaksDirectoryPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/EnabledTweaks";

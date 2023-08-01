@@ -1,10 +1,15 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include "DeviceManager.h"
+#include "qdir.h"
+#include "qstandardpaths.h"
 #include "statusmanager/StatusManager.h"
 #include "plistmanager.h"
+#include "HomeScreenApps.h"
 #include <QDebug>
 #include <QWindow>
+#include <QPainter>
+#include <QPainterPath>
 
 // Boilerplate
 
@@ -32,6 +37,7 @@ void MainWindow::updateInterfaceForNewDevice()
 
     if (DeviceManager::getInstance().isDeviceAvailable())
     {
+        MainWindow::loadThemes();
         MainWindow::loadStatusBar();
         MainWindow::loadSpringboardOptions();
         MainWindow::loadInternalOptions();
@@ -81,6 +87,11 @@ void MainWindow::refreshDevices()
 void MainWindow::on_homePageBtn_clicked()
 {
     ui->pages->setCurrentIndex(static_cast<int>(Page::Home));
+}
+
+void MainWindow::on_themesPageBtn_clicked()
+{
+    ui->pages->setCurrentIndex(static_cast<int>(Page::Themes));
 }
 
 void MainWindow::on_statusBarPageBtn_clicked()
@@ -142,11 +153,11 @@ void MainWindow::updatePhoneInfo()
     {
         if (DeviceManager::getInstance().isDeviceAvailable())
         {
-            ui->phoneVersionLbl->setText("<a style=\"text-decoration:none; color: white;\" href=\"#\">" + QString::fromStdString(version->toString()) + " <span style=\"color: #32d74b;\">Supported!</span></a>");
+            ui->phoneVersionLbl->setText("<a style=\"text-decoration:none; color: white;\" href=\"#\">iOS " + QString::fromStdString(version->toString()) + " <span style=\"color: #32d74b;\">Supported!</span></a>");
         }
         else
         {
-            ui->phoneVersionLbl->setText("<a style=\"text-decoration:none; color: white;\" href=\"#\">" + QString::fromStdString(version->toString()) + " <span style=\"color: #ff453a;\">Not Supported.</span></a>");
+            ui->phoneVersionLbl->setText("<a style=\"text-decoration:none; color: white;\" href=\"#\">iOS " + QString::fromStdString(version->toString()) + " <span style=\"color: #ff453a;\">Not Supported.</span></a>");
         }
     }
     else
@@ -172,6 +183,250 @@ void MainWindow::on_toolButton_3_clicked()
     auto location = *workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.UIKit.plist";
     auto value = PlistManager::getPlistValue(location, "UIAnimationDragCoefficient");
     qDebug() << "Value: " << dynamic_cast<PList::Real *>(value)->GetValue();
+}
+
+// Themes Page
+
+// Helper function to create rounded pixmap
+QPixmap MainWindow::createRoundedPixmap(const QPixmap& pixmap, double roundnessPercentage)
+{
+    QPixmap roundedPixmap(pixmap.size());
+    roundedPixmap.fill(Qt::transparent);
+
+    QPainter painter(&roundedPixmap);
+    painter.setRenderHint(QPainter::Antialiasing, true);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
+
+    int width = pixmap.width();
+    int height = pixmap.height();
+    int radius = qMin(width, height) * roundnessPercentage;
+
+    QPainterPath path;
+    path.addRoundedRect(roundedPixmap.rect(), radius, radius);
+    painter.setClipPath(path);
+    painter.drawPixmap(0, 0, pixmap);
+
+    return roundedPixmap;
+}
+
+void MainWindow::loadThemes()
+{
+    auto themesDirectoryPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/Themes";
+    auto themesDirectory = QDir(themesDirectoryPath);
+    if (!themesDirectory.exists())
+    {
+        // Create the directory if it doesn't exist
+        if (!themesDirectory.mkpath("."))
+        {
+            qDebug() << "Failed to create the directory: " << themesDirectory;
+        }
+    }
+
+    // Get a list of all folder names within the directory
+    QStringList folderList = themesDirectory.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+
+    // Clear the layout
+    QLayout* layout = ui->themesCnt->layout();
+    if (layout)
+    {
+        QLayoutItem* child;
+        while ((child = layout->takeAt(0)) != nullptr)
+        {
+            delete child->widget(); // Remove and delete the widget
+            delete child; // Delete the layout item
+        }
+        delete layout; // Delete the layout itself
+        ui->themesCnt->setLayout(nullptr); // Reset the layout pointer
+    }
+
+    // Clear the widget contents (if it's a container widget)
+    const QObjectList& children = ui->themesCnt->children();
+    for (QObject* child : children)
+    {
+        delete child; // Delete each child widget
+    }
+
+    // Create a QHBoxLayout to arrange the widgets horizontally
+    QHBoxLayout* mainLayout = new QHBoxLayout();
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+
+    // Iterate through the folder names
+    foreach (const QString& folderName, folderList)
+    {
+        QString folderPath = themesDirectory.filePath(folderName);
+        QDir directory(folderPath);
+        QStringList nameFilters;
+        nameFilters << "*.PNG";
+        QStringList pngFiles = directory.entryList(nameFilters, QDir::Files);
+
+        auto numIcons = pngFiles.size();
+
+        // Create the widget containing a container for the background and a button arranged vertically
+        QWidget* widget = new QWidget();
+
+        // Create a container widget to hold the iconLayout with background
+        QWidget* iconContainer = new QWidget();
+        iconContainer->setStyleSheet("background-image: url(:/background.png); background-repeat: no-repeat; background-position: center;");
+
+        // Load the icon images from the folder
+        QPixmap phoneIcon(QString("%1/%2/com.apple.mobilephone-large.png").arg(themesDirectoryPath, folderName));
+        QPixmap safariIcon(QString("%1/%2/com.apple.mobilesafari-large.png").arg(themesDirectoryPath, folderName));
+        QPixmap photosIcon(QString("%1/%2/com.apple.mobileslideshow-large.png").arg(themesDirectoryPath, folderName));
+        QPixmap cameraIcon(QString("%1/%2/com.apple.camera-large.png").arg(themesDirectoryPath, folderName));
+
+        // Create QToolButtons to display the icon images
+        QToolButton* phoneButton = new QToolButton(iconContainer);
+        phoneButton->setIcon(QIcon(createRoundedPixmap(phoneIcon, 0.3))); // Set the radius for rounded corners
+        phoneButton->setIconSize(QSize(45, 45));
+        phoneButton->setStyleSheet("QToolButton { min-height: 0px; background: none; padding: 0px; border: none; }");
+
+        QToolButton* safariButton = new QToolButton(iconContainer);
+        safariButton->setIcon(QIcon(createRoundedPixmap(safariIcon, 0.3))); // Set the radius for rounded corners
+        safariButton->setIconSize(QSize(45, 45));
+        safariButton->setStyleSheet("QToolButton { min-height: 0px; background: none; padding: 0px; border: none; }");
+
+        QToolButton* photosButton = new QToolButton(iconContainer);
+        photosButton->setIcon(QIcon(createRoundedPixmap(photosIcon, 0.3))); // Set the radius for rounded corners
+        photosButton->setIconSize(QSize(45, 45));
+        photosButton->setStyleSheet("QToolButton { min-height: 0px; background: none; padding: 0px; border: none; }");
+
+        QToolButton* cameraButton = new QToolButton(iconContainer);
+        cameraButton->setIcon(QIcon(createRoundedPixmap(cameraIcon, 0.3))); // Set the radius for rounded corners
+        cameraButton->setIconSize(QSize(45, 45));
+        cameraButton->setStyleSheet("QToolButton { min-height: 0px; background: none; padding: 0px; border: none; }");
+
+        QLabel* name = new QLabel(widget);
+        name->setText(folderName + " • " + QString::number(numIcons) + " Icons");
+        name->setAlignment(Qt::AlignCenter);
+
+        // Create a QPushButton
+        QToolButton* button = new QToolButton(widget);
+        button->setText("Apply");
+        button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+        // Create a QHBoxLayout to arrange the icon buttons horizontally
+        QHBoxLayout* iconLayout = new QHBoxLayout(iconContainer);
+        iconLayout->addWidget(phoneButton);
+        iconLayout->addWidget(safariButton);
+        iconLayout->addWidget(photosButton);
+        iconLayout->addWidget(cameraButton);
+        iconContainer->setLayout(iconLayout); // Set iconLayout as the layout for iconContainer
+
+        // Create a QVBoxLayout for the widget and add the iconContainer and button to it
+        QVBoxLayout* layout = new QVBoxLayout(widget);
+        layout->setContentsMargins(0, 0, 0, 9);
+        layout->addWidget(iconContainer); // Add iconContainer to the main layout
+        layout->addWidget(name);
+        layout->addWidget(button);
+        widget->setLayout(layout);
+
+        // Add the widget to the mainLayout (inside QScrollArea)
+        mainLayout->addWidget(widget);
+    }
+
+    // Create a QWidget to act as the container for the scroll area
+    QWidget* scrollWidget = new QWidget();
+
+    // Set the main layout (containing all the widgets) on the scroll widget
+    scrollWidget->setLayout(mainLayout);
+
+    // Create a QScrollArea to hold the content widget (scrollWidget)
+    QScrollArea* scrollArea = new QScrollArea();
+    scrollArea->setWidgetResizable(true); // Allow the content widget to resize within the scroll area
+    scrollArea->setFrameStyle(QFrame::NoFrame); // Remove the outline from the scroll area
+
+    // Set the scrollWidget as the content widget of the scroll area
+    scrollArea->setWidget(scrollWidget);
+
+    // Set the size policy of the scroll area to expand in both directions
+    scrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    // Set the scroll area as the central widget of the main window
+    QVBoxLayout *scrollLayout = new QVBoxLayout();
+    scrollLayout->setContentsMargins(0, 0, 0, 0);
+    scrollLayout->addWidget(scrollArea);
+    ui->themesCnt->setFixedHeight(150);
+    ui->themesCnt->setLayout(scrollLayout);
+
+    // Load home screen apps
+    auto apps = HomeScreenApps::getHomeScreenApps();
+
+    // NIGHTMARE
+    // Create a QVBoxLayout to arrange the widgets vertically
+    QVBoxLayout* outerLayout = new QVBoxLayout(ui->iconsCnt);
+    outerLayout->setContentsMargins(0, 0, 0, 0);
+
+    // Create a scroll area to contain the innerLayout
+    QScrollArea* scrollArea2 = new QScrollArea(ui->iconsCnt);
+    scrollArea2->setWidgetResizable(true);
+    scrollArea2->setFrameStyle(QFrame::NoFrame);
+
+    // Create a QWidget to hold the innerLayout
+    QWidget* scrollContentWidget = new QWidget();
+    QVBoxLayout* innerLayout = new QVBoxLayout(scrollContentWidget);
+    innerLayout->setContentsMargins(0, 0, 0, 0);
+
+    for (auto it = apps->Begin(); it != apps->End(); ++it) {
+        auto bundle = it->first;
+        auto dict = dynamic_cast<PList::Dictionary *>(it->second);
+        auto name = dynamic_cast<PList::String *>(dict->operator[]("name"))->GetValue();
+
+        std::vector<char> themed_icon = {};
+        std::vector<char> icon = {};
+
+        auto themed_icon_check = dict->operator[]("themed_icon");
+        if (themed_icon_check != nullptr) {
+            themed_icon = dynamic_cast<PList::Data *>(themed_icon_check)->GetValue();
+        }
+        auto icon_check = dict->operator[]("icon");
+        if (icon_check != nullptr) {
+            icon = dynamic_cast<PList::Data *>(icon_check)->GetValue();
+        }
+
+        // Create QToolButton with themed_icon, or icon if themed_icon is unavailable
+        QToolButton* iconButton = new QToolButton(ui->iconsCnt);
+        if (!themed_icon.empty()) {
+            // Use themed_icon
+            QIcon themedIcon = QIcon(QPixmap::fromImage(QImage::fromData(QByteArray(themed_icon.data(), themed_icon.size()))));
+            iconButton->setIcon(themedIcon);
+        } else if (!icon.empty()) {
+            // Use icon
+            QIcon iconData = QIcon(QPixmap::fromImage(QImage::fromData(QByteArray(icon.data(), icon.size()))));
+            iconButton->setIcon(iconData);
+        }
+        iconButton->setIconSize(QSize(32, 32)); // Set the desired icon size
+        iconButton->setStyleSheet("QToolButton { min-height: 0px; background: none; padding: 0px; border: none; }");
+
+        // Create QLineEdit with placeholder "Hidden Name" and text "name"
+        QLineEdit* nameLineEdit = new QLineEdit(ui->iconsCnt);
+        nameLineEdit->setPlaceholderText("Hidden Name");
+        nameLineEdit->setText(QString::fromStdString(name));
+
+        // Create QLabel with text "bundle"
+//        QLabel* bundleLabel = new QLabel(QString::fromStdString(bundle), ui->iconsCnt);
+
+        // Create QCheckBox with text "Add to Device"
+        QCheckBox* addToDeviceCheckBox = new QCheckBox("Add to Device", ui->iconsCnt);
+
+        // Create a QHBoxLayout to arrange the icon button, line edit, label, and check box horizontally
+        QHBoxLayout* iconLayout = new QHBoxLayout();
+        iconLayout->addWidget(iconButton);
+        iconLayout->addWidget(nameLineEdit);
+//        iconLayout->addWidget(bundleLabel);
+        iconLayout->addWidget(addToDeviceCheckBox);
+
+        // Add the icon layout to the inner vertical layout
+        innerLayout->addLayout(iconLayout);
+    }
+
+    // Set the scrollContentWidget as the widget for the scrollArea
+    scrollArea2->setWidget(scrollContentWidget);
+
+    // Add the scrollArea2 to the outerLayout
+    outerLayout->addWidget(scrollArea2);
+
+    // Set the outer layout on the ui->iconsCnt container
+    ui->iconsCnt->setLayout(outerLayout);
 }
 
 // Status Bar Page
@@ -525,11 +780,6 @@ void MainWindow::on_hideAirplaneChk_clicked(bool checked)
     StatusManager::getInstance().hideAirplane(checked);
 }
 
-void MainWindow::on_hideCellChk_clicked(bool checked)
-{
-    StatusManager::getInstance().hideCell(checked);
-}
-
 void MainWindow::on_hideWifiChk_clicked(bool checked)
 {
     StatusManager::getInstance().hideWiFi(checked);
@@ -580,10 +830,6 @@ void MainWindow::on_hideVPNChk_clicked(bool checked)
 void MainWindow::loadSpringboardOptions()
 {
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
-    if (!workspace)
-        return;
-    // fix this
-
     auto location = *workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.UIKit.plist";
     auto value = PlistManager::getPlistValue(location, "UIAnimationDragCoefficient");
     if (value)
@@ -824,10 +1070,6 @@ void MainWindow::on_allowAirDropEveryoneChk_clicked(bool checked)
 void MainWindow::loadSetupOptions()
 {
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
-    if (!workspace)
-        return;
-    // fix this
-
     auto location = *workspace + "/SkipSetup/ConfigProfileDomain/Library/ConfigurationProfiles/CloudConfigurationDetails.plist";
     auto value = PlistManager::getPlistValue(location, "CloudConfigurationUIComplete");
     if (value)
@@ -984,10 +1226,6 @@ void MainWindow::on_organizationNameTxt_textEdited(const QString &text)
 void MainWindow::loadInternalOptions()
 {
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
-    if (!workspace)
-        return;
-    // fix this
-
     auto location = *workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/hiddendotGlobalPreferences.plist";
     auto value = PlistManager::getPlistValue(location, "UIStatusBarShowBuildVersion");
     if (value)
