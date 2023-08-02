@@ -1,16 +1,12 @@
 #include "HomeScreenApps.h"
-#include "plist/Dictionary.h"
-#include "plist/Node.h"
 #include <iostream>
 #include <libimobiledevice/libimobiledevice.h>
 #include <libimobiledevice/sbservices.h>
 #include <plist/plist.h>
-#include <string>
-#include <vector>
 #include "DeviceManager.h"
 #include "qmessagebox.h"
 
-void HomeScreenApps::scoutArray(plist_t array, plist_t apps, bool writePos, sbservices_client_t sbservice_t)
+void HomeScreenApps::scoutArray(plist_t array, std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std::string, std::vector<char>, int>>>& apps, bool writePos, sbservices_client_t sbservice_t)
 {
     int num_items = plist_array_get_size(array);
     for (int j = 0; j < num_items; j++)
@@ -30,20 +26,16 @@ void HomeScreenApps::scoutArray(plist_t array, plist_t apps, bool writePos, sbse
                 char *bundle = nullptr;
                 plist_get_string_val(bundleIdentifier, &bundle);
 
-                plist_t currentApp = plist_dict_get_item(apps, bundle);
-                if (currentApp == nullptr) {
-                    currentApp = plist_new_dict();
-                    plist_dict_set_item(apps, bundle, currentApp);
-                    plist_dict_set_item(currentApp, "name", plist_new_string(name));
-                }
-                plist_dict_set_item(currentApp, "icon_position", plist_new_int(writePos ? j : -1));
+                apps[bundle]["name"] = std::string(name);
+
+                apps[bundle]["icon_position"] = writePos ? j : -1;
 
                 char* pngdata = nullptr;
                 uint64_t pngsize = 0;
                 sbservices_error_t sb_icon_err_code = sbservices_get_icon_pngdata(sbservice_t, bundle, &pngdata, &pngsize);
                 if (sb_icon_err_code == SBSERVICES_E_SUCCESS)
                 {
-                    plist_dict_set_item(currentApp, "icon", plist_new_data(pngdata, pngsize));
+                    apps[bundle]["icon"] = std::vector<char>(pngdata, pngdata + pngsize);
                 }
             }
             // Themed app
@@ -59,21 +51,21 @@ void HomeScreenApps::scoutArray(plist_t array, plist_t apps, bool writePos, sbse
 
                     sscanf(identifier, "Cowabunga_%[^,],%[^\n]", bundle, name);
 
-                    plist_t currentApp = plist_dict_get_item(apps, bundle);
-                    if (currentApp == nullptr) {
-                        currentApp = plist_new_dict();
-                        plist_dict_set_item(apps, bundle, currentApp);
-                        plist_dict_set_item(currentApp, "name", plist_new_string(name));
-                    }
-                    plist_dict_set_item(currentApp, "themed_icon_position", plist_new_int(writePos ? j : -1));
+                    apps[bundle]["name"] = std::string(name);
+
+                    char *themed_name = nullptr;
+                    plist_get_string_val(displayName, &themed_name);
+
+                    apps[bundle]["themed_name"] = std::string(themed_name);
+
+                    apps[bundle]["themed_icon_position"] = writePos ? j : -1;
 
                     char* pngdata = nullptr;
                     uint64_t pngsize = 0;
-                    std::cout << identifier << std::endl;
                     sbservices_error_t sb_icon_err_code = sbservices_get_icon_pngdata(sbservice_t, identifier, &pngdata, &pngsize);
                     if (sb_icon_err_code == SBSERVICES_E_SUCCESS)
                     {
-                        plist_dict_set_item(currentApp, "themed_icon", plist_new_data(pngdata, pngsize));
+                        apps[bundle]["themed_icon"] = std::vector<char>(pngdata, pngdata + pngsize);
                     }
                 }
             }
@@ -104,7 +96,7 @@ void HomeScreenApps::scoutArray(plist_t array, plist_t apps, bool writePos, sbse
     }
 }
 
-void HomeScreenApps::scoutAllApps(plist_t icon_state, plist_t apps, sbservices_client_t sbservice_t)
+void HomeScreenApps::scoutAllApps(plist_t icon_state, std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std::string, std::vector<char>, int>>>& apps, sbservices_client_t sbservice_t)
 {
     int size = plist_array_get_size(icon_state);
     for (int i = 0; i < size; i++)
@@ -114,11 +106,11 @@ void HomeScreenApps::scoutAllApps(plist_t icon_state, plist_t apps, sbservices_c
     }
 }
 
-PList::Dictionary* HomeScreenApps::getHomeScreenApps()
+std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std::string, std::vector<char>, int>>> HomeScreenApps::getHomeScreenApps()
 {
     auto udid = DeviceManager::getInstance().getCurrentUUID();
     if (!udid) {
-        return nullptr;
+        return {};
     }
 
     idevice_error_t idevice_ret = IDEVICE_E_UNKNOWN_ERROR;
@@ -130,8 +122,8 @@ PList::Dictionary* HomeScreenApps::getHomeScreenApps()
     idevice_ret = idevice_new(&device, udid->c_str());
     if (idevice_ret != IDEVICE_E_SUCCESS)
     {
-        std::cout << "No device found with UDID " << *udid << std::endl;
-        return nullptr;
+        std::cerr << "No device found with UDID " << *udid << std::endl;
+        return {};
     }
 
     // Get client
@@ -141,7 +133,7 @@ PList::Dictionary* HomeScreenApps::getHomeScreenApps()
         // possible itunes error!
         QMessageBox::critical(nullptr, "Error", "Unable to read the list of apps from your phone. Please make sure iTunes is installed on this PC.");
         std::cerr << "Unable to create SpringBoard client: " << sb_client_err_code << std::endl;
-        return nullptr;
+        return {};
     }
 
     // Get icon state
@@ -151,8 +143,17 @@ PList::Dictionary* HomeScreenApps::getHomeScreenApps()
         std::cerr << "Unable to get icon state: " << sb_icon_err_code << std::endl;
     }
 
-    plist_t apps = plist_new_dict();
+    auto apps = std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std::string, std::vector<char>, int>>>();
+
     HomeScreenApps::scoutAllApps(icon_state, apps, sbservice_t);
 
-    return dynamic_cast<PList::Dictionary *>(PList::Node::FromPlist(apps));
+    for (auto it = apps.begin(); it != apps.end(); ++it) {
+        auto bundle = it->first;
+        auto dict = it->second;
+        auto name = std::get<std::string>(dict["name"]);
+
+        qDebug() << name;
+    }
+
+    return apps;
 }

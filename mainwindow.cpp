@@ -5,11 +5,12 @@
 #include "qstandardpaths.h"
 #include "statusmanager/StatusManager.h"
 #include "plistmanager.h"
-#include "HomeScreenApps.h"
 #include <QDebug>
 #include <QWindow>
 #include <QPainter>
 #include <QPainterPath>
+#include <QFileDialog>
+#include <QScrollBar>
 
 // Boilerplate
 
@@ -187,6 +188,30 @@ void MainWindow::on_toolButton_3_clicked()
 
 // Themes Page
 
+void MainWindow::on_themesEnabledChk_toggled(bool checked)
+{
+    ui->themesPageContent->setDisabled(!checked);
+    DeviceManager::getInstance().setTweakEnabled(Tweak::Themes, checked);
+    MainWindow::updateEnabledTweaks();
+}
+
+void applyMaskToImage(QImage& image)
+{
+    image = image.scaled(QSize(120, 120), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QImage mask(":/overlay.png");
+    for (int y = 0; y < image.height(); ++y)
+    {
+        for (int x = 0; x < image.width(); ++x)
+        {
+            QRgb imagePixel = image.pixel(x, y);
+            QRgb maskPixel = mask.pixel(x, y);
+            imagePixel = qRgba(qRed(imagePixel), qGreen(imagePixel), qBlue(imagePixel), qAlpha(maskPixel));
+            image.setPixel(x, y, imagePixel);
+        }
+    }
+}
+
+
 // Helper function to create rounded pixmap
 QPixmap MainWindow::createRoundedPixmap(const QPixmap& pixmap, double roundnessPercentage)
 {
@@ -207,6 +232,216 @@ QPixmap MainWindow::createRoundedPixmap(const QPixmap& pixmap, double roundnessP
     painter.drawPixmap(0, 0, pixmap);
 
     return roundedPixmap;
+}
+
+void MainWindow::loadIcons() {
+    int scrollPos = -1;
+    QScrollArea* scrollArea = ui->iconsCnt->findChild<QScrollArea*>();
+    if (scrollArea) {
+        scrollPos = scrollArea->verticalScrollBar()->value();
+    }
+
+    // Clear the layout
+    auto layout1 = ui->iconsCnt->layout();
+    if (layout1)
+    {
+        QLayoutItem* child;
+        while ((child = layout1->takeAt(0)) != nullptr)
+        {
+            delete child->widget(); // Remove and delete the widget
+            delete child; // Delete the layout item
+        }
+        delete layout1; // Delete the layout itself
+//        ui->iconsCnt->setLayout(nullptr); // Reset the layout pointer
+    }
+
+    // Clear the widget contents (if it's a container widget)
+    const QObjectList& children1 = ui->iconsCnt->children();
+    for (QObject* child : children1)
+    {
+        delete child; // Delete each child widget
+    }
+
+    // Create a QVBoxLayout to arrange the widgets vertically
+    QVBoxLayout* outerLayout = new QVBoxLayout(ui->iconsCnt);
+    outerLayout->setContentsMargins(0, 0, 0, 0);
+
+    // Create a scroll area to contain the innerLayout
+    QScrollArea* scrollArea2 = new QScrollArea(ui->iconsCnt);
+    scrollArea2->setWidgetResizable(true);
+    scrollArea2->setFrameStyle(QFrame::NoFrame);
+
+    // Create a QWidget to hold the innerLayout
+    QWidget* scrollContentWidget = new QWidget();
+    QVBoxLayout* innerLayout = new QVBoxLayout(scrollContentWidget);
+    innerLayout->setContentsMargins(0, 0, 0, 0);
+
+    for (auto bundle : DeviceManager::getInstance().getAppBundles()) {
+        auto name = DeviceManager::getInstance().getAppName(bundle);
+        auto themed_name = DeviceManager::getInstance().getThemedName(bundle);
+        auto user_name = DeviceManager::getInstance().getUserName(bundle);
+        auto icon = DeviceManager::getInstance().getIcon(bundle);
+        auto themed_icon = DeviceManager::getInstance().getThemedIcon(bundle);
+        auto user_icon = DeviceManager::getInstance().getUserIcon(bundle);
+        auto border = DeviceManager::getInstance().getBorder(bundle);
+
+        QCheckBox* borderCheckBox = new QCheckBox("Border", ui->iconsCnt);
+        QCheckBox* addToDeviceCheckBox = new QCheckBox("Add to Device", ui->iconsCnt);
+        QLineEdit* nameLineEdit = new QLineEdit(ui->iconsCnt);
+        QToolButton* iconButton = new QToolButton(ui->iconsCnt);
+
+        // Border Check Box
+        borderCheckBox->setChecked(DeviceManager::getInstance().getBorder(bundle));
+        connect(borderCheckBox, &QCheckBox::clicked, [this, bundle, iconButton, addToDeviceCheckBox](bool checked) {
+            DeviceManager::getInstance().setBorder(bundle, checked);
+            // make icon use mask
+            auto icon = DeviceManager::getInstance().getIcon(bundle);
+            auto themed_icon = DeviceManager::getInstance().getThemedIcon(bundle);
+            auto user_icon = DeviceManager::getInstance().getUserIcon(bundle);
+            if (user_icon) {
+                if (checked) {
+                    auto image = QImage(QString::fromStdString(*user_icon));
+                    applyMaskToImage(image);
+                    iconButton->setIcon(QPixmap::fromImage(image));
+                } else {
+                    auto userIcon = QPixmap(QString::fromStdString(*user_icon));
+                    iconButton->setIcon(createRoundedPixmap(userIcon, 0.25));
+                }
+            } else if (themed_icon) {
+                if (checked) {
+                    auto image = QImage::fromData(QByteArray(themed_icon->data(), themed_icon->size()));
+                    applyMaskToImage(image);
+                    iconButton->setIcon(QPixmap::fromImage(image));
+                } else {
+                    auto image = QPixmap::fromImage(QImage::fromData(QByteArray(themed_icon->data(), themed_icon->size())));
+                    iconButton->setIcon(image);
+                }
+            } else if (icon) {
+                if (checked) {
+                    auto image = QImage::fromData(QByteArray(icon->data(), icon->size()));
+                    applyMaskToImage(image);
+                    iconButton->setIcon(QPixmap::fromImage(image));
+                } else {
+                    auto image = QPixmap::fromImage(QImage::fromData(QByteArray(icon->data(), icon->size())));
+                    iconButton->setIcon(image);
+                }
+            }
+            DeviceManager::getInstance().setAddToDevice(bundle, true);
+            addToDeviceCheckBox->setChecked(true);
+        });
+
+        // Add to Device Check Box
+        addToDeviceCheckBox->setChecked(DeviceManager::getInstance().getAddToDevice(bundle));
+        connect(addToDeviceCheckBox, &QCheckBox::clicked, [this, bundle](bool checked) {
+            DeviceManager::getInstance().setAddToDevice(bundle, checked);
+        });
+
+        // Name Line Edit
+        nameLineEdit->setPlaceholderText("Hidden Name (" + QString::fromStdString(name) + ")");
+        if (user_name) {
+            nameLineEdit->setText(QString::fromStdString(*user_name));
+        } else if (themed_name) {
+            nameLineEdit->setText(QString::fromStdString(*themed_name));
+        } else {
+            nameLineEdit->setText(QString::fromStdString(name));
+        }
+        connect(nameLineEdit, &QLineEdit::textEdited, [this, bundle, addToDeviceCheckBox](const QString& name) {
+            DeviceManager::getInstance().setUserName(bundle, name.toStdString());
+            DeviceManager::getInstance().setAddToDevice(bundle, true);
+            addToDeviceCheckBox->setChecked(true);
+        });
+
+        // Icon Button
+        if (user_icon) {
+            if (border) {
+                auto image = QImage(QString::fromStdString(*user_icon));
+                applyMaskToImage(image);
+                iconButton->setIcon(QPixmap::fromImage(image));
+            } else {
+                auto userIcon = QPixmap(QString::fromStdString(*user_icon));
+                iconButton->setIcon(createRoundedPixmap(userIcon, 0.25));
+            }
+        } else if (themed_icon) {
+            if (border) {
+                auto image = QImage::fromData(QByteArray(themed_icon->data(), themed_icon->size()));
+                applyMaskToImage(image);
+                iconButton->setIcon(QPixmap::fromImage(image));
+            } else {
+                auto image = QPixmap::fromImage(QImage::fromData(QByteArray(themed_icon->data(), themed_icon->size())));
+                iconButton->setIcon(image);
+            }
+        } else if (icon) {
+            if (border) {
+                auto image = QImage::fromData(QByteArray(icon->data(), icon->size()));
+                applyMaskToImage(image);
+                iconButton->setIcon(QPixmap::fromImage(image));
+            } else {
+                auto image = QPixmap::fromImage(QImage::fromData(QByteArray(icon->data(), icon->size())));
+                iconButton->setIcon(image);
+            }
+        }
+        iconButton->setIconSize(QSize(32, 32));
+        iconButton->setStyleSheet("QToolButton { min-height: 0px; background: none; padding: 0px; border: none; }");
+        connect(iconButton, &QToolButton::clicked, [this, bundle, addToDeviceCheckBox, iconButton]() {
+            QString initialPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/Themes";
+            QString filePath = QFileDialog::getOpenFileName(this, "Select File", initialPath, "App Icons (*.PNG)");
+
+            if (!filePath.isEmpty()) {
+                DeviceManager::getInstance().setUserIcon(bundle, filePath.toStdString());
+                DeviceManager::getInstance().setAddToDevice(bundle, true);
+                addToDeviceCheckBox->setChecked(true);
+                if (DeviceManager::getInstance().getBorder(bundle)) {
+                    auto image = QImage(filePath);
+                    applyMaskToImage(image);
+                    iconButton->setIcon(QPixmap::fromImage(image));
+                } else {
+                    auto image = QPixmap(filePath);
+                    iconButton->setIcon(createRoundedPixmap(image, 0.25));
+                }
+            }
+        });
+        // Right click, reset all
+        iconButton->setContextMenuPolicy(Qt::CustomContextMenu);
+        connect(iconButton, &QToolButton::customContextMenuRequested, [this, bundle, addToDeviceCheckBox, iconButton, themed_icon, icon, nameLineEdit, name, borderCheckBox, themed_name]() {
+            DeviceManager::getInstance().resetUserPrefs(bundle);
+            addToDeviceCheckBox->setChecked(false);
+            borderCheckBox->setChecked(false);
+            if (themed_icon) {
+                QIcon themedIcon = QIcon(QPixmap::fromImage(QImage::fromData(QByteArray(themed_icon->data(), themed_icon->size()))));
+                iconButton->setIcon(themedIcon);
+            } else if (icon) {
+                QIcon iconData = QIcon(QPixmap::fromImage(QImage::fromData(QByteArray(icon->data(), icon->size()))));
+                iconButton->setIcon(iconData);
+            }
+            if (themed_name) {
+                nameLineEdit->setText(QString::fromStdString(*themed_name));
+            } else {
+                nameLineEdit->setText(QString::fromStdString(name));
+            }
+        });
+
+        // Create a QHBoxLayout to arrange the icon button, line edit, label, and check box horizontally
+        QHBoxLayout* iconLayout = new QHBoxLayout();
+        iconLayout->addWidget(iconButton);
+        iconLayout->addWidget(nameLineEdit);
+        iconLayout->addWidget(borderCheckBox);
+        iconLayout->addWidget(addToDeviceCheckBox);
+
+        // Add the icon layout to the inner vertical layout
+        innerLayout->addLayout(iconLayout);
+    }
+
+    // Set the scrollContentWidget as the widget for the scrollArea
+    scrollArea2->setWidget(scrollContentWidget);
+
+    // Add the scrollArea2 to the outerLayout
+    outerLayout->addWidget(scrollArea2);
+
+    // keep height the same
+    if (scrollPos != -1) scrollArea2->verticalScrollBar()->setValue(scrollPos);
+
+    // Set the outer layout on the ui->iconsCnt container
+    ui->iconsCnt->setLayout(outerLayout);
 }
 
 void MainWindow::loadThemes()
@@ -236,7 +471,7 @@ void MainWindow::loadThemes()
             delete child; // Delete the layout item
         }
         delete layout; // Delete the layout itself
-        ui->themesCnt->setLayout(nullptr); // Reset the layout pointer
+//        ui->themesCnt->setLayout(nullptr); // Reset the layout pointer
     }
 
     // Clear the widget contents (if it's a container widget)
@@ -266,7 +501,7 @@ void MainWindow::loadThemes()
 
         // Create a container widget to hold the iconLayout with background
         QWidget* iconContainer = new QWidget();
-        iconContainer->setStyleSheet("background-image: url(:/background.png); background-repeat: no-repeat; background-position: center;");
+        iconContainer->setStyleSheet(":enabled { background-image: url(:/background.png); background-repeat: no-repeat; background-position: center; } :disabled { background-color: gray; }");
 
         // Load the icon images from the folder
         QPixmap phoneIcon(QString("%1/%2/com.apple.mobilephone-large.png").arg(themesDirectoryPath, folderName));
@@ -276,22 +511,22 @@ void MainWindow::loadThemes()
 
         // Create QToolButtons to display the icon images
         QToolButton* phoneButton = new QToolButton(iconContainer);
-        phoneButton->setIcon(QIcon(createRoundedPixmap(phoneIcon, 0.3))); // Set the radius for rounded corners
+        phoneButton->setIcon(QIcon(createRoundedPixmap(phoneIcon, 0.25))); // Set the radius for rounded corners
         phoneButton->setIconSize(QSize(45, 45));
         phoneButton->setStyleSheet("QToolButton { min-height: 0px; background: none; padding: 0px; border: none; }");
 
         QToolButton* safariButton = new QToolButton(iconContainer);
-        safariButton->setIcon(QIcon(createRoundedPixmap(safariIcon, 0.3))); // Set the radius for rounded corners
+        safariButton->setIcon(QIcon(createRoundedPixmap(safariIcon, 0.25))); // Set the radius for rounded corners
         safariButton->setIconSize(QSize(45, 45));
         safariButton->setStyleSheet("QToolButton { min-height: 0px; background: none; padding: 0px; border: none; }");
 
         QToolButton* photosButton = new QToolButton(iconContainer);
-        photosButton->setIcon(QIcon(createRoundedPixmap(photosIcon, 0.3))); // Set the radius for rounded corners
+        photosButton->setIcon(QIcon(createRoundedPixmap(photosIcon, 0.25))); // Set the radius for rounded corners
         photosButton->setIconSize(QSize(45, 45));
         photosButton->setStyleSheet("QToolButton { min-height: 0px; background: none; padding: 0px; border: none; }");
 
         QToolButton* cameraButton = new QToolButton(iconContainer);
-        cameraButton->setIcon(QIcon(createRoundedPixmap(cameraIcon, 0.3))); // Set the radius for rounded corners
+        cameraButton->setIcon(QIcon(createRoundedPixmap(cameraIcon, 0.25))); // Set the radius for rounded corners
         cameraButton->setIconSize(QSize(45, 45));
         cameraButton->setStyleSheet("QToolButton { min-height: 0px; background: none; padding: 0px; border: none; }");
 
@@ -348,85 +583,7 @@ void MainWindow::loadThemes()
     ui->themesCnt->setFixedHeight(150);
     ui->themesCnt->setLayout(scrollLayout);
 
-    // Load home screen apps
-    auto apps = HomeScreenApps::getHomeScreenApps();
-
-    // NIGHTMARE
-    // Create a QVBoxLayout to arrange the widgets vertically
-    QVBoxLayout* outerLayout = new QVBoxLayout(ui->iconsCnt);
-    outerLayout->setContentsMargins(0, 0, 0, 0);
-
-    // Create a scroll area to contain the innerLayout
-    QScrollArea* scrollArea2 = new QScrollArea(ui->iconsCnt);
-    scrollArea2->setWidgetResizable(true);
-    scrollArea2->setFrameStyle(QFrame::NoFrame);
-
-    // Create a QWidget to hold the innerLayout
-    QWidget* scrollContentWidget = new QWidget();
-    QVBoxLayout* innerLayout = new QVBoxLayout(scrollContentWidget);
-    innerLayout->setContentsMargins(0, 0, 0, 0);
-
-    for (auto it = apps->Begin(); it != apps->End(); ++it) {
-        auto bundle = it->first;
-        auto dict = dynamic_cast<PList::Dictionary *>(it->second);
-        auto name = dynamic_cast<PList::String *>(dict->operator[]("name"))->GetValue();
-
-        std::vector<char> themed_icon = {};
-        std::vector<char> icon = {};
-
-        auto themed_icon_check = dict->operator[]("themed_icon");
-        if (themed_icon_check != nullptr) {
-            themed_icon = dynamic_cast<PList::Data *>(themed_icon_check)->GetValue();
-        }
-        auto icon_check = dict->operator[]("icon");
-        if (icon_check != nullptr) {
-            icon = dynamic_cast<PList::Data *>(icon_check)->GetValue();
-        }
-
-        // Create QToolButton with themed_icon, or icon if themed_icon is unavailable
-        QToolButton* iconButton = new QToolButton(ui->iconsCnt);
-        if (!themed_icon.empty()) {
-            // Use themed_icon
-            QIcon themedIcon = QIcon(QPixmap::fromImage(QImage::fromData(QByteArray(themed_icon.data(), themed_icon.size()))));
-            iconButton->setIcon(themedIcon);
-        } else if (!icon.empty()) {
-            // Use icon
-            QIcon iconData = QIcon(QPixmap::fromImage(QImage::fromData(QByteArray(icon.data(), icon.size()))));
-            iconButton->setIcon(iconData);
-        }
-        iconButton->setIconSize(QSize(32, 32)); // Set the desired icon size
-        iconButton->setStyleSheet("QToolButton { min-height: 0px; background: none; padding: 0px; border: none; }");
-
-        // Create QLineEdit with placeholder "Hidden Name" and text "name"
-        QLineEdit* nameLineEdit = new QLineEdit(ui->iconsCnt);
-        nameLineEdit->setPlaceholderText("Hidden Name");
-        nameLineEdit->setText(QString::fromStdString(name));
-
-        // Create QLabel with text "bundle"
-//        QLabel* bundleLabel = new QLabel(QString::fromStdString(bundle), ui->iconsCnt);
-
-        // Create QCheckBox with text "Add to Device"
-        QCheckBox* addToDeviceCheckBox = new QCheckBox("Add to Device", ui->iconsCnt);
-
-        // Create a QHBoxLayout to arrange the icon button, line edit, label, and check box horizontally
-        QHBoxLayout* iconLayout = new QHBoxLayout();
-        iconLayout->addWidget(iconButton);
-        iconLayout->addWidget(nameLineEdit);
-//        iconLayout->addWidget(bundleLabel);
-        iconLayout->addWidget(addToDeviceCheckBox);
-
-        // Add the icon layout to the inner vertical layout
-        innerLayout->addLayout(iconLayout);
-    }
-
-    // Set the scrollContentWidget as the widget for the scrollArea
-    scrollArea2->setWidget(scrollContentWidget);
-
-    // Add the scrollArea2 to the outerLayout
-    outerLayout->addWidget(scrollArea2);
-
-    // Set the outer layout on the ui->iconsCnt container
-    ui->iconsCnt->setLayout(outerLayout);
+    MainWindow::loadIcons();
 }
 
 // Status Bar Page
@@ -451,7 +608,9 @@ void MainWindow::loadStatusBar()
     ui->pBadgeTxt->setText(QString::fromStdString(StatusManager::getInstance().getPrimaryServiceBadgeOverride()));
     // data network type
     ui->pStrengthChk->setChecked(StatusManager::getInstance().isGSMSignalStrengthBarsOverridden());
-    ui->pStrengthSld->setValue(StatusManager::getInstance().getGSMSignalStrengthBarsOverride());
+    auto pos = StatusManager::getInstance().getGSMSignalStrengthBarsOverride();
+    ui->pStrengthSld->setValue(pos);
+    ui->pStrengthLbl->setText(QString::number(pos) + (pos == 1 ? " Bar" : " Bars"));
 
     // Secondary Cellular
     if (sm.isSecondaryCellularServiceOverridden()) {
@@ -469,7 +628,9 @@ void MainWindow::loadStatusBar()
     ui->sBadgeTxt->setText(QString::fromStdString(StatusManager::getInstance().getSecondaryServiceBadgeOverride()));
     // data network type
     ui->sStrengthChk->setChecked(StatusManager::getInstance().isSecondaryGSMSignalStrengthBarsOverridden());
-    ui->sStrengthSld->setValue(StatusManager::getInstance().getSecondaryGSMSignalStrengthBarsOverride());
+    pos = StatusManager::getInstance().getSecondaryGSMSignalStrengthBarsOverride();
+    ui->sStrengthSld->setValue(pos);
+    ui->sStrengthLbl->setText(QString::number(pos) + (pos == 1 ? " Bar" : " Bars"));
 
     // Time etc.
     ui->timeChk->setChecked(StatusManager::getInstance().isTimeOverridden());
@@ -479,9 +640,13 @@ void MainWindow::loadStatusBar()
     ui->batteryDetailChk->setChecked(StatusManager::getInstance().isBatteryDetailOverridden());
     ui->batteryDetailTxt->setText(QString::fromStdString(StatusManager::getInstance().getBatteryDetailOverride()));
     ui->batteryCapacityChk->setChecked(StatusManager::getInstance().isBatteryCapacityOverridden());
-    ui->batteryCapacitySld->setValue(StatusManager::getInstance().getBatteryCapacityOverride());
+    pos = StatusManager::getInstance().getBatteryCapacityOverride();
+    ui->batteryCapacitySld->setValue(pos);
+    ui->batteryCapacityLbl->setText(QString::number(pos) + "%");
     ui->wifiStrengthChk->setChecked(StatusManager::getInstance().isWiFiSignalStrengthBarsOverridden());
-    ui->wifiStrengthSld->setValue(StatusManager::getInstance().getWiFiSignalStrengthBarsOverride());
+    pos = StatusManager::getInstance().getWiFiSignalStrengthBarsOverride();
+    ui->wifiStrengthSld->setValue(pos);
+    ui->wifiStrengthLbl->setText(QString::number(pos) + (pos == 1 ? " Bar" : " Bars"));
     ui->numericWifiChk->setChecked(StatusManager::getInstance().isRawWiFiSignalShown());
     ui->numericCellChk->setChecked(StatusManager::getInstance().isRawGSMSignalShown());
 

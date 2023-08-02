@@ -16,5 +16,6 @@
         <file>icon/wifi.svg</file>
         <file>icon/x-lg.svg</file>
         <file>background.png</file>
+        <file>overlay.png</file>
     </qresource>
 </RCC>

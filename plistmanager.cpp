@@ -129,3 +129,32 @@ void PlistManager::deletePlistKey(const std::string& plistPath, const std::strin
     output.write(out.data(), out.size());
     output.close();
 }
+
+void PlistManager::createEmptyPlist(const std::string& plistPath, bool bplist) {
+    plist_t root = plist_new_dict();
+
+    auto out = std::vector<char>();
+    if (bplist) {
+        char* bin = NULL;
+        uint32_t length = 0;
+        plist_to_bin(root, &bin, &length);
+        std::vector<char> tmp(bin, bin+length);
+        delete bin;
+        out = tmp;
+    } else {
+        char* xml = NULL;
+        uint32_t length = 0;
+        plist_to_xml(root, &xml, &length);
+        std::string tmp(xml, xml+length);
+        delete xml;
+        out = std::vector<char>(tmp.begin(), tmp.end());
+    }
+
+    std::ofstream output(plistPath, std::ios::binary);
+    if (!output.is_open()) {
+        return;
+    }
+
+    output.write(out.data(), out.size());
+    output.close();
+}

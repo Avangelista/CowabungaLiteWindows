@@ -11,7 +11,7 @@ public:
 };
 
 enum class Tweak {
-    AppliedTheme,
+    Themes,
     StatusBar,
     ControlCenter,
     SpringboardOptions,
@@ -28,8 +28,8 @@ class Tweaks {
 public:
     static TweakData getTweakData(Tweak tweak) {
         switch (tweak) {
-        case Tweak::AppliedTheme:
-            return {"AppliedTheme", "Icon Theming"};
+        case Tweak::Themes:
+            return {"Theme", "Icon Theming"};
         case Tweak::StatusBar:
             return {"StatusBar", "Status Bar"};
         case Tweak::ControlCenter:

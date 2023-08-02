@@ -43,6 +43,9 @@ private slots:
     void on_toolButton_3_clicked();
     void on_phoneVersionLbl_linkActivated(const QString &link);
 
+    // Themes
+    void on_themesEnabledChk_toggled(bool checked);
+
     // Status Bar
     void on_statusBarEnabledChk_toggled(bool checked);
     void on_pDefaultRdo_clicked();
@@ -139,6 +142,7 @@ private:
     // Themes
     QPixmap createRoundedPixmap(const QPixmap& pixmap, double roundnessPercentage);
     void loadThemes();
+    void loadIcons();
 
     // Status Bar
     void loadStatusBar();

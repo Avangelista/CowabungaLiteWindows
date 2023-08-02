@@ -1235,7 +1235,7 @@ QToolButton:pressed {
                  <item>
                   <widget class="QToolButton" name="toolButton_16">
                    <property name="text">
-                    <string>Import .theme</string>
+                    <string>Import Theme</string>
                    </property>
                   </widget>
                  </item>
@@ -1259,6 +1259,9 @@ QToolButton:pressed {
               </item>
               <item>
                <widget class="QWidget" name="themesPageContent" native="true">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
                 <layout class="QVBoxLayout" name="verticalLayout_22">
                  <property name="leftMargin">
                   <number>0</number>
@@ -1291,7 +1294,58 @@ QToolButton:pressed {
                   </widget>
                  </item>
                  <item>
+                  <widget class="QLabel" name="label_3">
+                   <property name="text">
+                    <string>Customize Individual Apps</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
                   <widget class="QWidget" name="iconsCnt" native="true"/>
+                 </item>
+                 <item>
+                  <widget class="QWidget" name="horizontalWidget" native="true">
+                   <layout class="QHBoxLayout" name="horizontalLayout_16">
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QToolButton" name="toolButton_14">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="text">
+                       <string>Hide All App Names</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QToolButton" name="toolButton_15">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="text">
+                       <string>Select All &quot;Add to Device&quot;</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
                  </item>
                  <item>
                   <spacer name="verticalSpacer_9">
