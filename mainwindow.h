@@ -40,11 +40,23 @@ private slots:
     void on_applyPageBtn_clicked();
 
     // Home
-    void on_toolButton_3_clicked();
+    void on_avangelistaGitHubBtn_clicked();
+    void on_avangelistaTwitterBtn_clicked();
+    void on_leminGitHubBtn_clicked();
+    void on_leminTwitterBtn_clicked();
+    void on_sourcelocBtn_clicked();
+    void on_iTechBtn_clicked();
+    void on_libiBtn_clicked();
+    void on_qtBtn_clicked();
+    void on_discordBtn_clicked();
+    void on_patreonBtn_clicked();
     void on_phoneVersionLbl_linkActivated(const QString &link);
 
     // Themes
     void on_themesEnabledChk_toggled(bool checked);
+    void on_addAllBtn_clicked();
+    void on_hideNamesBtn_clicked();
+    void on_borderAllBtn_clicked();
 
     // Status Bar
     void on_statusBarEnabledChk_toggled(bool checked);

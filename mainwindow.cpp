@@ -11,6 +11,7 @@
 #include <QPainterPath>
 #include <QFileDialog>
 #include <QScrollBar>
+#include <QDesktopServices>
 
 // Boilerplate
 
@@ -48,6 +49,7 @@ void MainWindow::updateInterfaceForNewDevice()
     {
         // reset all options and disable the pages
     }
+    MainWindow::updateEnabledTweaks();
 }
 
 // Sidebar
@@ -66,6 +68,20 @@ void MainWindow::refreshDevices()
         ui->devicePicker->addItem(QString("None"), QVariant::fromValue(NULL));
         // shouldn't need this
         // DeviceManager::getInstance().resetCurrentDevice();
+
+        ui->pages->setCurrentIndex(static_cast<int>(Page::Home));
+        ui->homePageBtn->setChecked(true);
+
+        // hide all pages
+        ui->sidebarDiv1->hide();
+        ui->themesPageBtn->hide();
+        ui->statusBarPageBtn->hide();
+        ui->controlCenterPageBtn->hide();
+        ui->springboardOptionsPageBtn->hide();
+        ui->internalOptionsPageBtn->hide();
+        ui->setupOptionsPageBtn->hide();
+        ui->sidebarDiv2->hide();
+        ui->applyPageBtn->hide();
     }
     else
     {
@@ -76,6 +92,17 @@ void MainWindow::refreshDevices()
             auto deviceName = QString("%1").arg(QString::fromStdString(device.Name));
             ui->devicePicker->addItem(deviceName, QVariant::fromValue(device.UUID));
         }
+
+        // show all pages
+        ui->sidebarDiv1->show();
+        ui->themesPageBtn->show();
+        ui->statusBarPageBtn->show();
+        ui->controlCenterPageBtn->show();
+        ui->springboardOptionsPageBtn->show();
+        ui->internalOptionsPageBtn->show();
+        ui->setupOptionsPageBtn->show();
+        ui->sidebarDiv2->show();
+        ui->applyPageBtn->show();
     }
 
     // Update selected device
@@ -176,14 +203,49 @@ void MainWindow::on_phoneVersionLbl_linkActivated(const QString &link)
     }
 }
 
-void MainWindow::on_toolButton_3_clicked()
+void openWebPage(const QString& url)
 {
-    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
-    if (!workspace)
-        return;
-    auto location = *workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.UIKit.plist";
-    auto value = PlistManager::getPlistValue(location, "UIAnimationDragCoefficient");
-    qDebug() << "Value: " << dynamic_cast<PList::Real *>(value)->GetValue();
+    QDesktopServices::openUrl(QUrl(url));
+}
+
+void MainWindow::on_avangelistaGitHubBtn_clicked() {
+    openWebPage("https://github.com/Avangelista");
+}
+
+void MainWindow::on_avangelistaTwitterBtn_clicked() {
+    openWebPage("https://twitter.com/AvangelistaDev");
+}
+
+void MainWindow::on_leminGitHubBtn_clicked() {
+    openWebPage("https://github.com/leminlimez");
+}
+
+void MainWindow::on_leminTwitterBtn_clicked() {
+    openWebPage("https://twitter.com/LeminLimez");
+}
+
+void MainWindow::on_sourcelocBtn_clicked() {
+    openWebPage("https://twitter.com/sourceloc");
+}
+
+void MainWindow::on_iTechBtn_clicked() {
+    openWebPage("https://twitter.com/iTechExpert21");
+}
+
+void MainWindow::on_libiBtn_clicked() {
+    openWebPage("https://libimobiledevice.org");
+}
+
+void MainWindow::on_qtBtn_clicked() {
+    openWebPage("https://www.qt.io/product/development-tools");
+}
+
+void MainWindow::on_discordBtn_clicked() {
+    openWebPage("https://discord.gg/Cowabunga");
+}
+
+void MainWindow::on_patreonBtn_clicked() {
+    openWebPage("https://www.patreon.com/Cowabunga_iOS");
 }
 
 // Themes Page
@@ -195,9 +257,39 @@ void MainWindow::on_themesEnabledChk_toggled(bool checked)
     MainWindow::updateEnabledTweaks();
 }
 
+void MainWindow::on_addAllBtn_clicked() {
+    auto state = DeviceManager::getInstance().addAllIcons();
+    if (state) {
+        ui->addAllBtn->setText("Deselect All \"Add/Update\"");
+    } else {
+        ui->addAllBtn->setText("Select All \"Add/Update\"");
+    }
+    MainWindow::loadIcons();
+}
+
+void MainWindow::on_hideNamesBtn_clicked() {
+    auto state = DeviceManager::getInstance().hideAllNames();
+    if (state) {
+        ui->hideNamesBtn->setText("Show All App Names");
+    } else {
+        ui->hideNamesBtn->setText("Hide All App Names");
+    }
+    MainWindow::loadIcons();
+}
+
+void MainWindow::on_borderAllBtn_clicked() {
+    auto state = DeviceManager::getInstance().borderAllIcons();
+    if (state) {
+        ui->borderAllBtn->setText("Deselect All \"Border\"");
+    } else {
+        ui->borderAllBtn->setText("Select All \"Border\"");
+    }
+    MainWindow::loadIcons();
+}
+
 void applyMaskToImage(QImage& image)
 {
-    image = image.scaled(QSize(120, 120), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    image = image.scaled(QSize(120, 120), Qt::KeepAspectRatio, Qt::SmoothTransformation).convertToFormat(QImage::Format_ARGB32);
     QImage mask(":/overlay.png");
     for (int y = 0; y < image.height(); ++y)
     {
@@ -286,7 +378,7 @@ void MainWindow::loadIcons() {
         auto border = DeviceManager::getInstance().getBorder(bundle);
 
         QCheckBox* borderCheckBox = new QCheckBox("Border", ui->iconsCnt);
-        QCheckBox* addToDeviceCheckBox = new QCheckBox("Add to Device", ui->iconsCnt);
+        QCheckBox* addToDeviceCheckBox = new QCheckBox("Add/Update", ui->iconsCnt);
         QLineEdit* nameLineEdit = new QLineEdit(ui->iconsCnt);
         QToolButton* iconButton = new QToolButton(ui->iconsCnt);
 
@@ -504,10 +596,10 @@ void MainWindow::loadThemes()
         iconContainer->setStyleSheet(":enabled { background-image: url(:/background.png); background-repeat: no-repeat; background-position: center; } :disabled { background-color: gray; }");
 
         // Load the icon images from the folder
-        QPixmap phoneIcon(QString("%1/%2/com.apple.mobilephone-large.png").arg(themesDirectoryPath, folderName));
-        QPixmap safariIcon(QString("%1/%2/com.apple.mobilesafari-large.png").arg(themesDirectoryPath, folderName));
-        QPixmap photosIcon(QString("%1/%2/com.apple.mobileslideshow-large.png").arg(themesDirectoryPath, folderName));
-        QPixmap cameraIcon(QString("%1/%2/com.apple.camera-large.png").arg(themesDirectoryPath, folderName));
+        QPixmap phoneIcon(QString("%1/com.apple.mobilephone-large.png").arg(folderPath));
+        QPixmap safariIcon(QString("%1/com.apple.mobilesafari-large.png").arg(folderPath));
+        QPixmap photosIcon(QString("%1/com.apple.mobileslideshow-large.png").arg(folderPath));
+        QPixmap cameraIcon(QString("%1/com.apple.camera-large.png").arg(folderPath));
 
         // Create QToolButtons to display the icon images
         QToolButton* phoneButton = new QToolButton(iconContainer);
@@ -538,6 +630,10 @@ void MainWindow::loadThemes()
         QToolButton* button = new QToolButton(widget);
         button->setText("Apply");
         button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        connect(button, &QToolButton::clicked, [this, directory]() {
+            DeviceManager::getInstance().applyTheme(directory);
+            MainWindow::loadIcons();
+        });
 
         // Create a QHBoxLayout to arrange the icon buttons horizontally
         QHBoxLayout* iconLayout = new QHBoxLayout(iconContainer);
@@ -584,6 +680,10 @@ void MainWindow::loadThemes()
     ui->themesCnt->setLayout(scrollLayout);
 
     MainWindow::loadIcons();
+
+    ui->addAllBtn->setText("Select All \"Add/Update\"");
+    ui->hideNamesBtn->setText("Hide All App Names");
+    ui->borderAllBtn->setText("Select All \"Border\"");
 }
 
 // Status Bar Page
@@ -1658,17 +1758,30 @@ void MainWindow::updateEnabledTweaks()
     }
     else
     {
-        for (auto t : tweaks)
-        {
-            labelText += "  • " + Tweaks::getTweakData(t).description + "\n";
+        std::ostringstream labelTextStream;
+        bool firstTweak = true;
+        for (auto t : tweaks) {
+            if (!firstTweak) {
+                labelTextStream << ", ";
+            } else {
+                firstTweak = false;
+            }
+            labelTextStream << Tweaks::getTweakData(t).description;
         }
+        labelText = labelTextStream.str();
     }
     ui->enabledTweaksLbl->setText(QString::fromStdString(labelText));
+
+    ui->themesEnabledChk->setChecked(std::find(tweaks.begin(), tweaks.end(), Tweak::Themes) != tweaks.end());
+    ui->statusBarEnabledChk->setChecked(std::find(tweaks.begin(), tweaks.end(), Tweak::StatusBar) != tweaks.end());
+    ui->springboardOptionsEnabledChk->setChecked(std::find(tweaks.begin(), tweaks.end(), Tweak::SpringboardOptions) != tweaks.end());
+    ui->internalOptionsEnabledChk->setChecked(std::find(tweaks.begin(), tweaks.end(), Tweak::InternalOptions) != tweaks.end());
+    ui->setupOptionsEnabledChk->setChecked(std::find(tweaks.begin(), tweaks.end(), Tweak::SkipSetup) != tweaks.end());
 }
 
 void MainWindow::on_applyTweaksBtn_clicked()
 {
-    DeviceManager::getInstance().applyTweaks();
+    DeviceManager::getInstance().applyTweaks(ui->statusLbl);
 }
 
 // Window

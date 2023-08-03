@@ -2,6 +2,7 @@
 #include "CreateBackup.h"
 #include "HomeScreenApps.h"
 #include "plistmanager.h"
+#include "qregularexpression.h"
 #include <libimobiledevice/libimobiledevice.h>
 #include <libimobiledevice/lockdown.h>
 #include <libimobiledevice/restore.h>
@@ -178,7 +179,12 @@ void DeviceManager::setCurrentDeviceIndex(int index)
         this->deviceAvailable = true;
         DeviceManager::configureWorkspace(currentDevice->UUID);
         this->homeScreenApps = HomeScreenApps::getHomeScreenApps();
+        // fix - maybe we dont want these to reset?
         this->appsToAdd = {};
+        this->borders = {};
+        this->allIconsAdded = false;
+        this->allIconsBordered = false;
+        this->allNamesHidden = false;
     }
     else
     {
@@ -193,6 +199,11 @@ void DeviceManager::resetCurrentDevice()
     this->currentWorkspace.reset();
     this->homeScreenApps.reset();
     this->appsToAdd = {};
+    this->borders = {};
+    this->allIconsAdded = false;
+    this->allIconsBordered = false;
+    this->allNamesHidden = false;
+    this->enabledTweaks = {};
     if (this->devices.empty())
     {
         this->currentDeviceIndex = 0;
@@ -201,6 +212,7 @@ void DeviceManager::resetCurrentDevice()
     }
     else
     {
+        this->enabledTweaks.insert(Tweak::SkipSetup);
         DeviceManager::setCurrentDeviceIndex(0);
     }
 }
@@ -311,7 +323,7 @@ void DeviceManager::setBorder(std::string bundle, bool border) {
     }
 }
 
-bool DeviceManager::getBorder(std::string bundle) {
+const bool DeviceManager::getBorder(std::string bundle) const {
     return borders.count(bundle) == 1;
 }
 
@@ -336,6 +348,69 @@ void DeviceManager::resetUserPrefs(std::string bundle) {
 
 const std::unordered_set<std::string> DeviceManager::getAppsToAdd() const {
     return appsToAdd;
+}
+
+bool DeviceManager::addAllIcons() {
+    appsToAdd = {};
+    if (!allIconsAdded) {
+        for (const auto& pair : *homeScreenApps) {
+            appsToAdd.emplace(pair.first);
+        }
+    }
+    allIconsAdded = !allIconsAdded;
+    return allIconsAdded;
+}
+
+bool DeviceManager::hideAllNames() {
+    if (allNamesHidden) {
+        for (const auto& pair : *homeScreenApps) {
+            if (pair.second.find("user_name") != pair.second.end()) {
+                if (std::get<std::string>(pair.second.at("user_name")) == "") {
+                    homeScreenApps->at(pair.first).erase("user_name");
+                    if (pair.second.find("themed_name") != pair.second.end() && std::get<std::string>(pair.second.at("themed_name")) == "") {
+                        homeScreenApps->at(pair.first)["user_name"] = pair.second.at("name");
+                    }
+                }
+            } else {
+                if (pair.second.find("themed_name") != pair.second.end() && std::get<std::string>(pair.second.at("themed_name")) == "") {
+                    homeScreenApps->at(pair.first)["user_name"] = pair.second.at("name");
+                }
+            }
+        }
+    } else {
+        for (const auto& pair : *homeScreenApps) {
+            homeScreenApps->at(pair.first)["user_name"] = "";
+        }
+    }
+    allNamesHidden = !allNamesHidden;
+    return allNamesHidden;
+}
+
+bool DeviceManager::borderAllIcons() {
+    borders = {};
+    if (!allIconsBordered) {
+        for (const auto& pair : *homeScreenApps) {
+            borders.emplace(pair.first);
+        }
+    }
+    allIconsBordered = !allIconsBordered;
+    return allIconsBordered;
+}
+
+void DeviceManager::applyTheme(QDir themePath) {
+    QStringList pngFiles = themePath.entryList(QStringList() << "*.png");
+
+    QRegularExpression regex("(\\.png$|-large\\.png$|@2x\\.png$|@3x\\.png$)", QRegularExpression::CaseInsensitiveOption);
+
+    for (const QString& pngFile : pngFiles) {
+        auto fileName = QFileInfo(pngFile).fileName().replace(regex, "").toStdString();
+
+        auto it = homeScreenApps->find(fileName);
+        if (it != homeScreenApps->end()) {
+            appsToAdd.emplace(fileName);
+            it->second["user_icon"] = themePath.filePath(pngFile).toStdString();
+        }
+    }
 }
 
 void DeviceManager::setTweakEnabled(Tweak t, bool enabled = true)
@@ -368,102 +443,83 @@ std::vector<Tweak> DeviceManager::getEnabledTweaks()
     return tweaks;
 }
 
-void DeviceManager::applyTweaks()
+void DeviceManager::applyTweaks(QLabel *statusLabel)
 {
     auto workspace = DeviceManager::getCurrentWorkspace();
 
-    // Erase theme folder
-    auto themeDirectoryPath = QString::fromStdString(*workspace) + "/Theme/HomeDomain/Library/WebClips";
-    auto themeDirectory = QDir(themeDirectoryPath);
-    if (themeDirectory.exists())
-    {
-        themeDirectory.removeRecursively();
+    if (DeviceManager::isTweakEnabled(Tweak::Themes)) {
+
+        statusLabel->setText("Generating theme folder...");
+
+        // Erase theme folder
+        auto themeDirectoryPath = QString::fromStdString(*workspace) + "/Theme/HomeDomain/Library/WebClips";
+        auto themeDirectory = QDir(themeDirectoryPath);
+        if (themeDirectory.exists())
+        {
+            themeDirectory.removeRecursively();
+        }
+
+        // Generate theme folder
+        for (auto bundle : DeviceManager::getInstance().getAppsToAdd()) {
+            auto name = DeviceManager::getInstance().getAppName(bundle);
+            auto themed_name = DeviceManager::getInstance().getThemedName(bundle);
+            auto user_name = DeviceManager::getInstance().getUserName(bundle);
+            auto icon = DeviceManager::getInstance().getIcon(bundle);
+            auto themed_icon = DeviceManager::getInstance().getThemedIcon(bundle);
+            auto user_icon = DeviceManager::getInstance().getUserIcon(bundle);
+            auto border = DeviceManager::getInstance().getBorder(bundle);
+            QString iconDirectoryPath = "Cowabunga_" + QString::fromStdString(bundle + "," + name + ".webclip");
+            themeDirectory.mkpath(iconDirectoryPath);
+            auto iconDirectory = QDir(themeDirectory.absoluteFilePath(iconDirectoryPath));
+
+            if (user_icon) {
+                if (!QFile::copy(QString::fromStdString(*user_icon), iconDirectory.absolutePath() + "/icon.png")) {
+                    qDebug() << "Error copying theme icon!";
+                }
+            } else if (themed_icon) {
+                QString iconFilePath = iconDirectory.absoluteFilePath("icon.png");
+                QFile file(iconFilePath);
+                if (file.open(QIODevice::WriteOnly)) {
+                    QDataStream out(&file);
+                    out.writeRawData(themed_icon->data(), themed_icon->size());
+                    file.close();
+                } else {
+                    qDebug() << "Error: Unable to write the icon data to file.";
+                }
+            } else if (icon) {
+                QString iconFilePath = iconDirectory.absoluteFilePath("icon.png");
+                QFile file(iconFilePath);
+                if (file.open(QIODevice::WriteOnly)) {
+                    QDataStream out(&file);
+                    out.writeRawData(icon->data(), icon->size());
+                    file.close();
+                } else {
+                    qDebug() << "Error: Unable to write the icon data to file.";
+                }
+            }
+
+            auto plistFilePath = iconDirectory.absoluteFilePath("Info.plist").toStdString();
+            PlistManager::createEmptyPlist(plistFilePath, false);
+            auto ApplicationBundleIdentifier = PList::String(bundle);
+            PlistManager::setPlistValue(plistFilePath, "ApplicationBundleIdentifier", ApplicationBundleIdentifier);
+            if (user_name) {
+                auto Title = PList::String(*user_name);
+                PlistManager::setPlistValue(plistFilePath, "Title", Title);
+            } else if (themed_name) {
+                auto Title = PList::String(*themed_name);
+                PlistManager::setPlistValue(plistFilePath, "Title", Title);
+            } else {
+                auto Title = PList::String(name);
+                PlistManager::setPlistValue(plistFilePath, "Title", Title);
+            }
+            if (border) {
+                auto IsAppClip = PList::Boolean(true);
+                PlistManager::setPlistValue(plistFilePath, "IsAppClip", IsAppClip);
+            }
+        }
     }
 
-    // Generate theme folder
-    for (auto bundle : DeviceManager::getInstance().getAppsToAdd()) {
-        auto name = DeviceManager::getInstance().getAppName(bundle);
-        auto themed_name = DeviceManager::getInstance().getThemedName(bundle);
-        auto user_name = DeviceManager::getInstance().getUserName(bundle);
-        auto icon = DeviceManager::getInstance().getIcon(bundle);
-        auto themed_icon = DeviceManager::getInstance().getThemedIcon(bundle);
-        auto user_icon = DeviceManager::getInstance().getUserIcon(bundle);
-        auto border = DeviceManager::getInstance().getBorder(bundle);
-        QString iconDirectoryPath = "Cowabunga_" + QString::fromStdString(bundle + "," + name + ".webclip");
-        themeDirectory.mkpath(iconDirectoryPath);
-        auto iconDirectory = QDir(themeDirectory.absoluteFilePath(iconDirectoryPath));
-
-        if (user_icon) {
-            if (!QFile::copy(QString::fromStdString(*user_icon), iconDirectory.absolutePath() + "/icon.png")) {
-                qDebug() << "Error copying theme icon!";
-            }
-        } else if (themed_icon) {
-            QString iconFilePath = iconDirectory.absoluteFilePath("icon.png");
-            QFile file(iconFilePath);
-            if (file.open(QIODevice::WriteOnly)) {
-                QDataStream out(&file);
-                out.writeRawData(themed_icon->data(), themed_icon->size());
-                file.close();
-            } else {
-                qDebug() << "Error: Unable to write the icon data to file.";
-            }
-        } else if (icon) {
-            QString iconFilePath = iconDirectory.absoluteFilePath("icon.png");
-            QFile file(iconFilePath);
-            if (file.open(QIODevice::WriteOnly)) {
-                QDataStream out(&file);
-                out.writeRawData(icon->data(), icon->size());
-                file.close();
-            } else {
-                qDebug() << "Error: Unable to write the icon data to file.";
-            }
-        }
-
-        auto plistFilePath = iconDirectory.absoluteFilePath("Info.plist").toStdString();
-        PlistManager::createEmptyPlist(plistFilePath, false);
-        auto ApplicationBundleIdentifier = PList::String(bundle);
-        PlistManager::setPlistValue(plistFilePath, "ApplicationBundleIdentifier", ApplicationBundleIdentifier);
-        if (user_name) {
-            auto Title = PList::String(*user_name);
-            PlistManager::setPlistValue(plistFilePath, "Title", Title);
-        } else if (themed_name) {
-            auto Title = PList::String(*themed_name);
-            PlistManager::setPlistValue(plistFilePath, "Title", Title);
-        } else {
-            auto Title = PList::String(name);
-            PlistManager::setPlistValue(plistFilePath, "Title", Title);
-        }
-        if (border) {
-            auto IsAppClip = PList::Boolean(true);
-            PlistManager::setPlistValue(plistFilePath, "IsAppClip", IsAppClip);
-        }
-//        auto ApplicationBundleVersion = PList::Integer(int64_t(1));
-//        PlistManager::setPlistValue(plistFilePath, "ApplicationBundleVersion", ApplicationBundleVersion);
-//        auto ClassicMode = PList::Boolean(false);
-//        PlistManager::setPlistValue(plistFilePath, "ClassicMode", ClassicMode);
-//        auto ConfigurationIsManaged = PList::Boolean(false);
-//        PlistManager::setPlistValue(plistFilePath, "ConfigurationIsManaged", ConfigurationIsManaged);
-//        auto ContentMode = PList::String("UIWebClipContentModeRecommended");
-//        PlistManager::setPlistValue(plistFilePath, "ContentMode", ContentMode);
-//        auto FullScreen = PList::Boolean(true);
-//        PlistManager::setPlistValue(plistFilePath, "FullScreen", FullScreen);
-//        auto IconIsPrecomposed = PList::Boolean(false);
-//        PlistManager::setPlistValue(plistFilePath, "IconIsPrecomposed", IconIsPrecomposed);
-//        auto IconIsScreenShotBased = PList::Boolean(false);
-//        PlistManager::setPlistValue(plistFilePath, "IconIsScreenShotBased", IconIsScreenShotBased);
-//        auto IgnoreManifestScope = PList::Boolean(false);
-//        PlistManager::setPlistValue(plistFilePath, "IgnoreManifestScope", IgnoreManifestScope);
-//        auto IsAppClip = PList::Boolean(false);
-//        PlistManager::setPlistValue(plistFilePath, "IsAppClip", IsAppClip);
-//        auto Orientations = PList::Integer(int64_t(0));
-//        PlistManager::setPlistValue(plistFilePath, "Orientations", Orientations);
-//        auto RemovalDisallowed = PList::Boolean(false);
-//        PlistManager::setPlistValue(plistFilePath, "RemovalDisallowed", RemovalDisallowed);
-//        auto ScenelessBackgroundLaunch = PList::Boolean(false);
-//        PlistManager::setPlistValue(plistFilePath, "ScenelessBackgroundLaunch", ScenelessBackgroundLaunch);
-//        auto WebClipStatusBarStyle = PList::String("UIWebClipStatusBarStyleDefault");
-//        PlistManager::setPlistValue(plistFilePath, "WebClipStatusBarStyle", WebClipStatusBarStyle);
-    }
+    statusLabel->setText("Copying enabled tweaks...");
 
     // Erase backup folder
     auto enabledTweaksDirectoryPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/EnabledTweaks";
@@ -480,21 +536,31 @@ void DeviceManager::applyTweaks()
         Utils::copyDirectory(QString::fromStdString(*workspace + "/" + folderName), enabledTweaksDirectoryPath);
     }
 
+    statusLabel->setText("Generating backup...");
+
     auto backupDirectoryPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/Backup";
 
     CreateBackup::createBackup(enabledTweaksDirectoryPath.toStdString(), backupDirectoryPath.toStdString());
 
-    DeviceManager::restoreBackupToDevice(*DeviceManager::getCurrentUUID(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation).toStdString());
+    statusLabel->setText("Restoring backup to device...");
+
+    auto success = DeviceManager::restoreBackupToDevice(*DeviceManager::getCurrentUUID(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation).toStdString());
+
+    if (success) {
+        statusLabel->setText("Done!");
+    } else {
+        statusLabel->setText("Failed.");
+    }
 }
 
-int DeviceManager::restoreBackupToDevice(const std::string &udid, const std::string &backupDirectory)
+bool DeviceManager::restoreBackupToDevice(const std::string &udid, const std::string &backupDirectory)
 {
     std::string command = "idevicebackup2.exe -u " + udid + " -s Backup restore --system --skip-apps " + backupDirectory;
     FILE *pipe = _popen(command.c_str(), "r");
     if (pipe == nullptr)
     {
         std::cerr << "Failed to execute command." << std::endl;
-        return 1;
+        return false;
     }
     char buffer[128];
     char last[128];
@@ -513,17 +579,14 @@ int DeviceManager::restoreBackupToDevice(const std::string &udid, const std::str
     if (result == "Restore Successful.\n")
     {
         QMessageBox::information(nullptr, "Success", "Tweaks applied! Your device will now restart.\n\nImportant: If you are presented with a setup, select \"Customize\" > \"Don't transfer apps and data\" and your phone should return to the homescreen as normal.");
+        return true;
     }
-    else
-    {
-        QMessageBox detailsMessageBox;
-        detailsMessageBox.setWindowTitle("Error");
-        detailsMessageBox.setIcon(QMessageBox::Critical);
-        detailsMessageBox.setText(QString::fromStdString(result) + "\n" + QString::fromStdString(details));
-        detailsMessageBox.setTextInteractionFlags(Qt::TextSelectableByMouse);
-        detailsMessageBox.setDetailedText(QString::fromStdString(everything));
-        detailsMessageBox.exec();
-    }
-
-    return 0;
+    QMessageBox detailsMessageBox;
+    detailsMessageBox.setWindowTitle("Error");
+    detailsMessageBox.setIcon(QMessageBox::Critical);
+    detailsMessageBox.setText(QString::fromStdString(result) + "\n" + QString::fromStdString(details));
+    detailsMessageBox.setTextInteractionFlags(Qt::TextSelectableByMouse);
+    detailsMessageBox.setDetailedText(QString::fromStdString(everything));
+    detailsMessageBox.exec();
+    return false;
 }

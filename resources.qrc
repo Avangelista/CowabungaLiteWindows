@@ -17,5 +17,9 @@
         <file>icon/x-lg.svg</file>
         <file>background.png</file>
         <file>overlay.png</file>
+        <file>icon/discord.svg</file>
+        <file>icon/heart-fill.svg</file>
+        <file>icon/github.svg</file>
+        <file>icon/twitter.svg</file>
     </qresource>
 </RCC>

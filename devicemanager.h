@@ -1,6 +1,8 @@
 #ifndef DEVICEMANAGER_H
 #define DEVICEMANAGER_H
 
+#include "qdir.h"
+#include "qlabel.h"
 #include "utils.h"
 #include <vector>
 #include <unordered_set>
@@ -44,13 +46,19 @@ public:
     const std::optional<std::string> getUserIcon(std::string bundle) const;
     void setUserIcon(std::string bundle, std::string iconPath);
     void setBorder(std::string bundle, bool border);
-    bool getBorder(std::string bundle);
+    const bool getBorder(std::string bundle) const;
     void setAddToDevice(std::string bundle, bool add);
     const bool getAddToDevice(std::string bundle) const;
     const std::unordered_set<std::string> getAppsToAdd() const;
     void resetUserPrefs(std::string bundle);
 
-    void applyTweaks();
+    bool addAllIcons();
+    bool hideAllNames();
+    bool borderAllIcons();
+
+    void applyTheme(QDir themePath);
+
+    void applyTweaks(QLabel* statusLabel);
 private:
     DeviceManager();
     ~DeviceManager();
@@ -69,11 +77,15 @@ private:
     std::unordered_set<std::string> appsToAdd;
     std::unordered_set<std::string> borders;
 
+    bool allIconsAdded = false;
+    bool allNamesHidden = false;
+    bool allIconsBordered = false;
+
     std::unordered_set<Tweak> enabledTweaks;
 
     std::optional<std::string> currentWorkspace;
 
-    int restoreBackupToDevice(const std::string&, const std::string&);
+    bool restoreBackupToDevice(const std::string&, const std::string&);
 };
 
 #endif // DEVICEMANAGER_H
