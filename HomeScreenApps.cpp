@@ -131,7 +131,7 @@ std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std
     if (sb_client_err_code != SBSERVICES_E_SUCCESS)
     {
         // possible itunes error!
-        QMessageBox::critical(nullptr, "Error", "Unable to read the list of apps from your phone. Please make sure iTunes is installed on this PC.");
+        QMessageBox::critical(nullptr, "Error", "Unable to read the list of apps from your device. Please make sure iTunes is installed on this PC and your device is unlocked.");
         std::cerr << "Unable to create SpringBoard client: " << sb_client_err_code << std::endl;
         return {};
     }

@@ -1,6 +1,8 @@
 #include "plistmanager.h"
 #include <fstream>
 #include <QDebug>
+#include <iostream>
+#include <QFile>
 
 bool PlistManager::isBinaryPlist(const std::vector<char>& data) {
     if (data.size() < 8) {
@@ -18,13 +20,30 @@ bool PlistManager::isBinaryPlist(const std::vector<char>& data) {
     return true;
 }
 
-PList::Node* PlistManager::getPlistValue(const std::string& plistPath, const std::string& key) {
-    std::ifstream input(plistPath, std::ios::binary);
-    if (!input.is_open()) {
+PList::Node* PlistManager::getPlistValue(const QString& plistPath, const std::string& key) {
+//    std::ifstream input(plistPath, std::ios::binary);
+//    if (!input.is_open()) {
+//        return nullptr;
+//    }
+//    std::vector<char> in((std::istreambuf_iterator<char>(input)), (std::istreambuf_iterator<char>()));
+//    input.close();
+
+    std::vector<char> in;
+    QFile inputFile(plistPath);
+    if (!inputFile.open(QIODevice::ReadOnly)) {
         return nullptr;
     }
-    std::vector<char> in((std::istreambuf_iterator<char>(input)), (std::istreambuf_iterator<char>()));
-    input.close();
+
+    QDataStream inputStream(&inputFile);
+    inputStream.setVersion(QDataStream::Qt_5_0); // Set the desired version
+
+    while (!inputStream.atEnd()) {
+        char c;
+        inputStream >> c;
+        in.push_back(c);
+    }
+
+    inputFile.close();
 
     auto bplist = isBinaryPlist(in);
     plist_t root = NULL;
@@ -40,13 +59,30 @@ PList::Node* PlistManager::getPlistValue(const std::string& plistPath, const std
     return PList::Node::FromPlist(value);
 }
 
-void PlistManager::setPlistValue(const std::string& plistPath, const std::string& key, PList::Node& value) {
-    std::ifstream input(plistPath, std::ios::binary);
-    if (!input.is_open()) {
+void PlistManager::setPlistValue(const QString& plistPath, const std::string& key, PList::Node& value) {
+//    std::ifstream input(plistPath, std::ios::binary);
+//    if (!input.is_open()) {
+//        return;
+//    }
+//    std::vector<char> in((std::istreambuf_iterator<char>(input)), (std::istreambuf_iterator<char>()));
+//    input.close();
+
+    std::vector<char> in;
+    QFile inputFile(plistPath);
+    if (!inputFile.open(QIODevice::ReadOnly)) {
         return;
     }
-    std::vector<char> in((std::istreambuf_iterator<char>(input)), (std::istreambuf_iterator<char>()));
-    input.close();
+
+    QDataStream inputStream(&inputFile);
+    inputStream.setVersion(QDataStream::Qt_5_0); // Set the desired version
+
+    while (!inputStream.atEnd()) {
+        char c;
+        inputStream >> c;
+        in.push_back(c);
+    }
+
+    inputFile.close();
 
     auto bplist = isBinaryPlist(in);
     plist_t root = NULL;
@@ -76,22 +112,46 @@ void PlistManager::setPlistValue(const std::string& plistPath, const std::string
         out = std::vector<char>(tmp.begin(), tmp.end());
     }
 
-    std::ofstream output(plistPath, std::ios::binary);
-    if (!output.is_open()) {
-        return;
-    }
+//    std::ofstream output(plistPath, std::ios::binary);
+//    if (!output.is_open()) {
+//        return;
+//    }
 
-    output.write(out.data(), out.size());
-    output.close();
+//    output.write(out.data(), out.size());
+//    output.close();
+
+    QFile file(plistPath);
+    if (file.open(QIODevice::WriteOnly)) {
+        QDataStream outStream(&file);
+        outStream.writeRawData(out.data(), out.size());
+        file.close();
+    }
 }
 
-void PlistManager::deletePlistKey(const std::string& plistPath, const std::string& key) {
-    std::ifstream input(plistPath, std::ios::binary);
-    if (!input.is_open()) {
+void PlistManager::deletePlistKey(const QString& plistPath, const std::string& key) {
+//    std::ifstream input(plistPath, std::ios::binary);
+//    if (!input.is_open()) {
+//        return;
+//    }
+//    std::vector<char> in((std::istreambuf_iterator<char>(input)), (std::istreambuf_iterator<char>()));
+//    input.close();
+
+    std::vector<char> in;
+    QFile inputFile(plistPath);
+    if (!inputFile.open(QIODevice::ReadOnly)) {
         return;
     }
-    std::vector<char> in((std::istreambuf_iterator<char>(input)), (std::istreambuf_iterator<char>()));
-    input.close();
+
+    QDataStream inputStream(&inputFile);
+    inputStream.setVersion(QDataStream::Qt_5_0); // Set the desired version
+
+    while (!inputStream.atEnd()) {
+        char c;
+        inputStream >> c;
+        in.push_back(c);
+    }
+
+    inputFile.close();
 
     auto bplist = isBinaryPlist(in);
     plist_t root = NULL;
@@ -121,16 +181,23 @@ void PlistManager::deletePlistKey(const std::string& plistPath, const std::strin
         out = std::vector<char>(tmp.begin(), tmp.end());
     }
 
-    std::ofstream output(plistPath, std::ios::binary);
-    if (!output.is_open()) {
-        return;
-    }
+//    std::ofstream output(plistPath, std::ios::binary);
+//    if (!output.is_open()) {
+//        return;
+//    }
 
-    output.write(out.data(), out.size());
-    output.close();
+//    output.write(out.data(), out.size());
+//    output.close();
+
+    QFile file(plistPath);
+    if (file.open(QIODevice::WriteOnly)) {
+        QDataStream outStream(&file);
+        outStream.writeRawData(out.data(), out.size());
+        file.close();
+    }
 }
 
-void PlistManager::createEmptyPlist(const std::string& plistPath, bool bplist) {
+void PlistManager::createEmptyPlist(const QString& plistPath, bool bplist) {
     plist_t root = plist_new_dict();
 
     auto out = std::vector<char>();
@@ -150,11 +217,18 @@ void PlistManager::createEmptyPlist(const std::string& plistPath, bool bplist) {
         out = std::vector<char>(tmp.begin(), tmp.end());
     }
 
-    std::ofstream output(plistPath, std::ios::binary);
-    if (!output.is_open()) {
-        return;
-    }
+//    std::ofstream output(plistPath, std::ios::binary);
+//    if (!output.is_open()) {
+//        return;
+//    }
 
-    output.write(out.data(), out.size());
-    output.close();
+//    output.write(out.data(), out.size());
+//    output.close();
+
+    QFile file(plistPath);
+    if (file.open(QIODevice::WriteOnly)) {
+        QDataStream outStream(&file);
+        outStream.writeRawData(out.data(), out.size());
+        file.close();
+    }
 }

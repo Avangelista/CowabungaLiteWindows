@@ -2,6 +2,7 @@
 #include "CreateBackup.h"
 #include "HomeScreenApps.h"
 #include "plistmanager.h"
+#include "qprocess.h"
 #include "qregularexpression.h"
 #include <libimobiledevice/libimobiledevice.h>
 #include <libimobiledevice/lockdown.h>
@@ -443,6 +444,44 @@ std::vector<Tweak> DeviceManager::getEnabledTweaks()
     return tweaks;
 }
 
+void DeviceManager::removeTweaks(QLabel *statusLabel) {
+    statusLabel->setText("Copying restore files...");
+
+    // Set the source directory path (assuming it's located in the binary directory)
+    auto sourceDir = QCoreApplication::applicationDirPath() + "/restore";
+    auto enabledTweaksDirectoryPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/EnabledTweaks";
+    auto enabledTweaksDirectory = QDir(enabledTweaksDirectoryPath);
+    if (enabledTweaksDirectory.exists())
+    {
+        enabledTweaksDirectory.removeRecursively();
+    }
+
+    if (Utils::copyDirectory(sourceDir, enabledTweaksDirectoryPath))
+    {
+        // fix this idk
+    }
+    else
+    {
+        qDebug() << "Error creating workspace directory";
+    }
+
+    statusLabel->setText("Generating backup...");
+
+    auto backupDirectoryPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/Backup";
+
+    CreateBackup::createBackup(enabledTweaksDirectoryPath.toStdString(), backupDirectoryPath.toStdString());
+
+    statusLabel->setText("Restoring backup to device...");
+
+    auto success = DeviceManager::restoreBackupToDevice(*DeviceManager::getCurrentUUID(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation).toStdString());
+
+    if (success) {
+        statusLabel->setText("Done!");
+    } else {
+        statusLabel->setText("Failed.");
+    }
+}
+
 void DeviceManager::applyTweaks(QLabel *statusLabel)
 {
     auto workspace = DeviceManager::getCurrentWorkspace();
@@ -498,7 +537,7 @@ void DeviceManager::applyTweaks(QLabel *statusLabel)
                 }
             }
 
-            auto plistFilePath = iconDirectory.absoluteFilePath("Info.plist").toStdString();
+            auto plistFilePath = iconDirectory.absoluteFilePath("Info.plist");
             PlistManager::createEmptyPlist(plistFilePath, false);
             auto ApplicationBundleIdentifier = PList::String(bundle);
             PlistManager::setPlistValue(plistFilePath, "ApplicationBundleIdentifier", ApplicationBundleIdentifier);
@@ -555,38 +594,78 @@ void DeviceManager::applyTweaks(QLabel *statusLabel)
 
 bool DeviceManager::restoreBackupToDevice(const std::string &udid, const std::string &backupDirectory)
 {
-    std::string command = "idevicebackup2.exe -u " + udid + " -s Backup restore --system --skip-apps " + backupDirectory;
-    FILE *pipe = _popen(command.c_str(), "r");
-    if (pipe == nullptr)
-    {
-        std::cerr << "Failed to execute command." << std::endl;
-        return false;
+    QStringList arguments;
+    arguments << "-u" << QString::fromStdString(udid) << "-s" << "Backup" << "restore" << "--system" << "--skip-apps" << QString::fromStdString(backupDirectory);
+
+    QProcess process;
+    process.start("idevicebackup2.exe", arguments);
+    process.waitForFinished(-1);
+
+    QByteArray output = process.readAllStandardOutput();
+    QByteArray errorOutput = process.readAllStandardError();
+
+    // Split the output into lines using '\n' as the separator
+    // AAA Fix using \r\n
+    QStringList outputLines = QString(output).split("\r\n");
+
+    // Get the last two lines of the output
+    QString lastLine;
+    QString secondLastLine;
+    if (outputLines.size() >= 3) {
+        lastLine = outputLines.at(outputLines.size() - 2);
+        secondLastLine = outputLines.at(outputLines.size() - 3);
+    } else {
+        lastLine = output;
+        secondLastLine = errorOutput;
     }
-    char buffer[128];
-    char last[128];
-    char prev[128];
-    auto everything = std::string();
-    while (fgets(buffer, 128, pipe) != nullptr)
+
+    if (lastLine == "Restore Successful.")
     {
-        std::cout << buffer << std::endl;
-        everything += std::string(buffer);
-        strncpy(prev, last, 128);
-        strncpy(last, buffer, 128);
-    }
-    _pclose(pipe);
-    auto result = std::string(last);
-    auto details = std::string(prev);
-    if (result == "Restore Successful.\n")
-    {
-        QMessageBox::information(nullptr, "Success", "Tweaks applied! Your device will now restart.\n\nImportant: If you are presented with a setup, select \"Customize\" > \"Don't transfer apps and data\" and your phone should return to the homescreen as normal.");
+        QMessageBox::information(nullptr, "Success!", "All done! Your device will now restart.\n\nYou should see a black loading screen after entering your passcode - it will disappear after a few seconds.\n\nImportant: If you are presented with a setup, select \"Customize\" > \"Don't transfer apps and data\" and your phone should return to the homescreen as normal.");
         return true;
     }
     QMessageBox detailsMessageBox;
-    detailsMessageBox.setWindowTitle("Error");
+    detailsMessageBox.setWindowTitle("Error!");
     detailsMessageBox.setIcon(QMessageBox::Critical);
-    detailsMessageBox.setText(QString::fromStdString(result) + "\n" + QString::fromStdString(details));
+    detailsMessageBox.setText(lastLine + "\n" + secondLastLine);
     detailsMessageBox.setTextInteractionFlags(Qt::TextSelectableByMouse);
-    detailsMessageBox.setDetailedText(QString::fromStdString(everything));
+    detailsMessageBox.setDetailedText(errorOutput + "\n" + output);
     detailsMessageBox.exec();
     return false;
+
+//    return true;
+//    std::string command = "idevicebackup2.exe -u " + udid + " -s Backup restore --system --skip-apps " + backupDirectory;
+//    FILE *pipe = _popen(command.c_str(), "r");
+//    if (pipe == nullptr)
+//    {
+//        std::cerr << "Failed to execute command." << std::endl;
+//        return false;
+//    }
+//    char buffer[128];
+//    char last[128];
+//    char prev[128];
+//    auto everything = std::string();
+//    while (fgets(buffer, 128, pipe) != nullptr)
+//    {
+//        std::cout << buffer << std::endl;
+//        everything += std::string(buffer);
+//        strncpy(prev, last, 128);
+//        strncpy(last, buffer, 128);
+//    }
+//    _pclose(pipe);
+//    auto result = std::string(last);
+//    auto details = std::string(prev);
+//    if (result == "Restore Successful.\n")
+//    {
+//        QMessageBox::information(nullptr, "Success!", "All done! Your device will now restart.\n\nYou should see a black loading screen after entering your passcode - it will disappear after a few seconds.\n\nImportant: If you are presented with a setup, select \"Customize\" > \"Don't transfer apps and data\" and your phone should return to the homescreen as normal.");
+//        return true;
+//    }
+//    QMessageBox detailsMessageBox;
+//    detailsMessageBox.setWindowTitle("Error!");
+//    detailsMessageBox.setIcon(QMessageBox::Critical);
+//    detailsMessageBox.setText(QString::fromStdString(result) + "\n" + QString::fromStdString(details));
+//    detailsMessageBox.setTextInteractionFlags(Qt::TextSelectableByMouse);
+//    detailsMessageBox.setDetailedText(QString::fromStdString(everything));
+//    detailsMessageBox.exec();
+//    return false;
 }

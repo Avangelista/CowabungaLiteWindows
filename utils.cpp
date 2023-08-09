@@ -2,7 +2,10 @@
 #include <QDirIterator>
 #include <QFileInfo>
 #include <QFile>
-#include <QDebug>
+#include <QtCore/QProcess>
+#include <QtCore/QDir>
+#include <QtCore/QDebug>
+#include <zlib.h>
 
 bool Utils::copyDirectory(QString source, QString dest) {
     QDir().mkpath(dest);
@@ -32,4 +35,19 @@ bool Utils::copyDirectory(QString source, QString dest) {
     }
 
     return true;
+}
+
+void Utils::unzip (QString zipFile , QString outputFolder){
+    QStringList arguments;
+    arguments << "-x" << "-d" << outputFolder << zipFile;
+
+    QProcess process;
+    process.start("minizip.exe", arguments);
+    process.waitForFinished(-1);
+
+    QByteArray output = process.readAllStandardOutput();
+    QByteArray errorOutput = process.readAllStandardError();
+
+    qDebug() << "Standard Output:" << output;
+    qDebug() << "Error Output:" << errorOutput;
 }

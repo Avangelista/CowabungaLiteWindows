@@ -21,5 +21,10 @@
         <file>icon/heart-fill.svg</file>
         <file>icon/github.svg</file>
         <file>icon/twitter.svg</file>
+        <file>icon/file-earmark-zip.svg</file>
+        <file>icon/folder.svg</file>
+        <file>icon/trash.svg</file>
+        <file>cowliteicon.png</file>
+        <file>icon/currency-dollar.svg</file>
     </qresource>
 </RCC>

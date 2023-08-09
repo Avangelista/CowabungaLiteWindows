@@ -3,6 +3,7 @@
 // compile: g++ -o CreateBackup CreateBackup.cpp -lcrypto
 
 #include "CreateBackup.h"
+#include "qdir.h"
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -12,6 +13,10 @@
 #include <regex>
 #include <openssl/sha.h>
 #include <random>
+#include <QString>
+#include <QDebug>
+#include <QRandomGenerator>
+#include <QCryptographicHash>
 
 std::string removeDomain(const std::string &domain, const std::string &input)
 {
@@ -28,48 +33,50 @@ std::string removeDomain(const std::string &domain, const std::string &input)
     return input;
 }
 
-void writeStringWithLength(std::ofstream &output_file, const std::string &str)
+void writeStringWithLength(QFile &output_file, const QString &qstr)
 {
-    uint16_t length = str.size();
-    uint16_t bigEndianLength = (length << 8) | (length >> 8);
+    QByteArray byteArray = qstr.toUtf8();
+    quint16 length = static_cast<quint16>(byteArray.size());
+
+    quint16 bigEndianLength = (length << 8) | (length >> 8);
 
     output_file.write(reinterpret_cast<const char *>(&bigEndianLength), sizeof(bigEndianLength));
-    output_file.write(str.data(), length);
+    output_file.write(byteArray);
 }
 
-void writeHash(std::ofstream &output_file, const std::string &file)
+void writeHash(QFile &output_file, const QString &file)
 {
-    std::ifstream input_file(file, std::ios::binary);
-    if (!input_file)
+    QFile input_file(file);
+    if (!input_file.open(QIODevice::ReadOnly))
     {
-        std::cerr << "Failed to open file: " << file << std::endl;
+        qDebug() << "Failed to open file:" << file;
         return;
     }
 
-    std::string fileContent((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
-    unsigned char hash[SHA_DIGEST_LENGTH];
-    SHA1(reinterpret_cast<const unsigned char *>(fileContent.c_str()), fileContent.size(), hash);
-    output_file.write(reinterpret_cast<const char *>(hash), sizeof(hash));
+    QByteArray fileContent = input_file.readAll();
+    QByteArray hash = QCryptographicHash::hash(fileContent, QCryptographicHash::Sha1);
+    output_file.write(hash);
 }
 
-void generateRandomHex(std::ofstream &output_file)
+void generateRandomHex(QFile &output_file)
 {
-    std::random_device rd;
-    std::mt19937 generator(rd());
-    std::uniform_int_distribution<int> distribution(0, 255);
+    QRandomGenerator generator;
+    generator.seed(QDateTime::currentMSecsSinceEpoch());
 
     constexpr int bufferSize = 12;
-    char buffer[bufferSize];
+    QByteArray buffer;
+    buffer.resize(bufferSize);
 
     for (int i = 0; i < bufferSize; ++i)
     {
-        buffer[i] = static_cast<char>(distribution(generator));
+        buffer[i] = static_cast<char>(generator.generate() % 256);
     }
 
-    output_file.write(buffer, bufferSize);
+    output_file.write(buffer);
 
     // For testing purposes
-    // output_file.write("\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF", 12);
+    // QByteArray testData(12, '\xFF');
+    // output_file.write(testData);
 }
 
 std::string calculateSHA1(const std::string &str)
@@ -86,86 +93,97 @@ std::string calculateSHA1(const std::string &str)
     return ss.str();
 }
 
-void copyFile(const std::string &source, const std::string &destination)
+void copyFile(const QString &source, const QString &destination)
 {
-    std::ifstream sourceFile(source, std::ios::binary);
-    if (!sourceFile)
+    QFile sourceFile(source);
+    if (!sourceFile.open(QIODevice::ReadOnly))
     {
-        std::cerr << "Failed to open source file: " << source << std::endl;
+        qDebug() << "Failed to open source file:" << source;
         return;
     }
 
-    std::ofstream destinationFile(destination, std::ios::binary);
-    if (!destinationFile)
+    QFile destinationFile(destination);
+    if (!destinationFile.open(QIODevice::WriteOnly))
     {
-        std::cerr << "Failed to create destination file: " << destination << std::endl;
+        qDebug() << "Failed to create destination file:" << destination;
         return;
     }
 
-    destinationFile << sourceFile.rdbuf();
+    destinationFile.write(sourceFile.readAll());
 }
 
 void processFiles(const std::string &path, const std::string &domainString, const std::string &outputDir)
 {
-    std::string fileString = std::regex_replace(removeDomain(domainString, path), std::regex("hiddendot"), ".");
-    fileString = std::regex_replace(fileString, std::regex("\\\\"), "/");
+    QString qPath = QString::fromStdString(path);
+    QString qDomainString = QString::fromStdString(domainString);
+    QString qOutputDir = QString::fromStdString(outputDir);
 
-    std::ofstream output_file(outputDir + "/Manifest.mbdb", std::ios::app | std::ios::binary);
-    if (domainString == "ConfigProfileDomain")
+    QString fileString = QString::fromStdString(removeDomain(qDomainString.toStdString(), qPath.toStdString()))
+                            .replace("hiddendot", ".")
+                            .replace("\\", "/");
+    
+    QFile output_file(qOutputDir + "/Manifest.mbdb");
+    if (!output_file.open(QIODevice::Append))
+    {
+        qDebug() << "Failed to open output file";
+        return;
+    }
+
+    if (qDomainString == "ConfigProfileDomain")
     {
         writeStringWithLength(output_file, "SysSharedContainerDomain-systemgroup.com.apple.configurationprofiles");
-    } else {
-        writeStringWithLength(output_file, domainString);
+    }
+    else
+    {
+        writeStringWithLength(output_file, qDomainString);
     }
     writeStringWithLength(output_file, fileString);
 
-    if (std::filesystem::is_regular_file(path))
+    if (QFileInfo(qPath).isFile())
     {
         output_file.write("\xFF\xFF\x00\x14", 4);
-        writeHash(output_file, path);
+        writeHash(output_file, qPath);
         output_file.write("\xFF\xFF\x81\xFF\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\xF5\x00\x00\x01\xF5", 20);
         generateRandomHex(output_file);
-        struct stat st;
-        if (stat(path.c_str(), &st) == 0)
-        {
-            uint64_t fileSize = static_cast<uint64_t>(st.st_size);
+        QFileInfo fileInfo(qPath);
+        qint64 fileSize = fileInfo.size();
+        QByteArray sizeBytes;
 
-            // Convert to big endian
-            for (int i = 7; i >= 0; --i)
-            {
-                unsigned char byte = static_cast<unsigned char>((fileSize >> (8 * i)) & 0xFF);
-                output_file.put(byte);
-            }
-        }
-        else
+        // Convert to big endian
+        for (int i = 7; i >= 0; --i)
         {
-            output_file.write("\x00\x00\x00\x00\x00\x00\x00\x00", 8);
+            unsigned char byte = static_cast<unsigned char>((fileSize >> (8 * i)) & 0xFF);
+            sizeBytes.append(byte);
         }
+
+        output_file.write(sizeBytes);
         output_file.write("\x04\x00", 2);
         output_file.close();
 
-        // Rename file to its domain-path hash
-        std::string hash;
-        if (domainString == "ConfigProfileDomain")
+        QString hash;
+        if (qDomainString == "ConfigProfileDomain")
         {
-            hash = calculateSHA1("SysSharedContainerDomain-systemgroup.com.apple.configurationprofiles-" + fileString);
-        } else {
-            hash = calculateSHA1(domainString + "-" + fileString);
+            hash = QString::fromStdString(calculateSHA1("SysSharedContainerDomain-systemgroup.com.apple.configurationprofiles-" + fileString.toStdString()));
         }
-        std::string newFile = outputDir + "/" + hash;
-        copyFile(path, newFile);
+        else
+        {
+            hash = QString::fromStdString(calculateSHA1(domainString + "-" + fileString.toStdString()));
+        }
+        QString newFile = qOutputDir + "/" + hash;
+        copyFile(qPath, newFile);
     }
-    else if (std::filesystem::is_directory(path))
+    else if (QFileInfo(qPath).isDir())
     {
         output_file.write("\xFF\xFF\xFF\xFF\xFF\xFF\x41\xFF\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\xF5\x00\x00\x01\xF5", 24);
         generateRandomHex(output_file);
         output_file.write("\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00", 10);
         output_file.close();
 
-        for (const auto &entry : std::filesystem::directory_iterator(path))
+        QDir dir(qPath);
+        for (const QString &entry : dir.entryList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot))
         {
-            const auto &filePath = entry.path();
-            processFiles(filePath.string(), domainString, outputDir);
+            QString filePath = qPath + "/" + entry;
+            processFiles(filePath.toStdString(), qDomainString.toStdString(), qOutputDir.toStdString());
         }
     }
 }
@@ -179,37 +197,41 @@ std::string basename(const std::string &path)
 
 bool createDirectory(const std::string &dirPath)
 {
+    QString qDirPath = QString::fromStdString(dirPath);
+
     try
     {
-        if (std::filesystem::create_directory(dirPath))
-        {
+        if (QDir().mkpath(qDirPath))
             return true;
-        }
         else
         {
-            std::cerr << "Failed to create directory." << std::endl;
+            qDebug() << "Failed to create directory.";
             return false;
         }
     }
-    catch (const std::filesystem::filesystem_error &ex)
+    catch (const std::exception &ex)
     {
-        std::cerr << "Failed to create directory: " << ex.what() << std::endl;
+        qDebug() << "Failed to create directory:" << ex.what();
         return false;
     }
 }
 
 bool removeDirectoryIfExists(const std::string &dirPath)
 {
-    if (std::filesystem::exists(dirPath) && std::filesystem::is_directory(dirPath))
+    QString qDirPath = QString::fromStdString(dirPath);
+
+    if (QFileInfo(qDirPath).exists() && QFileInfo(qDirPath).isDir())
     {
         try
         {
-            std::filesystem::remove_all(dirPath);
-            return true;
+            if (QDir(qDirPath).removeRecursively())
+                return true;
+            else
+                return false;
         }
-        catch (const std::filesystem::filesystem_error &ex)
+        catch (const std::exception &ex)
         {
-            std::cerr << "Failed to remove directory: " << ex.what() << std::endl;
+            qDebug() << "Failed to remove directory:" << ex.what();
             return false;
         }
     }
@@ -221,29 +243,32 @@ bool CreateBackup::createBackup(std::string indir, std::string outdir)
     removeDirectoryIfExists(outdir);
     createDirectory(outdir);
 
+    QString qIndir = QString::fromStdString(indir);
+    QString qOutdir = QString::fromStdString(outdir);
+
     // NOTE: Manifest.mbdb tracks the locations and SHA1 hashes of each file in the backup
-    std::ofstream output_file(outdir + "/Manifest.mbdb", std::ios::binary);
-    if (!output_file)
+    QFile output_file(qOutdir + "/Manifest.mbdb");
+    if (!output_file.open(QIODevice::WriteOnly))
     {
-        std::cerr << "Failed to create output file" << std::endl;
+        qDebug() << "Failed to create output file";
         return false;
     }
 
     // Manifest.mbdb file header
-    std::string header = "mbdb\x05\x00";
-    output_file.write(header.c_str(), 6);
+    QByteArray header = "mbdb\x05\x00";
+    output_file.write(header, 6);
+
+    // Close the file after writing the header
     output_file.close();
 
     // Iterate over all domains
-    for (const auto &domainEntry : std::filesystem::directory_iterator(indir))
+    QDir domainDir(qIndir);
+    for (const QString &domainEntry : domainDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot))
     {
-        if (domainEntry.is_directory())
-        {
-            std::string domain = domainEntry.path().string();
-            std::string domainString = basename(domain);
+        QString domain = qIndir + "/" + domainEntry;
+        QString domainString = QFileInfo(domain).baseName();
 
-            processFiles(domain, domainString, outdir);
-        }
+        processFiles(domain.toStdString(), domainString.toStdString(), outdir);
     }
 
     // Generate Info.plist

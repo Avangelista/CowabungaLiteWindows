@@ -8,6 +8,7 @@ class Utils
 {
 public:
     static bool copyDirectory(QString, QString);
+    static void unzip(QString zipFile , QString outputFolder);
 };
 
 enum class Tweak {

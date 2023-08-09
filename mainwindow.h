@@ -57,6 +57,9 @@ private slots:
     void on_addAllBtn_clicked();
     void on_hideNamesBtn_clicked();
     void on_borderAllBtn_clicked();
+    void on_themesBtn_clicked();
+    void on_importThemeFolderBtn_clicked();
+    void on_importThemeZipBtn_clicked();
 
     // Status Bar
     void on_statusBarEnabledChk_toggled(bool checked);
@@ -67,6 +70,8 @@ private slots:
     void on_pCarrierTxt_textEdited(const QString &text);
     void on_pBadgeChk_clicked(bool checked);
     void on_pBadgeTxt_textEdited(const QString &text);
+    void on_pTypeChk_clicked(bool checked);
+    void on_pTypeDrp_activated(int index);
     void on_pStrengthChk_clicked(bool checked);
     void on_pStrengthSld_sliderMoved(int pos);
     void on_sDefaultRdo_clicked();
@@ -76,6 +81,8 @@ private slots:
     void on_sCarrierTxt_textEdited(const QString &text);
     void on_sBadgeChk_clicked(bool checked);
     void on_sBadgeTxt_textEdited(const QString &text);
+    void on_sTypeChk_clicked(bool checked);
+    void on_sTypeDrp_activated(int index);
     void on_sStrengthChk_clicked(bool checked);
     void on_sStrengthSld_sliderMoved(int pos);
     void on_timeChk_clicked(bool checked);
@@ -134,6 +141,7 @@ private slots:
 
     // Apply
     void on_applyTweaksBtn_clicked();
+    void on_removeTweaksBtn_clicked();
 
     // Window
     void on_titleBar_pressed();
@@ -152,9 +160,10 @@ private:
     void updatePhoneInfo();
 
     // Themes
-    QPixmap createRoundedPixmap(const QPixmap& pixmap, double roundnessPercentage);
+    void loadThemesPage();
     void loadThemes();
     void loadIcons();
+    bool themesEasterEgg = false;
 
     // Status Bar
     void loadStatusBar();

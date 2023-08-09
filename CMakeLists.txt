@@ -90,6 +90,10 @@ set_target_properties(CowabungaLite PROPERTIES
 set(FILES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/files")
 file(COPY ${FILES_PATH} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
+# Copy restore files to the output directory
+set(RESTORE_FILES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/restore")
+file(COPY ${RESTORE_FILES_PATH} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
 # Copy the DLL files to the output directory
 set(DLL_PATH "${CMAKE_CURRENT_SOURCE_DIR}/dll")
 set(EXE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/exe")

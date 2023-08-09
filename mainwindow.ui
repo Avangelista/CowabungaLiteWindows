@@ -439,6 +439,9 @@ QToolButton:pressed {
           </item>
           <item>
            <widget class="QToolButton" name="explorePageBtn">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -541,6 +544,9 @@ QToolButton:pressed {
           </item>
           <item>
            <widget class="QToolButton" name="controlCenterPageBtn">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
@@ -878,50 +884,164 @@ QToolButton:pressed {
                </widget>
               </item>
               <item>
-               <widget class="QWidget" name="horizontalWidget_3" native="true">
-                <layout class="QHBoxLayout" name="horizontalLayout_3">
+               <widget class="QWidget" name="horizontalWidget" native="true">
+                <layout class="QHBoxLayout" name="horizontalLayout_27">
+                 <property name="spacing">
+                  <number>50</number>
+                 </property>
                  <property name="leftMargin">
                   <number>0</number>
                  </property>
                  <property name="topMargin">
-                  <number>9</number>
+                  <number>0</number>
                  </property>
                  <property name="rightMargin">
                   <number>0</number>
                  </property>
                  <property name="bottomMargin">
-                  <number>9</number>
+                  <number>0</number>
                  </property>
                  <item>
-                  <widget class="QToolButton" name="discordBtn">
-                   <property name="text">
-                    <string>  Join the Discord</string>
-                   </property>
-                   <property name="icon">
-                    <iconset resource="resources.qrc">
-                     <normaloff>:/icon/discord.svg</normaloff>:/icon/discord.svg</iconset>
-                   </property>
-                   <property name="toolButtonStyle">
-                    <enum>Qt::ToolButtonTextBesideIcon</enum>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QToolButton" name="patreonBtn">
-                   <property name="text">
-                    <string>  Support us on Patreon</string>
-                   </property>
-                   <property name="icon">
-                    <iconset resource="resources.qrc">
-                     <normaloff>:/icon/heart-fill.svg</normaloff>:/icon/heart-fill.svg</iconset>
-                   </property>
-                   <property name="toolButtonStyle">
-                    <enum>Qt::ToolButtonTextBesideIcon</enum>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
                   <spacer name="horizontalSpacer_2">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                 <item>
+                  <widget class="QToolButton" name="toolButton_3">
+                   <property name="styleSheet">
+                    <string notr="true">QToolButton {
+	background-color: transparent;
+	padding: 0px;
+}</string>
+                   </property>
+                   <property name="text">
+                    <string>...</string>
+                   </property>
+                   <property name="icon">
+                    <iconset resource="resources.qrc">
+                     <normaloff>:/cowliteicon.png</normaloff>:/cowliteicon.png</iconset>
+                   </property>
+                   <property name="iconSize">
+                    <size>
+                     <width>120</width>
+                     <height>200</height>
+                    </size>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QWidget" name="verticalWidget" native="true">
+                   <layout class="QVBoxLayout" name="verticalLayout_26">
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <spacer name="verticalSpacer_11">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>20</width>
+                        <height>40</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="label_2">
+                      <property name="font">
+                       <font>
+                        <pointsize>-1</pointsize>
+                        <bold>true</bold>
+                       </font>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">QLabel {
+	font-size: 29px;
+}</string>
+                      </property>
+                      <property name="text">
+                       <string>Cowabunga Lite</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="verticalSpacer_12">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>20</width>
+                        <height>40</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                    <item>
+                     <widget class="QToolButton" name="patreonBtn">
+                      <property name="text">
+                       <string>  Support us on Patreon</string>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="resources.qrc">
+                        <normaloff>:/icon/heart-fill.svg</normaloff>:/icon/heart-fill.svg</iconset>
+                      </property>
+                      <property name="toolButtonStyle">
+                       <enum>Qt::ToolButtonTextBesideIcon</enum>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QToolButton" name="discordBtn">
+                      <property name="text">
+                       <string>  Join the Discord</string>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="resources.qrc">
+                        <normaloff>:/icon/discord.svg</normaloff>:/icon/discord.svg</iconset>
+                      </property>
+                      <property name="toolButtonStyle">
+                       <enum>Qt::ToolButtonTextBesideIcon</enum>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="verticalSpacer_4">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>20</width>
+                        <height>40</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="horizontalSpacer_12">
                    <property name="orientation">
                     <enum>Qt::Horizontal</enum>
                    </property>
@@ -937,43 +1057,28 @@ QToolButton:pressed {
                </widget>
               </item>
               <item>
-               <widget class="Line" name="line_6">
-                <property name="styleSheet">
-                 <string notr="true">QFrame {
-	color: #414141;
-}</string>
-                </property>
-                <property name="frameShadow">
-                 <enum>QFrame::Plain</enum>
-                </property>
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-               </widget>
-              </item>
-              <item>
                <widget class="QWidget" name="verticalWidget_2" native="true">
                 <layout class="QVBoxLayout" name="verticalLayout_25">
                  <property name="spacing">
-                  <number>6</number>
+                  <number>15</number>
                  </property>
                  <property name="leftMargin">
                   <number>0</number>
                  </property>
                  <property name="topMargin">
-                  <number>9</number>
+                  <number>30</number>
                  </property>
                  <property name="rightMargin">
                   <number>0</number>
                  </property>
                  <property name="bottomMargin">
-                  <number>9</number>
+                  <number>30</number>
                  </property>
                  <item>
                   <widget class="QWidget" name="horizontalWidget_2" native="true">
                    <layout class="QHBoxLayout" name="horizontalLayout_2">
                     <property name="spacing">
-                     <number>1</number>
+                     <number>0</number>
                     </property>
                     <property name="leftMargin">
                      <number>0</number>
@@ -1000,8 +1105,7 @@ QToolButton:pressed {
                       </property>
                       <property name="styleSheet">
                        <string notr="true">QToolButton {
-	border-top-right-radius: 0px;
-	border-bottom-right-radius: 0px;
+	background: none;
 }</string>
                       </property>
                       <property name="text">
@@ -1020,7 +1124,15 @@ QToolButton:pressed {
                      <widget class="QToolButton" name="avangelistaGitHubBtn">
                       <property name="styleSheet">
                        <string notr="true">QToolButton {
-	border-radius: 0px;
+	border-top-right-radius: 0px;
+	border-bottom-right-radius: 0px;
+	background: none;
+	border: 1px solid #3b3b3b;
+}
+
+QToolButton:pressed {
+    background-color: #535353;
+    color: #FFFFFF;
 }</string>
                       </property>
                       <property name="text">
@@ -1037,6 +1149,14 @@ QToolButton:pressed {
                       <property name="styleSheet">
                        <string notr="true">QToolButton {
 	border-radius: 0px;
+	background: none;
+	border: 1px solid #3b3b3b;
+	border-left: none;
+}
+
+QToolButton:pressed {
+    background-color: #535353;
+    color: #FFFFFF;
 }</string>
                       </property>
                       <property name="text">
@@ -1045,6 +1165,31 @@ QToolButton:pressed {
                       <property name="icon">
                        <iconset resource="resources.qrc">
                         <normaloff>:/icon/twitter.svg</normaloff>:/icon/twitter.svg</iconset>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QToolButton" name="toolButton">
+                      <property name="styleSheet">
+                       <string notr="true">QToolButton {
+	border-top-left-radius: 0px;
+	border-bottom-left-radius: 0px;
+	background: none;
+	border: 1px solid #3b3b3b;
+	border-left: none;
+}
+
+QToolButton:pressed {
+    background-color: #535353;
+    color: #FFFFFF;
+}</string>
+                      </property>
+                      <property name="text">
+                       <string>...</string>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="resources.qrc">
+                        <normaloff>:/icon/currency-dollar.svg</normaloff>:/icon/currency-dollar.svg</iconset>
                       </property>
                      </widget>
                     </item>
@@ -1061,8 +1206,7 @@ QToolButton:pressed {
                       </property>
                       <property name="styleSheet">
                        <string notr="true">QToolButton {
-	border-top-left-radius: 0px;
-	border-bottom-left-radius: 0px;
+	background: none;
 }</string>
                       </property>
                       <property name="text">
@@ -1077,7 +1221,7 @@ QToolButton:pressed {
                   <widget class="QWidget" name="horizontalWidget" native="true">
                    <layout class="QHBoxLayout" name="horizontalLayout_6">
                     <property name="spacing">
-                     <number>1</number>
+                     <number>0</number>
                     </property>
                     <property name="leftMargin">
                      <number>0</number>
@@ -1104,8 +1248,7 @@ QToolButton:pressed {
                       </property>
                       <property name="styleSheet">
                        <string notr="true">QToolButton {
-	border-top-right-radius: 0px;
-	border-bottom-right-radius: 0px;
+	background: none;
 }</string>
                       </property>
                       <property name="text">
@@ -1124,7 +1267,15 @@ QToolButton:pressed {
                      <widget class="QToolButton" name="leminGitHubBtn">
                       <property name="styleSheet">
                        <string notr="true">QToolButton {
-	border-radius: 0px;
+	border-top-right-radius: 0px;
+	border-bottom-right-radius: 0px;
+	background: none;
+	border: 1px solid #3b3b3b;
+}
+
+QToolButton:pressed {
+    background-color: #535353;
+    color: #FFFFFF;
 }</string>
                       </property>
                       <property name="text">
@@ -1141,6 +1292,14 @@ QToolButton:pressed {
                       <property name="styleSheet">
                        <string notr="true">QToolButton {
 	border-radius: 0px;
+	background: none;
+	border: 1px solid #3b3b3b;
+	border-left: none;
+}
+
+QToolButton:pressed {
+    background-color: #535353;
+    color: #FFFFFF;
 }</string>
                       </property>
                       <property name="text">
@@ -1149,6 +1308,31 @@ QToolButton:pressed {
                       <property name="icon">
                        <iconset resource="resources.qrc">
                         <normaloff>:/icon/twitter.svg</normaloff>:/icon/twitter.svg</iconset>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QToolButton" name="toolButton_2">
+                      <property name="styleSheet">
+                       <string notr="true">QToolButton {
+	border-top-left-radius: 0px;
+	border-bottom-left-radius: 0px;
+	background: none;
+	border: 1px solid #3b3b3b;
+	border-left: none;
+}
+
+QToolButton:pressed {
+    background-color: #535353;
+    color: #FFFFFF;
+}</string>
+                      </property>
+                      <property name="text">
+                       <string>...</string>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="resources.qrc">
+                        <normaloff>:/icon/currency-dollar.svg</normaloff>:/icon/currency-dollar.svg</iconset>
                       </property>
                      </widget>
                     </item>
@@ -1165,8 +1349,7 @@ QToolButton:pressed {
                       </property>
                       <property name="styleSheet">
                        <string notr="true">QToolButton {
-	border-top-left-radius: 0px;
-	border-bottom-left-radius: 0px;
+	background: none;
 }</string>
                       </property>
                       <property name="text">
@@ -1181,7 +1364,7 @@ QToolButton:pressed {
                   <widget class="QWidget" name="horizontalWidget" native="true">
                    <layout class="QHBoxLayout" name="horizontalLayout_24">
                     <property name="spacing">
-                     <number>1</number>
+                     <number>0</number>
                     </property>
                     <property name="leftMargin">
                      <number>0</number>
@@ -1208,12 +1391,11 @@ QToolButton:pressed {
                       </property>
                       <property name="styleSheet">
                        <string notr="true">QToolButton {
-	border-top-right-radius: 0px;
-	border-bottom-right-radius: 0px;
+	background: none;
 }</string>
                       </property>
                       <property name="text">
-                       <string>Additional Thanks:</string>
+                       <string>Additional Thanks</string>
                       </property>
                      </widget>
                     </item>
@@ -1227,7 +1409,15 @@ QToolButton:pressed {
                       </property>
                       <property name="styleSheet">
                        <string notr="true">QToolButton {
-	border-radius: 0px;
+	border-top-right-radius: 0px;
+	border-bottom-right-radius: 0px;
+	background: none;
+	border: 1px solid #3b3b3b;
+}
+
+QToolButton:pressed {
+    background-color: #535353;
+    color: #FFFFFF;
 }</string>
                       </property>
                       <property name="text">
@@ -1246,6 +1436,14 @@ QToolButton:pressed {
                       <property name="styleSheet">
                        <string notr="true">QToolButton {
 	border-radius: 0px;
+	background: none;
+	border: 1px solid #3b3b3b;
+	border-left: none;
+}
+
+QToolButton:pressed {
+    background-color: #535353;
+    color: #FFFFFF;
 }</string>
                       </property>
                       <property name="text">
@@ -1264,6 +1462,14 @@ QToolButton:pressed {
                       <property name="styleSheet">
                        <string notr="true">QToolButton {
 	border-radius: 0px;
+	background: none;
+	border: 1px solid #3b3b3b;
+	border-left: none;
+}
+
+QToolButton:pressed {
+    background-color: #535353;
+    color: #FFFFFF;
 }</string>
                       </property>
                       <property name="text">
@@ -1283,6 +1489,14 @@ QToolButton:pressed {
                        <string notr="true">QToolButton {
 	border-top-left-radius: 0px;
 	border-bottom-left-radius: 0px;
+	background: none;
+	border: 1px solid #3b3b3b;
+	border-left: none;
+}
+
+QToolButton:pressed {
+    background-color: #535353;
+    color: #FFFFFF;
 }</string>
                       </property>
                       <property name="text">
@@ -1297,39 +1511,14 @@ QToolButton:pressed {
                </widget>
               </item>
               <item>
-               <widget class="Line" name="line_5">
-                <property name="styleSheet">
-                 <string notr="true">QFrame {
-	color: #414141;
-}</string>
-                </property>
-                <property name="frameShadow">
-                 <enum>QFrame::Plain</enum>
-                </property>
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-               </widget>
-              </item>
-              <item>
                <widget class="QLabel" name="label">
                 <property name="text">
                  <string>Cowabunga Lite Windows - Version 0.1 Beta</string>
                 </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
                </widget>
-              </item>
-              <item>
-               <spacer name="verticalSpacer_4">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>20</width>
-                  <height>40</height>
-                 </size>
-                </property>
-               </spacer>
               </item>
              </layout>
             </widget>
@@ -1366,9 +1555,9 @@ QToolButton:pressed {
                   <number>9</number>
                  </property>
                  <item>
-                  <widget class="QToolButton" name="toolButton_13">
+                  <widget class="QToolButton" name="themesBtn">
                    <property name="enabled">
-                    <bool>false</bool>
+                    <bool>true</bool>
                    </property>
                    <property name="styleSheet">
                     <string notr="true">QToolButton {
@@ -1440,10 +1629,58 @@ QToolButton:pressed {
                   </spacer>
                  </item>
                  <item>
-                  <widget class="QToolButton" name="toolButton_16">
-                   <property name="text">
-                    <string>Import Theme</string>
-                   </property>
+                  <widget class="QWidget" name="horizontalWidget" native="true">
+                   <layout class="QHBoxLayout" name="horizontalLayout_26">
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QToolButton" name="importThemeBtn">
+                      <property name="enabled">
+                       <bool>false</bool>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">QToolButton {
+	background: none;
+}</string>
+                      </property>
+                      <property name="text">
+                       <string>Import Theme:</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QToolButton" name="importThemeFolderBtn">
+                      <property name="text">
+                       <string>...</string>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="resources.qrc">
+                        <normaloff>:/icon/folder.svg</normaloff>:/icon/folder.svg</iconset>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QToolButton" name="importThemeZipBtn">
+                      <property name="text">
+                       <string>...</string>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="resources.qrc">
+                        <normaloff>:/icon/file-earmark-zip.svg</normaloff>:/icon/file-earmark-zip.svg</iconset>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
                   </widget>
                  </item>
                 </layout>
@@ -1511,6 +1748,19 @@ QToolButton:pressed {
                   <widget class="QWidget" name="iconsCnt" native="true"/>
                  </item>
                  <item>
+                  <spacer name="verticalSpacer_9">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>20</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                 <item>
                   <widget class="QWidget" name="horizontalWidget" native="true">
                    <layout class="QHBoxLayout" name="horizontalLayout_16">
                     <property name="leftMargin">
@@ -1534,7 +1784,7 @@ QToolButton:pressed {
                        </sizepolicy>
                       </property>
                       <property name="text">
-                       <string>Hide All App Names</string>
+                       <string>Hide/Show All App Names</string>
                       </property>
                      </widget>
                     </item>
@@ -1547,7 +1797,7 @@ QToolButton:pressed {
                        </sizepolicy>
                       </property>
                       <property name="text">
-                       <string>Select All &quot;Border&quot;</string>
+                       <string>Toggle All &quot;Border&quot;</string>
                       </property>
                      </widget>
                     </item>
@@ -1560,25 +1810,12 @@ QToolButton:pressed {
                        </sizepolicy>
                       </property>
                       <property name="text">
-                       <string>Select All &quot;Add/Update&quot;</string>
+                       <string>Toggle All &quot;Add to Device&quot;</string>
                       </property>
                      </widget>
                     </item>
                    </layout>
                   </widget>
-                 </item>
-                 <item>
-                  <spacer name="verticalSpacer_9">
-                   <property name="orientation">
-                    <enum>Qt::Vertical</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>20</width>
-                     <height>40</height>
-                    </size>
-                   </property>
-                  </spacer>
                  </item>
                 </layout>
                </widget>
@@ -1722,20 +1959,20 @@ QToolButton:pressed {
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>450</width>
-                   <height>1250</height>
+                   <width>650</width>
+                   <height>1200</height>
                   </rect>
                  </property>
                  <property name="minimumSize">
                   <size>
-                   <width>450</width>
-                   <height>1250</height>
+                   <width>650</width>
+                   <height>1200</height>
                   </size>
                  </property>
                  <property name="maximumSize">
                   <size>
-                   <width>450</width>
-                   <height>1250</height>
+                   <width>650</width>
+                   <height>1200</height>
                   </size>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -1873,6 +2110,137 @@ QToolButton:pressed {
                        <property name="text">
                         <string>Change Data Network Type</string>
                        </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QComboBox" name="pTypeDrp">
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>150</width>
+                         <height>16777215</height>
+                        </size>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">QComboBox {
+	background-color: #3b3b3b;
+    border: none;
+    color: #e8e8e8;
+    font-size: 14px;
+	padding-left: 8px;
+	border-radius: 8px;
+}
+
+QComboBox::drop-down {
+    image: url(:/icon/caret-down-fill.svg);
+	icon-size: 16px;
+    subcontrol-position: right center;
+	margin-right: 8px;
+}
+
+QComboBox QAbstractItemView {
+	background-color: #3b3b3b;
+    outline: none;
+	margin-top: 1px;
+}
+
+QComboBox QAbstractItemView::item {
+	background-color: #3b3b3b;
+	color: #e8e8e8;
+    padding-left: 8px;
+}
+
+QComboBox QAbstractItemView::item:hover {
+    background-color: #535353;
+    color: #ffffff;
+}</string>
+                       </property>
+                       <property name="currentIndex">
+                        <number>0</number>
+                       </property>
+                       <property name="maxVisibleItems">
+                        <number>15</number>
+                       </property>
+                       <item>
+                        <property name="text">
+                         <string>GPRS</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>EDGE</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>3G</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>4G</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>LTE</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Wi-Fi</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Personal Hotspot</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>1x</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>5Gᴇ</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>LTE-A</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>LTE+</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>5G</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>5G+</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>5GUW</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>5GUC</string>
+                        </property>
+                       </item>
                       </widget>
                      </item>
                      <item>
@@ -2048,6 +2416,134 @@ QToolButton:pressed {
                        <property name="text">
                         <string>Change Data Network Type</string>
                        </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QComboBox" name="sTypeDrp">
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>150</width>
+                         <height>16777215</height>
+                        </size>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">QComboBox {
+	background-color: #3b3b3b;
+    border: none;
+    color: #e8e8e8;
+    font-size: 14px;
+	padding-left: 8px;
+	border-radius: 8px;
+}
+
+QComboBox::drop-down {
+    image: url(:/icon/caret-down-fill.svg);
+	icon-size: 16px;
+    subcontrol-position: right center;
+	margin-right: 8px;
+}
+
+QComboBox QAbstractItemView {
+	background-color: #3b3b3b;
+    outline: none;
+	margin-top: 1px;
+}
+
+QComboBox QAbstractItemView::item {
+	background-color: #3b3b3b;
+	color: #e8e8e8;
+    padding-left: 8px;
+}
+
+QComboBox QAbstractItemView::item:hover {
+    background-color: #535353;
+    color: #ffffff;
+}</string>
+                       </property>
+                       <property name="maxVisibleItems">
+                        <number>15</number>
+                       </property>
+                       <item>
+                        <property name="text">
+                         <string>GPRS</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>EDGE</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>3G</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>4G</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>LTE</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Wi-Fi</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Personal Hotspot</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>1x</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>5Gᴇ</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>LTE-A</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>LTE+</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>5G</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>5G+</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>5GUW</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>5GUC</string>
+                        </property>
+                       </item>
                       </widget>
                      </item>
                      <item>
@@ -2718,7 +3214,7 @@ QToolButton:pressed {
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>450</width>
+                  <width>650</width>
                   <height>16777215</height>
                  </size>
                 </property>
@@ -3304,96 +3800,135 @@ QToolButton:pressed {
                <number>0</number>
               </property>
               <item>
-               <layout class="QVBoxLayout" name="verticalLayout_24">
-                <item>
-                 <spacer name="verticalSpacer_10">
-                  <property name="orientation">
-                   <enum>Qt::Vertical</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                   <size>
-                    <width>20</width>
-                    <height>40</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-                <item>
-                 <widget class="QLabel" name="label_6">
-                  <property name="text">
-                   <string>Enabled Tweaks:</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="enabledTweaksLbl">
-                  <property name="text">
-                   <string>None</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QWidget" name="horizontalWidget" native="true">
-                  <layout class="QHBoxLayout" name="horizontalLayout_17">
-                   <property name="leftMargin">
-                    <number>0</number>
+               <widget class="QWidget" name="verticalWidget" native="true">
+                <layout class="QVBoxLayout" name="verticalLayout_24">
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <spacer name="verticalSpacer_10">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
                    </property>
-                   <property name="topMargin">
-                    <number>20</number>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>20</width>
+                     <height>40</height>
+                    </size>
                    </property>
-                   <property name="rightMargin">
-                    <number>0</number>
+                  </spacer>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="label_6">
+                   <property name="text">
+                    <string>Enabled Tweaks:</string>
                    </property>
-                   <property name="bottomMargin">
-                    <number>0</number>
+                   <property name="alignment">
+                    <set>Qt::AlignCenter</set>
                    </property>
-                   <item>
-                    <widget class="QToolButton" name="applyTweaksBtn">
-                     <property name="text">
-                      <string>  Apply Tweaks</string>
-                     </property>
-                     <property name="icon">
-                      <iconset resource="resources.qrc">
-                       <normaloff>:/icon/check-circle.svg</normaloff>:/icon/check-circle.svg</iconset>
-                     </property>
-                     <property name="toolButtonStyle">
-                      <enum>Qt::ToolButtonTextBesideIcon</enum>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="statusLbl">
-                  <property name="text">
-                   <string>Ready!</string>
-                  </property>
-                  <property name="alignment">
-                   <set>Qt::AlignCenter</set>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <spacer name="verticalSpacer_2">
-                  <property name="orientation">
-                   <enum>Qt::Vertical</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                   <size>
-                    <width>20</width>
-                    <height>40</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-               </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="enabledTweaksLbl">
+                   <property name="text">
+                    <string>None</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QWidget" name="horizontalWidget" native="true">
+                   <layout class="QHBoxLayout" name="horizontalLayout_17">
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>20</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QToolButton" name="applyTweaksBtn">
+                      <property name="text">
+                       <string>  Apply Tweaks</string>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="resources.qrc">
+                        <normaloff>:/icon/check-circle.svg</normaloff>:/icon/check-circle.svg</iconset>
+                      </property>
+                      <property name="toolButtonStyle">
+                       <enum>Qt::ToolButtonTextBesideIcon</enum>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="statusLbl">
+                   <property name="text">
+                    <string>Ready!</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="verticalSpacer_2">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>20</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                 <item>
+                  <widget class="QWidget" name="horizontalWidget" native="true">
+                   <layout class="QHBoxLayout" name="horizontalLayout_25">
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QToolButton" name="removeTweaksBtn">
+                      <property name="text">
+                       <string>Remove All Tweaks</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
               </item>
              </layout>
             </widget>

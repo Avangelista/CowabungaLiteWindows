@@ -2,6 +2,7 @@
 #include "./ui_mainwindow.h"
 #include "DeviceManager.h"
 #include "qdir.h"
+#include "qmessagebox.h"
 #include "qstandardpaths.h"
 #include "statusmanager/StatusManager.h"
 #include "plistmanager.h"
@@ -39,7 +40,7 @@ void MainWindow::updateInterfaceForNewDevice()
 
     if (DeviceManager::getInstance().isDeviceAvailable())
     {
-        MainWindow::loadThemes();
+        MainWindow::loadThemesPage();
         MainWindow::loadStatusBar();
         MainWindow::loadSpringboardOptions();
         MainWindow::loadInternalOptions();
@@ -259,32 +260,73 @@ void MainWindow::on_themesEnabledChk_toggled(bool checked)
 
 void MainWindow::on_addAllBtn_clicked() {
     auto state = DeviceManager::getInstance().addAllIcons();
-    if (state) {
-        ui->addAllBtn->setText("Deselect All \"Add/Update\"");
-    } else {
-        ui->addAllBtn->setText("Select All \"Add/Update\"");
-    }
     MainWindow::loadIcons();
 }
 
 void MainWindow::on_hideNamesBtn_clicked() {
     auto state = DeviceManager::getInstance().hideAllNames();
-    if (state) {
-        ui->hideNamesBtn->setText("Show All App Names");
-    } else {
-        ui->hideNamesBtn->setText("Hide All App Names");
-    }
     MainWindow::loadIcons();
 }
 
 void MainWindow::on_borderAllBtn_clicked() {
     auto state = DeviceManager::getInstance().borderAllIcons();
-    if (state) {
-        ui->borderAllBtn->setText("Deselect All \"Border\"");
-    } else {
-        ui->borderAllBtn->setText("Select All \"Border\"");
-    }
     MainWindow::loadIcons();
+}
+
+void MainWindow::on_themesBtn_clicked() {
+    themesEasterEgg = !themesEasterEgg;
+    MainWindow::loadIcons();
+}
+
+void MainWindow::on_importThemeFolderBtn_clicked() {
+    QString selectedFile = QFileDialog::getExistingDirectory(nullptr, "Select Folder", "", QFileDialog::ShowDirsOnly);
+
+    if (!selectedFile.isEmpty()) {
+        QFileInfo fileInfo(selectedFile);
+        QString folderName = fileInfo.fileName();
+
+        auto themeDirectoryPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/Themes/" + folderName;
+        auto themeDirectory = QDir(themeDirectoryPath);
+
+        if (themeDirectory.exists())
+        {
+            themeDirectory.removeRecursively();
+        } else {
+            if (!themeDirectory.mkpath("."))
+            {
+                qDebug() << "Failed to create the directory: " << themeDirectory;
+            }
+            if (Utils::copyDirectory(selectedFile, themeDirectoryPath)) {
+                MainWindow::loadThemes();
+            } else {
+                qDebug() << "Couldn't copy folder " << selectedFile;
+            }
+        }
+    }
+}
+
+void MainWindow::on_importThemeZipBtn_clicked() {
+    QString selectedFile = QFileDialog::getOpenFileName(nullptr, "Select Zip File", "", "Zip Files (*.zip)", nullptr, QFileDialog::ReadOnly);
+
+    if (!selectedFile.isEmpty()) {
+        QFileInfo fileInfo(selectedFile);
+        QRegularExpression regex("(\\.zip$)", QRegularExpression::CaseInsensitiveOption);
+        QString zipName = fileInfo.fileName().replace(regex, "");
+
+        auto themeDirectoryPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/Themes/" + zipName;
+        auto themeDirectory = QDir(themeDirectoryPath);
+
+        if (themeDirectory.exists()) {
+            themeDirectory.removeRecursively();
+        } else {
+            if (!themeDirectory.mkpath(".")) {
+                qDebug() << "Failed to create the directory: " << themeDirectory;
+            } else {
+                Utils::unzip(selectedFile, themeDirectoryPath);
+                MainWindow::loadThemes();
+            }
+        }
+    }
 }
 
 void applyMaskToImage(QImage& image)
@@ -305,7 +347,7 @@ void applyMaskToImage(QImage& image)
 
 
 // Helper function to create rounded pixmap
-QPixmap MainWindow::createRoundedPixmap(const QPixmap& pixmap, double roundnessPercentage)
+QPixmap createRoundedPixmap(const QPixmap& pixmap, double roundnessPercentage)
 {
     QPixmap roundedPixmap(pixmap.size());
     roundedPixmap.fill(Qt::transparent);
@@ -324,6 +366,11 @@ QPixmap MainWindow::createRoundedPixmap(const QPixmap& pixmap, double roundnessP
     painter.drawPixmap(0, 0, pixmap);
 
     return roundedPixmap;
+}
+
+void MainWindow::loadThemesPage() {
+    loadThemes();
+    loadIcons();
 }
 
 void MainWindow::loadIcons() {
@@ -366,7 +413,7 @@ void MainWindow::loadIcons() {
     // Create a QWidget to hold the innerLayout
     QWidget* scrollContentWidget = new QWidget();
     QVBoxLayout* innerLayout = new QVBoxLayout(scrollContentWidget);
-    innerLayout->setContentsMargins(0, 0, 0, 0);
+    innerLayout->setContentsMargins(0, 0, 20, 0);
 
     for (auto bundle : DeviceManager::getInstance().getAppBundles()) {
         auto name = DeviceManager::getInstance().getAppName(bundle);
@@ -378,7 +425,7 @@ void MainWindow::loadIcons() {
         auto border = DeviceManager::getInstance().getBorder(bundle);
 
         QCheckBox* borderCheckBox = new QCheckBox("Border", ui->iconsCnt);
-        QCheckBox* addToDeviceCheckBox = new QCheckBox("Add/Update", ui->iconsCnt);
+        QCheckBox* addToDeviceCheckBox = new QCheckBox("Add to Device", ui->iconsCnt);
         QLineEdit* nameLineEdit = new QLineEdit(ui->iconsCnt);
         QToolButton* iconButton = new QToolButton(ui->iconsCnt);
 
@@ -519,6 +566,12 @@ void MainWindow::loadIcons() {
         iconLayout->addWidget(borderCheckBox);
         iconLayout->addWidget(addToDeviceCheckBox);
 
+        if (themesEasterEgg) {
+            borderCheckBox->show();
+        } else {
+            borderCheckBox->hide();
+        }
+
         // Add the icon layout to the inner vertical layout
         innerLayout->addLayout(iconLayout);
     }
@@ -534,6 +587,13 @@ void MainWindow::loadIcons() {
 
     // Set the outer layout on the ui->iconsCnt container
     ui->iconsCnt->setLayout(outerLayout);
+
+    if (themesEasterEgg) {
+        ui->borderAllBtn->show();
+    } else {
+        ui->borderAllBtn->hide();
+    }
+
 }
 
 void MainWindow::loadThemes()
@@ -627,12 +687,24 @@ void MainWindow::loadThemes()
         name->setAlignment(Qt::AlignCenter);
 
         // Create a QPushButton
-        QToolButton* button = new QToolButton(widget);
-        button->setText("Apply");
-        button->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-        connect(button, &QToolButton::clicked, [this, directory]() {
+        QToolButton* applyButton = new QToolButton(widget);
+        applyButton->setText("Apply");
+        applyButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        connect(applyButton, &QToolButton::clicked, [this, directory]() {
             DeviceManager::getInstance().applyTheme(directory);
             MainWindow::loadIcons();
+        });
+
+        // Create a QPushButton for "Delete"
+        QToolButton* deleteButton = new QToolButton(widget);
+        deleteButton->setIcon(QIcon(":/icon/trash.svg")); // Set the trash.svg resource icon
+        connect(deleteButton, &QToolButton::clicked, [this, directory]() {
+            QDir(directory).removeRecursively();
+            MainWindow::loadThemes();
+            // Implement your logic here to delete the theme or handle the deletion process.
+            // For example:
+            // QDir(directory).removeRecursively(); // Remove the entire theme directory and its contents
+            // After deletion, you may need to reload the themes or perform other necessary actions.
         });
 
         // Create a QHBoxLayout to arrange the icon buttons horizontally
@@ -643,12 +715,17 @@ void MainWindow::loadThemes()
         iconLayout->addWidget(cameraButton);
         iconContainer->setLayout(iconLayout); // Set iconLayout as the layout for iconContainer
 
-        // Create a QVBoxLayout for the widget and add the iconContainer and button to it
+        // Create a QHBoxLayout to arrange the buttons horizontally
+        QHBoxLayout* buttonLayout = new QHBoxLayout();
+        buttonLayout->addWidget(applyButton);
+        buttonLayout->addWidget(deleteButton);
+
+        // Create a QVBoxLayout for the widget and add the iconContainer, buttons, and name to it
         QVBoxLayout* layout = new QVBoxLayout(widget);
         layout->setContentsMargins(0, 0, 0, 9);
         layout->addWidget(iconContainer); // Add iconContainer to the main layout
         layout->addWidget(name);
-        layout->addWidget(button);
+        layout->addLayout(buttonLayout); // Add the buttons horizontally
         widget->setLayout(layout);
 
         // Add the widget to the mainLayout (inside QScrollArea)
@@ -678,12 +755,6 @@ void MainWindow::loadThemes()
     scrollLayout->addWidget(scrollArea);
     ui->themesCnt->setFixedHeight(150);
     ui->themesCnt->setLayout(scrollLayout);
-
-    MainWindow::loadIcons();
-
-    ui->addAllBtn->setText("Select All \"Add/Update\"");
-    ui->hideNamesBtn->setText("Hide All App Names");
-    ui->borderAllBtn->setText("Select All \"Border\"");
 }
 
 // Status Bar Page
@@ -706,7 +777,8 @@ void MainWindow::loadStatusBar()
     ui->pCarrierTxt->setText(QString::fromStdString(StatusManager::getInstance().getCarrierOverride()));
     ui->pBadgeChk->setChecked(StatusManager::getInstance().isPrimaryServiceBadgeOverridden());
     ui->pBadgeTxt->setText(QString::fromStdString(StatusManager::getInstance().getPrimaryServiceBadgeOverride()));
-    // data network type
+    ui->pTypeChk->setChecked(StatusManager::getInstance().isDataNetworkTypeOverridden());
+    ui->pTypeDrp->setCurrentIndex(StatusManager::getInstance().getDataNetworkTypeOverride());
     ui->pStrengthChk->setChecked(StatusManager::getInstance().isGSMSignalStrengthBarsOverridden());
     auto pos = StatusManager::getInstance().getGSMSignalStrengthBarsOverride();
     ui->pStrengthSld->setValue(pos);
@@ -726,7 +798,8 @@ void MainWindow::loadStatusBar()
     ui->sCarrierTxt->setText(QString::fromStdString(StatusManager::getInstance().getSecondaryCarrierOverride()));
     ui->sBadgeChk->setChecked(StatusManager::getInstance().isSecondaryServiceBadgeOverridden());
     ui->sBadgeTxt->setText(QString::fromStdString(StatusManager::getInstance().getSecondaryServiceBadgeOverride()));
-    // data network type
+    ui->sTypeChk->setChecked(StatusManager::getInstance().isSecondaryDataNetworkTypeOverridden());
+    ui->sTypeDrp->setCurrentIndex(StatusManager::getInstance().getSecondaryDataNetworkTypeOverride());
     ui->sStrengthChk->setChecked(StatusManager::getInstance().isSecondaryGSMSignalStrengthBarsOverridden());
     pos = StatusManager::getInstance().getSecondaryGSMSignalStrengthBarsOverride();
     ui->sStrengthSld->setValue(pos);
@@ -826,6 +899,24 @@ void MainWindow::on_pBadgeTxt_textEdited(const QString &text)
     }
 }
 
+void MainWindow::on_pTypeChk_clicked(bool checked) {
+    if (checked)
+    {
+        StatusManager::getInstance().setDataNetworkType(ui->pTypeDrp->currentIndex());
+    }
+    else
+    {
+        StatusManager::getInstance().unsetDataNetworkType();
+    }
+}
+
+void MainWindow::on_pTypeDrp_activated(int index) {
+    if (ui->pTypeChk->checkState())
+    {
+        StatusManager::getInstance().setDataNetworkType(index);
+    }
+}
+
 void MainWindow::on_pStrengthChk_clicked(bool checked)
 {
     if (checked)
@@ -899,6 +990,24 @@ void MainWindow::on_sBadgeTxt_textEdited(const QString &text)
     if (ui->sBadgeChk->checkState())
     {
         StatusManager::getInstance().setSecondaryServiceBadge(ui->sBadgeTxt->text().toStdString());
+    }
+}
+
+void MainWindow::on_sTypeChk_clicked(bool checked) {
+    if (checked)
+    {
+        StatusManager::getInstance().setSecondaryDataNetworkType(ui->sTypeDrp->currentIndex());
+    }
+    else
+    {
+        StatusManager::getInstance().unsetSecondaryDataNetworkType();
+    }
+}
+
+void MainWindow::on_sTypeDrp_activated(int index) {
+    if (ui->sTypeChk->checkState())
+    {
+        StatusManager::getInstance().setSecondaryDataNetworkType(index);
     }
 }
 
@@ -1095,7 +1204,7 @@ void MainWindow::on_hideVPNChk_clicked(bool checked)
 void MainWindow::loadSpringboardOptions()
 {
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
-    auto location = *workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.UIKit.plist";
+    auto location = QString::fromStdString(*workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.UIKit.plist");
     auto value = PlistManager::getPlistValue(location, "UIAnimationDragCoefficient");
     if (value)
     {
@@ -1109,7 +1218,7 @@ void MainWindow::loadSpringboardOptions()
         ui->UIAnimSpeedLbl->setText("1 (Default)");
         ui->UIAnimSpeedSld->setValue(100);
     }
-    location = *workspace + "/SpringboardOptions/ConfigProfileDomain/Library/ConfigurationProfiles/SharedDeviceConfiguration.plist";
+    location = QString::fromStdString(*workspace + "/SpringboardOptions/ConfigProfileDomain/Library/ConfigurationProfiles/SharedDeviceConfiguration.plist");
     value = PlistManager::getPlistValue(location, "LockScreenFootnote");
     if (value)
     {
@@ -1119,7 +1228,7 @@ void MainWindow::loadSpringboardOptions()
     {
         ui->footnoteTxt->setText("");
     }
-    location = *workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.springboard.plist";
+    location = QString::fromStdString(*workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.springboard.plist");
     value = PlistManager::getPlistValue(location, "SBDontLockAfterCrash");
     if (value)
     {
@@ -1160,7 +1269,7 @@ void MainWindow::loadSpringboardOptions()
     {
         ui->enableLSCCChk->setChecked(false);
     }
-    location = *workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.Accessibility.plist";
+    location = QString::fromStdString(*workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.Accessibility.plist");
     value = PlistManager::getPlistValue(location, "StartupSoundEnabled");
     if (value)
     {
@@ -1171,7 +1280,7 @@ void MainWindow::loadSpringboardOptions()
     {
         ui->enableShutdownSoundChk->setChecked(false);
     }
-    location = *workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.sharingd.plist";
+    location = QString::fromStdString(*workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.sharingd.plist");
     value = PlistManager::getPlistValue(location, "DiscoverableMode");
     if (value)
     {
@@ -1196,7 +1305,7 @@ void MainWindow::on_footnoteTxt_textEdited(const QString &text)
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
-    auto location = *workspace + "/SpringboardOptions/ConfigProfileDomain/Library/ConfigurationProfiles/SharedDeviceConfiguration.plist";
+    auto location = QString::fromStdString(*workspace + "/SpringboardOptions/ConfigProfileDomain/Library/ConfigurationProfiles/SharedDeviceConfiguration.plist");
     if (!text.isEmpty())
     {
         auto node = PList::String(text.toStdString());
@@ -1216,7 +1325,7 @@ void MainWindow::on_UIAnimSpeedSld_sliderMoved(int pos)
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
-    auto location = *workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.UIKit.plist";
+    auto location = QString::fromStdString(*workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.UIKit.plist");
     if (speed != 1)
     {
         auto node = PList::Real(speed);
@@ -1233,7 +1342,7 @@ void MainWindow::on_disableLockRespringChk_clicked(bool checked)
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
-    auto location = *workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.springboard.plist";
+    auto location = QString::fromStdString(*workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.springboard.plist");
     if (checked)
     {
         auto node = PList::Boolean(checked);
@@ -1250,7 +1359,7 @@ void MainWindow::on_disableDimmingChk_clicked(bool checked)
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
-    auto location = *workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.springboard.plist";
+    auto location = QString::fromStdString(*workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.springboard.plist");
     if (checked)
     {
         auto node = PList::Boolean(checked);
@@ -1267,7 +1376,7 @@ void MainWindow::on_disableBatteryAlertsChk_clicked(bool checked)
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
-    auto location = *workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.springboard.plist";
+    auto location = QString::fromStdString(*workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.springboard.plist");
     if (checked)
     {
         auto node = PList::Boolean(checked);
@@ -1284,7 +1393,7 @@ void MainWindow::on_enableLSCCChk_clicked(bool checked)
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
-    auto location = *workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.springboard.plist";
+    auto location = QString::fromStdString(*workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.springboard.plist");
     if (checked)
     {
         auto node = PList::Boolean(checked);
@@ -1301,7 +1410,7 @@ void MainWindow::on_enableShutdownSoundChk_clicked(bool checked)
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
-    auto location = *workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.Accessibility.plist";
+    auto location = QString::fromStdString(*workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.Accessibility.plist");
     if (checked)
     {
         auto node = PList::Boolean(checked);
@@ -1318,7 +1427,7 @@ void MainWindow::on_allowAirDropEveryoneChk_clicked(bool checked)
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
-    auto location = *workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.sharingd.plist";
+    auto location = QString::fromStdString(*workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.sharingd.plist");
     if (checked)
     {
         auto node = PList::String("Everyone");
@@ -1335,7 +1444,7 @@ void MainWindow::on_allowAirDropEveryoneChk_clicked(bool checked)
 void MainWindow::loadSetupOptions()
 {
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
-    auto location = *workspace + "/SkipSetup/ConfigProfileDomain/Library/ConfigurationProfiles/CloudConfigurationDetails.plist";
+    auto location = QString::fromStdString(*workspace + "/SkipSetup/ConfigProfileDomain/Library/ConfigurationProfiles/CloudConfigurationDetails.plist");
     auto value = PlistManager::getPlistValue(location, "CloudConfigurationUIComplete");
     if (value)
     {
@@ -1365,7 +1474,7 @@ void MainWindow::loadSetupOptions()
     {
         ui->organizationNameTxt->setText("");
     }
-    location = *workspace + "/SkipSetup/ManagedPreferencesDomain/mobile/com.apple.MobileAsset.plist";
+    location = QString::fromStdString(*workspace + "/SkipSetup/ManagedPreferencesDomain/mobile/com.apple.MobileAsset.plist");
     value = PlistManager::getPlistValue(location, "MobileAssetAssetAudience");
     if (value)
     {
@@ -1389,7 +1498,7 @@ void MainWindow::on_skipSetupChk_clicked(bool checked)
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
-    auto location = *workspace + "/SkipSetup/ConfigProfileDomain/Library/ConfigurationProfiles/CloudConfigurationDetails.plist";
+    auto location = QString::fromStdString(*workspace + "/SkipSetup/ConfigProfileDomain/Library/ConfigurationProfiles/CloudConfigurationDetails.plist");
     if (checked)
     {
         auto node1 = PList::Boolean(checked);
@@ -1434,7 +1543,7 @@ void MainWindow::on_disableUpdatesChk_clicked(bool checked)
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
-    auto location = *workspace + "/SkipSetup/ManagedPreferencesDomain/mobile/com.apple.MobileAsset.plist";
+    auto location = QString::fromStdString(*workspace + "/SkipSetup/ManagedPreferencesDomain/mobile/com.apple.MobileAsset.plist");
     if (checked)
     {
         auto node = PList::String("");
@@ -1457,7 +1566,7 @@ void MainWindow::on_enableSupervisionChk_clicked(bool checked)
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
-    auto location = *workspace + "/SkipSetup/ConfigProfileDomain/Library/ConfigurationProfiles/CloudConfigurationDetails.plist";
+    auto location = QString::fromStdString(*workspace + "/SkipSetup/ConfigProfileDomain/Library/ConfigurationProfiles/CloudConfigurationDetails.plist");
     if (checked)
     {
         auto node = PList::Boolean(checked);
@@ -1474,7 +1583,7 @@ void MainWindow::on_organizationNameTxt_textEdited(const QString &text)
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
-    auto location = *workspace + "/SkipSetup/ConfigProfileDomain/Library/ConfigurationProfiles/CloudConfigurationDetails.plist";
+    auto location = QString::fromStdString(*workspace + "/SkipSetup/ConfigProfileDomain/Library/ConfigurationProfiles/CloudConfigurationDetails.plist");
     if (!text.isEmpty())
     {
         auto node = PList::String(text.toStdString());
@@ -1491,7 +1600,7 @@ void MainWindow::on_organizationNameTxt_textEdited(const QString &text)
 void MainWindow::loadInternalOptions()
 {
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
-    auto location = *workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/hiddendotGlobalPreferences.plist";
+    auto location = QString::fromStdString(*workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/hiddendotGlobalPreferences.plist");
     auto value = PlistManager::getPlistValue(location, "UIStatusBarShowBuildVersion");
     if (value)
     {
@@ -1562,7 +1671,7 @@ void MainWindow::loadInternalOptions()
     {
         ui->VCChk->setChecked(false);
     }
-    location = *workspace + "/InternalOptions/HomeDomain/Library/Preferences/com.apple.AppStore.plist";
+    location = QString::fromStdString(*workspace + "/InternalOptions/HomeDomain/Library/Preferences/com.apple.AppStore.plist");
     value = PlistManager::getPlistValue(location, "debugGestureEnabled");
     if (value)
     {
@@ -1573,7 +1682,7 @@ void MainWindow::loadInternalOptions()
     {
         ui->appStoreChk->setChecked(false);
     }
-    location = *workspace + "/InternalOptions/HomeDomain/Library/Preferences/com.apple.mobilenotes.plist";
+    location = QString::fromStdString(*workspace + "/InternalOptions/HomeDomain/Library/Preferences/com.apple.mobilenotes.plist");
     value = PlistManager::getPlistValue(location, "DebugModeEnabled");
     if (value)
     {
@@ -1598,7 +1707,7 @@ void MainWindow::on_buildVersionChk_toggled(bool checked)
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
-    auto location = *workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/hiddendotGlobalPreferences.plist";
+    auto location = QString::fromStdString(*workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/hiddendotGlobalPreferences.plist");
     if (checked)
     {
         auto node = PList::Boolean(checked);
@@ -1615,7 +1724,7 @@ void MainWindow::on_RTLChk_toggled(bool checked)
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
-    auto location = *workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/hiddendotGlobalPreferences.plist";
+    auto location = QString::fromStdString(*workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/hiddendotGlobalPreferences.plist");
     if (checked)
     {
         auto node = PList::Boolean(checked);
@@ -1632,7 +1741,7 @@ void MainWindow::on_metalHUDChk_toggled(bool checked)
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
-    auto location = *workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/hiddendotGlobalPreferences.plist";
+    auto location = QString::fromStdString(*workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/hiddendotGlobalPreferences.plist");
     if (checked)
     {
         auto node = PList::Boolean(checked);
@@ -1649,7 +1758,7 @@ void MainWindow::on_accessoryChk_toggled(bool checked)
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
-    auto location = *workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/hiddendotGlobalPreferences.plist";
+    auto location = QString::fromStdString(*workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/hiddendotGlobalPreferences.plist");
     if (checked)
     {
         auto node = PList::Boolean(checked);
@@ -1666,7 +1775,7 @@ void MainWindow::on_iMessageChk_toggled(bool checked)
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
-    auto location = *workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/hiddendotGlobalPreferences.plist";
+    auto location = QString::fromStdString(*workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/hiddendotGlobalPreferences.plist");
     if (checked)
     {
         auto node = PList::Boolean(checked);
@@ -1683,7 +1792,7 @@ void MainWindow::on_IDSChk_toggled(bool checked)
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
-    auto location = *workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/hiddendotGlobalPreferences.plist";
+    auto location = QString::fromStdString(*workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/hiddendotGlobalPreferences.plist");
     if (checked)
     {
         auto node = PList::Boolean(checked);
@@ -1700,7 +1809,7 @@ void MainWindow::on_VCChk_toggled(bool checked)
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
-    auto location = *workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/hiddendotGlobalPreferences.plist";
+    auto location = QString::fromStdString(*workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/hiddendotGlobalPreferences.plist");
     if (checked)
     {
         auto node = PList::Boolean(checked);
@@ -1717,7 +1826,7 @@ void MainWindow::on_appStoreChk_toggled(bool checked)
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
-    auto location = *workspace + "/InternalOptions/HomeDomain/Library/Preferences/com.apple.AppStore.plist";
+    auto location = QString::fromStdString(*workspace + "/InternalOptions/HomeDomain/Library/Preferences/com.apple.AppStore.plist");
     if (checked)
     {
         auto node = PList::Boolean(checked);
@@ -1734,7 +1843,7 @@ void MainWindow::on_notesChk_toggled(bool checked)
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
-    auto location = *workspace + "/InternalOptions/HomeDomain/Library/Preferences/com.apple.mobilenotes.plist";
+    auto location = QString::fromStdString(*workspace + "/InternalOptions/HomeDomain/Library/Preferences/com.apple.mobilenotes.plist");
     if (checked)
     {
         auto node = PList::Boolean(checked);
@@ -1782,6 +1891,14 @@ void MainWindow::updateEnabledTweaks()
 void MainWindow::on_applyTweaksBtn_clicked()
 {
     DeviceManager::getInstance().applyTweaks(ui->statusLbl);
+}
+
+void MainWindow::on_removeTweaksBtn_clicked() {
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(nullptr, "Sure?", "This will remove all tweaks previously added with Cowabunga Lite (except themed app icons, you'll need to remove them manually).\n\nAre you sure?", QMessageBox::Yes | QMessageBox::No);
+    if (reply == QMessageBox::Yes) {
+        DeviceManager::getInstance().removeTweaks(ui->statusLbl);
+    }
 }
 
 // Window

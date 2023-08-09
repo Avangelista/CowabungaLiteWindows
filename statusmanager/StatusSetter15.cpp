@@ -556,17 +556,14 @@ int StatusSetter15::getSecondaryDataNetworkTypeOverride()
 void StatusSetter15::setSecondaryDataNetworkType(int id)
 {
     StatusBarOverrideData *overrides = getOverrides();
-    overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::SecondaryCellularDataNetworkStatusBarItem)] = 1;
-    overrides->values.itemIsEnabled[static_cast<int>(StatusBarItem::SecondaryCellularDataNetworkStatusBarItem)] = 1;
-    overrides->overrideDataNetworkType = 1;
-    overrides->values.dataNetworkType = id;
+    overrides->overrideSecondaryDataNetworkType = 1;
+    overrides->values.secondaryDataNetworkType = id;
     applyChanges(overrides);
 }
 
 void StatusSetter15::unsetSecondaryDataNetworkType()
 {
     StatusBarOverrideData *overrides = getOverrides();
-    overrides->overrideItemIsEnabled[static_cast<int>(StatusBarItem::SecondaryCellularDataNetworkStatusBarItem)] = 0;
     overrides->overrideSecondaryDataNetworkType = 0;
     applyChanges(overrides);
 }
