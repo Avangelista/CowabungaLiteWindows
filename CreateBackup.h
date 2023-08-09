@@ -1,12 +1,12 @@
 #ifndef CREATEBACKUP_H
 #define CREATEBACKUP_H
 
-#include <string>
+#include <QString>
 
 class CreateBackup
 {
 public:
-    static bool createBackup(std::string, std::string);
+    static bool createBackup(const QString& indir, const QString& outdir);
 };
 
 

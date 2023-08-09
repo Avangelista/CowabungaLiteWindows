@@ -112,40 +112,36 @@ void copyFile(const QString &source, const QString &destination)
     destinationFile.write(sourceFile.readAll());
 }
 
-void processFiles(const std::string &path, const std::string &domainString, const std::string &outputDir)
+void processFiles(const QString &path, const QString &domainString, const QString &outputDir)
 {
-    QString qPath = QString::fromStdString(path);
-    QString qDomainString = QString::fromStdString(domainString);
-    QString qOutputDir = QString::fromStdString(outputDir);
-
-    QString fileString = QString::fromStdString(removeDomain(qDomainString.toStdString(), qPath.toStdString()))
+    QString fileString = QString::fromStdString(removeDomain(domainString.toStdString(), path.toStdString()))
                             .replace("hiddendot", ".")
                             .replace("\\", "/");
     
-    QFile output_file(qOutputDir + "/Manifest.mbdb");
+    QFile output_file(outputDir + "/Manifest.mbdb");
     if (!output_file.open(QIODevice::Append))
     {
         qDebug() << "Failed to open output file";
         return;
     }
 
-    if (qDomainString == "ConfigProfileDomain")
+    if (domainString == "ConfigProfileDomain")
     {
         writeStringWithLength(output_file, "SysSharedContainerDomain-systemgroup.com.apple.configurationprofiles");
     }
     else
     {
-        writeStringWithLength(output_file, qDomainString);
+        writeStringWithLength(output_file, domainString);
     }
     writeStringWithLength(output_file, fileString);
 
-    if (QFileInfo(qPath).isFile())
+    if (QFileInfo(path).isFile())
     {
         output_file.write("\xFF\xFF\x00\x14", 4);
-        writeHash(output_file, qPath);
+        writeHash(output_file, path);
         output_file.write("\xFF\xFF\x81\xFF\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\xF5\x00\x00\x01\xF5", 20);
         generateRandomHex(output_file);
-        QFileInfo fileInfo(qPath);
+        QFileInfo fileInfo(path);
         qint64 fileSize = fileInfo.size();
         QByteArray sizeBytes;
 
@@ -161,47 +157,38 @@ void processFiles(const std::string &path, const std::string &domainString, cons
         output_file.close();
 
         QString hash;
-        if (qDomainString == "ConfigProfileDomain")
+        if (domainString == "ConfigProfileDomain")
         {
             hash = QString::fromStdString(calculateSHA1("SysSharedContainerDomain-systemgroup.com.apple.configurationprofiles-" + fileString.toStdString()));
         }
         else
         {
-            hash = QString::fromStdString(calculateSHA1(domainString + "-" + fileString.toStdString()));
+            hash = QString::fromStdString(calculateSHA1(domainString.toStdString() + "-" + fileString.toStdString()));
         }
-        QString newFile = qOutputDir + "/" + hash;
-        copyFile(qPath, newFile);
+        QString newFile = outputDir + "/" + hash;
+        copyFile(path, newFile);
     }
-    else if (QFileInfo(qPath).isDir())
+    else if (QFileInfo(path).isDir())
     {
         output_file.write("\xFF\xFF\xFF\xFF\xFF\xFF\x41\xFF\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01\xF5\x00\x00\x01\xF5", 24);
         generateRandomHex(output_file);
         output_file.write("\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00", 10);
         output_file.close();
 
-        QDir dir(qPath);
+        QDir dir(path);
         for (const QString &entry : dir.entryList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot))
         {
-            QString filePath = qPath + "/" + entry;
-            processFiles(filePath.toStdString(), qDomainString.toStdString(), qOutputDir.toStdString());
+            QString filePath = path + "/" + entry;
+            processFiles(filePath, domainString, outputDir);
         }
     }
 }
 
-std::string basename(const std::string &path)
+bool createDirectory(const QString &dirPath)
 {
-    size_t lastSlash = path.find_last_of("/\\");
-    std::string filename = path.substr(lastSlash + 1);
-    return filename;
-}
-
-bool createDirectory(const std::string &dirPath)
-{
-    QString qDirPath = QString::fromStdString(dirPath);
-
     try
     {
-        if (QDir().mkpath(qDirPath))
+        if (QDir().mkpath(dirPath))
             return true;
         else
         {
@@ -216,15 +203,13 @@ bool createDirectory(const std::string &dirPath)
     }
 }
 
-bool removeDirectoryIfExists(const std::string &dirPath)
+bool removeDirectoryIfExists(const QString &dirPath)
 {
-    QString qDirPath = QString::fromStdString(dirPath);
-
-    if (QFileInfo(qDirPath).exists() && QFileInfo(qDirPath).isDir())
+    if (QFileInfo::exists(dirPath) && QFileInfo(dirPath).isDir())
     {
         try
         {
-            if (QDir(qDirPath).removeRecursively())
+            if (QDir(dirPath).removeRecursively())
                 return true;
             else
                 return false;
@@ -238,16 +223,13 @@ bool removeDirectoryIfExists(const std::string &dirPath)
     return false;
 }
 
-bool CreateBackup::createBackup(std::string indir, std::string outdir)
+bool CreateBackup::createBackup(const QString& indir, const QString& outdir)
 {
     removeDirectoryIfExists(outdir);
     createDirectory(outdir);
 
-    QString qIndir = QString::fromStdString(indir);
-    QString qOutdir = QString::fromStdString(outdir);
-
     // NOTE: Manifest.mbdb tracks the locations and SHA1 hashes of each file in the backup
-    QFile output_file(qOutdir + "/Manifest.mbdb");
+    QFile output_file(outdir + "/Manifest.mbdb");
     if (!output_file.open(QIODevice::WriteOnly))
     {
         qDebug() << "Failed to create output file";
@@ -262,29 +244,35 @@ bool CreateBackup::createBackup(std::string indir, std::string outdir)
     output_file.close();
 
     // Iterate over all domains
-    QDir domainDir(qIndir);
+    QDir domainDir(indir);
     for (const QString &domainEntry : domainDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot))
     {
-        QString domain = qIndir + "/" + domainEntry;
+        QString domain = indir + "/" + domainEntry;
         QString domainString = QFileInfo(domain).baseName();
 
-        processFiles(domain.toStdString(), domainString.toStdString(), outdir);
+        processFiles(domain, domainString, outdir);
     }
 
     // Generate Info.plist
-    std::ofstream infoPlist(outdir + "/Info.plist", std::ios::binary);
-    infoPlist << R"(<?xml version="1.0" encoding="UTF-8"?>
+    QString infoPlistContent = R"(<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
 </dict>
 </plist>
 )";
+    QFile infoPlist(outdir + "/Info.plist");
+    if (!infoPlist.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        qDebug() << "Failed to create Info.plist file";
+        return false;
+    }
+    QTextStream infoStream(&infoPlist);
+    infoStream << infoPlistContent;
     infoPlist.close();
 
     // Generate Status.plist
-    std::ofstream statusPlist(outdir + "/Status.plist", std::ios::binary);
-    statusPlist << R"(<?xml version="1.0" encoding="UTF-8"?>
+    QString statusPlistContent = R"(<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
@@ -303,11 +291,18 @@ bool CreateBackup::createBackup(std::string indir, std::string outdir)
 </dict>
 </plist>
 )";
+    QFile statusPlist(outdir + "/Status.plist");
+    if (!statusPlist.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        qDebug() << "Failed to create Status.plist file";
+        return false;
+    }
+    QTextStream statusStream(&statusPlist);
+    statusStream << statusPlistContent;
     statusPlist.close();
 
     // Generate Manifest.plist
-    std::ofstream manifestPlist(outdir + "/Manifest.plist", std::ios::binary);
-    manifestPlist << R"(<?xml version="1.0" encoding="UTF-8"?>
+    QString manifestPlistContent = R"(<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
@@ -350,6 +345,14 @@ bool CreateBackup::createBackup(std::string indir, std::string outdir)
 </dict>
 </plist>
 )";
+    QFile manifestPlist(outdir + "/Manifest.plist");
+    if (!manifestPlist.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        qDebug() << "Failed to create Manifest.plist file";
+        return false;
+    }
+    QTextStream manifestStream(&manifestPlist);
+    manifestStream << manifestPlistContent;
     manifestPlist.close();
 
     return true;

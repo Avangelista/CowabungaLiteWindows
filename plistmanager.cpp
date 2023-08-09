@@ -34,14 +34,9 @@ PList::Node* PlistManager::getPlistValue(const QString& plistPath, const std::st
         return nullptr;
     }
 
-    QDataStream inputStream(&inputFile);
-    inputStream.setVersion(QDataStream::Qt_5_0); // Set the desired version
-
-    while (!inputStream.atEnd()) {
-        char c;
-        inputStream >> c;
-        in.push_back(c);
-    }
+    QByteArray byteArray = inputFile.readAll();
+    in.resize(byteArray.size());
+    std::memcpy(in.data(), byteArray.data(), byteArray.size());
 
     inputFile.close();
 
@@ -73,14 +68,9 @@ void PlistManager::setPlistValue(const QString& plistPath, const std::string& ke
         return;
     }
 
-    QDataStream inputStream(&inputFile);
-    inputStream.setVersion(QDataStream::Qt_5_0); // Set the desired version
-
-    while (!inputStream.atEnd()) {
-        char c;
-        inputStream >> c;
-        in.push_back(c);
-    }
+    QByteArray byteArray = inputFile.readAll();
+    in.resize(byteArray.size());
+    std::memcpy(in.data(), byteArray.data(), byteArray.size());
 
     inputFile.close();
 
@@ -142,14 +132,9 @@ void PlistManager::deletePlistKey(const QString& plistPath, const std::string& k
         return;
     }
 
-    QDataStream inputStream(&inputFile);
-    inputStream.setVersion(QDataStream::Qt_5_0); // Set the desired version
-
-    while (!inputStream.atEnd()) {
-        char c;
-        inputStream >> c;
-        in.push_back(c);
-    }
+    QByteArray byteArray = inputFile.readAll();
+    in.resize(byteArray.size());
+    std::memcpy(in.data(), byteArray.data(), byteArray.size());
 
     inputFile.close();
 

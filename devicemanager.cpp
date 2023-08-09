@@ -469,7 +469,7 @@ void DeviceManager::removeTweaks(QLabel *statusLabel) {
 
     auto backupDirectoryPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/Backup";
 
-    CreateBackup::createBackup(enabledTweaksDirectoryPath.toStdString(), backupDirectoryPath.toStdString());
+    CreateBackup::createBackup(enabledTweaksDirectoryPath, backupDirectoryPath);
 
     statusLabel->setText("Restoring backup to device...");
 
@@ -579,7 +579,7 @@ void DeviceManager::applyTweaks(QLabel *statusLabel)
 
     auto backupDirectoryPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/Backup";
 
-    CreateBackup::createBackup(enabledTweaksDirectoryPath.toStdString(), backupDirectoryPath.toStdString());
+    CreateBackup::createBackup(enabledTweaksDirectoryPath, backupDirectoryPath);
 
     statusLabel->setText("Restoring backup to device...");
 
