@@ -1756,7 +1756,7 @@ void MainWindow::loadSpringboardOptions()
     {
         ui->allowAirDropEveryoneChk->setChecked(false);
     }
-    location = QString::fromStdString(*workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.Pasteboard.plist");
+    location = QString::fromStdString(*workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.Pasteboard.plist");
     value = PlistManager::getPlistValue(location, "PlaySoundOnPaste");
     if (value)
     {
@@ -1930,7 +1930,7 @@ void MainWindow::on_enablePasteSoundChk_clicked(bool checked) {
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
-    auto location = QString::fromStdString(*workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.Pasteboard.plist");
+    auto location = QString::fromStdString(*workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.Pasteboard.plist");
     if (checked)
     {
         auto node = PList::Boolean(checked);
