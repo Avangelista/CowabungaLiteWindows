@@ -9,13 +9,15 @@ QT_END_NAMESPACE
 
 enum class Page {
     Home = 0,
-    Themes = 1,
-    StatusBar = 2,
-    ControlCenter = 3,
-    SpringboardOptions = 4,
-    InternalOptions = 5,
-    SetupOptions = 6,
-    Apply = 7
+    Explore = 1,
+    LocSim = 2,
+    Themes = 3,
+    StatusBar = 4,
+    ControlCenter = 5,
+    SpringboardOptions = 6,
+    InternalOptions = 7,
+    SetupOptions = 8,
+    Apply = 9
 };
 
 class MainWindow : public QMainWindow
@@ -31,6 +33,8 @@ private slots:
     void on_refreshBtn_clicked();
     void on_devicePicker_activated(int index);
     void on_homePageBtn_clicked();
+    void on_explorePageBtn_clicked();
+    void on_locSimPageBtn_clicked();
     void on_themesPageBtn_clicked();
     void on_statusBarPageBtn_clicked();
     void on_controlCenterPageBtn_clicked();
@@ -51,6 +55,11 @@ private slots:
     void on_discordBtn_clicked();
     void on_patreonBtn_clicked();
     void on_phoneVersionLbl_linkActivated(const QString &link);
+
+    // Loc Sim
+    void on_loadLocSimBtn_clicked();
+    void on_setLocationBtn_clicked();
+    void on_resetLocationBtn_clicked();
 
     // Themes
     void on_themesEnabledChk_toggled(bool checked);
@@ -119,6 +128,8 @@ private slots:
     void on_enableLSCCChk_clicked(bool checked);
     void on_enableShutdownSoundChk_clicked(bool checked);
     void on_allowAirDropEveryoneChk_clicked(bool checked);
+    void on_enablePasteSoundChk_clicked(bool checked);
+    void on_enableWakeVibrateChk_clicked(bool checked);
 
     // Setup Options
     void on_setupOptionsEnabledChk_toggled(bool checked);
@@ -138,6 +149,7 @@ private slots:
     void on_VCChk_toggled(bool checked);
     void on_appStoreChk_toggled(bool checked);
     void on_notesChk_toggled(bool checked);
+    void on_showTouchesChk_clicked(bool checked);
 
     // Apply
     void on_applyTweaksBtn_clicked();
@@ -158,6 +170,14 @@ private:
 
     // Home
     void updatePhoneInfo();
+
+    // Explore
+    void loadExplorePage();
+    void addThemeRow(QWidget *parent, const QString &name, const QString &previewUrl, const QString &downloadUrl);
+    bool loadedExplorePage = false;
+
+    // Loc Sim
+    void loadLocSim();
 
     // Themes
     void loadThemesPage();

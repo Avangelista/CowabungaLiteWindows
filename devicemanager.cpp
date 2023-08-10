@@ -632,40 +632,4 @@ bool DeviceManager::restoreBackupToDevice(const std::string &udid, const std::st
     detailsMessageBox.setDetailedText(errorOutput + "\n" + output);
     detailsMessageBox.exec();
     return false;
-
-//    return true;
-//    std::string command = "idevicebackup2.exe -u " + udid + " -s Backup restore --system --skip-apps " + backupDirectory;
-//    FILE *pipe = _popen(command.c_str(), "r");
-//    if (pipe == nullptr)
-//    {
-//        std::cerr << "Failed to execute command." << std::endl;
-//        return false;
-//    }
-//    char buffer[128];
-//    char last[128];
-//    char prev[128];
-//    auto everything = std::string();
-//    while (fgets(buffer, 128, pipe) != nullptr)
-//    {
-//        std::cout << buffer << std::endl;
-//        everything += std::string(buffer);
-//        strncpy(prev, last, 128);
-//        strncpy(last, buffer, 128);
-//    }
-//    _pclose(pipe);
-//    auto result = std::string(last);
-//    auto details = std::string(prev);
-//    if (result == "Restore Successful.\n")
-//    {
-//        QMessageBox::information(nullptr, "Success!", "All done! Your device will now restart.\n\nYou should see a black loading screen after entering your passcode - it will disappear after a few seconds.\n\nImportant: If you are presented with a setup, select \"Customize\" > \"Don't transfer apps and data\" and your phone should return to the homescreen as normal.");
-//        return true;
-//    }
-//    QMessageBox detailsMessageBox;
-//    detailsMessageBox.setWindowTitle("Error!");
-//    detailsMessageBox.setIcon(QMessageBox::Critical);
-//    detailsMessageBox.setText(QString::fromStdString(result) + "\n" + QString::fromStdString(details));
-//    detailsMessageBox.setTextInteractionFlags(Qt::TextSelectableByMouse);
-//    detailsMessageBox.setDetailedText(QString::fromStdString(everything));
-//    detailsMessageBox.exec();
-//    return false;
 }

@@ -3,6 +3,7 @@
 #include "DeviceManager.h"
 #include "qdir.h"
 #include "qmessagebox.h"
+#include "qprocess.h"
 #include "qstandardpaths.h"
 #include "statusmanager/StatusManager.h"
 #include "plistmanager.h"
@@ -13,6 +14,23 @@
 #include <QFileDialog>
 #include <QScrollBar>
 #include <QDesktopServices>
+#include <QtNetwork/QNetworkAccessManager>
+#include <QtNetwork/QNetworkReply>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <iostream>
+#include <libimobiledevice/libimobiledevice.h>
+#include <libimobiledevice/lockdown.h>
+#include <libimobiledevice/service.h>
+#include <endianness.h>
+
+#define DT_SIMULATELOCATION_SERVICE "com.apple.dt.simulatelocation"
+
+enum {
+    SET_LOCATION = 0,
+    RESET_LOCATION = 1
+};
 
 // Boilerplate
 
@@ -40,6 +58,18 @@ void MainWindow::updateInterfaceForNewDevice()
 
     if (DeviceManager::getInstance().isDeviceAvailable())
     {
+        // load locsim
+        ui->locSimCnt->hide();
+        ui->loadLocSimBtn->show();
+        if (DeviceManager::getInstance().getCurrentVersion() >= Version(17)) {
+            ui->loadLocSimBtn->setEnabled(false);
+            ui->loadLocSimBtn->setText("Unavailable");
+        } else {
+            ui->loadLocSimBtn->setEnabled(true);
+            ui->loadLocSimBtn->setText("Start Location Simulation");
+        }
+
+//        MainWindow::loadExplorePage();
         MainWindow::loadThemesPage();
         MainWindow::loadStatusBar();
         MainWindow::loadSpringboardOptions();
@@ -74,6 +104,7 @@ void MainWindow::refreshDevices()
         ui->homePageBtn->setChecked(true);
 
         // hide all pages
+        ui->locSimPageBtn->hide();
         ui->sidebarDiv1->hide();
         ui->themesPageBtn->hide();
         ui->statusBarPageBtn->hide();
@@ -95,6 +126,7 @@ void MainWindow::refreshDevices()
         }
 
         // show all pages
+        ui->locSimPageBtn->show();
         ui->sidebarDiv1->show();
         ui->themesPageBtn->show();
         ui->statusBarPageBtn->show();
@@ -116,6 +148,20 @@ void MainWindow::refreshDevices()
 void MainWindow::on_homePageBtn_clicked()
 {
     ui->pages->setCurrentIndex(static_cast<int>(Page::Home));
+}
+
+void MainWindow::on_explorePageBtn_clicked()
+{
+    ui->pages->setCurrentIndex(static_cast<int>(Page::Explore));
+    if (!loadedExplorePage) {
+        loadedExplorePage = true;
+        MainWindow::loadExplorePage();
+    }
+}
+
+void MainWindow::on_locSimPageBtn_clicked()
+{
+    ui->pages->setCurrentIndex(static_cast<int>(Page::LocSim));
 }
 
 void MainWindow::on_themesPageBtn_clicked()
@@ -182,7 +228,11 @@ void MainWindow::updatePhoneInfo()
     {
         if (DeviceManager::getInstance().isDeviceAvailable())
         {
-            ui->phoneVersionLbl->setText("<a style=\"text-decoration:none; color: white;\" href=\"#\">iOS " + QString::fromStdString(version->toString()) + " <span style=\"color: #32d74b;\">Supported!</span></a>");
+            if (*version >= Version(17)) {
+                ui->phoneVersionLbl->setText("<a style=\"text-decoration:none; color: white;\" href=\"#\">iOS " + QString::fromStdString(version->toString()) + " <span style=\"color: #ffff00;\">Supported, YMMV.</span></a>");
+            } else {
+                ui->phoneVersionLbl->setText("<a style=\"text-decoration:none; color: white;\" href=\"#\">iOS " + QString::fromStdString(version->toString()) + " <span style=\"color: #32d74b;\">Supported!</span></a>");
+            }
         }
         else
         {
@@ -247,6 +297,438 @@ void MainWindow::on_discordBtn_clicked() {
 
 void MainWindow::on_patreonBtn_clicked() {
     openWebPage("https://www.patreon.com/Cowabunga_iOS");
+}
+
+// Explore Page
+void MainWindow::addThemeRow(QWidget *parent, const QString &name, const QString &previewUrl, const QString &downloadUrl) {
+    QHBoxLayout *layout = new QHBoxLayout;
+    QLabel *previewLabel = new QLabel;
+    QToolButton *downloadButton = new QToolButton;
+
+    QNetworkAccessManager *imageManager = new QNetworkAccessManager(this);
+    QNetworkReply *imageReply = imageManager->get(QNetworkRequest(QUrl(previewUrl)));
+    QEventLoop loop;
+    QObject::connect(imageReply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+    loop.exec();
+    QImage image;
+    image.loadFromData(imageReply->readAll());
+    imageReply->deleteLater();
+    if (!image.isNull()) {
+        QPixmap previewImage = QPixmap::fromImage(image);
+        previewLabel->setPixmap(previewImage);
+    } else {
+        qDebug() << "Failed to load preview image from data";
+    }
+
+    QObject::connect(downloadButton, &QToolButton::clicked, [=]() {
+        QString zipFilePath = QDir::tempPath() + "/" + name + ".zip";
+        QNetworkAccessManager *downloadManager = new QNetworkAccessManager(this);
+        QNetworkReply *downloadReply = downloadManager->get(QNetworkRequest(QUrl(downloadUrl)));
+        QObject::connect(downloadReply, &QNetworkReply::finished, [=]() {
+            if (downloadReply->error() == QNetworkReply::NoError) {
+                QFile zipFile(zipFilePath);
+                if (zipFile.open(QIODevice::WriteOnly)) {
+                    zipFile.write(downloadReply->readAll());
+                    zipFile.close();
+                    QString themeDirectoryPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/Themes/" + name;
+                    Utils::unzip(zipFilePath, themeDirectoryPath);
+                }
+            }
+            downloadReply->deleteLater();
+            downloadManager->deleteLater();
+        });
+    });
+
+    layout->addWidget(previewLabel);
+    layout->addWidget(new QLabel(name));
+    layout->addWidget(downloadButton);
+
+    layout->addWidget(previewLabel);
+    layout->addWidget(new QLabel(name));
+    layout->addWidget(downloadButton);
+
+    parent->layout()->addItem(layout);
+}
+
+void MainWindow::loadExplorePage() {
+    QNetworkAccessManager manager;
+    QUrl apiUrl("https://raw.githubusercontent.com/leminlimez/Cowabunga-explore-repo/main/icon-themes.json");
+    QNetworkReply *reply = manager.get(QNetworkRequest(apiUrl));
+    QEventLoop loop;
+    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+    loop.exec();
+    QByteArray responseData = reply->readAll();
+    reply->deleteLater();
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(responseData);
+    QJsonArray themesArray = jsonDoc.array();
+
+    QVBoxLayout *exploreThemesLayout = new QVBoxLayout; // Vertical layout for exploreThemesCnt
+    exploreThemesLayout->setContentsMargins(0, 0, 0, 0);
+
+    // Create a QWidget to hold the contents of the scroll area
+    QWidget *scrollContent = new QWidget;
+    QVBoxLayout *scrollLayout = new QVBoxLayout(scrollContent);
+    scrollLayout->setContentsMargins(0, 0, 20, 0);
+
+    for (const QJsonValue &themeValue : themesArray) {
+        QJsonObject themeObj = themeValue.toObject();
+        QString name = themeObj["name"].toString();
+        QString preview = themeObj["preview"].toString();
+        QString url = themeObj["url"].toString();
+        auto previewUrl = "https://raw.githubusercontent.com/leminlimez/Cowabunga-explore-repo/main/" + preview;
+        auto themeUrl = "https://raw.githubusercontent.com/leminlimez/Cowabunga-explore-repo/main/" + url;
+        QString author;
+        if (themeObj.contains("contact") && themeObj["contact"].isObject()) {
+            QJsonObject contactObj = themeObj["contact"].toObject();
+
+            // Get the first value from the contact object
+            if (!contactObj.isEmpty()) {
+                QJsonValue firstValue = contactObj.constBegin().value();
+                author = firstValue.toString();
+            }
+        }
+
+        QHBoxLayout *layout = new QHBoxLayout;
+        layout->setContentsMargins(0, 0, 0, 0);
+        layout->setSpacing(20);
+
+        QToolButton *previewButton = new QToolButton;
+
+        // Download and set the preview icon
+        QNetworkAccessManager *imageManager = new QNetworkAccessManager(this);
+        QNetworkReply *imageReply = imageManager->get(QNetworkRequest(QUrl(previewUrl)));
+        QEventLoop loop;
+        QObject::connect(imageReply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+        loop.exec();
+        QImage image;
+        image.loadFromData(imageReply->readAll());
+        imageReply->deleteLater();
+        if (!image.isNull()) {
+            QPixmap previewIcon = QPixmap::fromImage(image)/*.scaled(150, 150, Qt::KeepAspectRatio)*/;
+            previewButton->setIcon(QIcon(Utils::createRoundedPixmap(previewIcon, 0.1)));
+            previewButton->setIconSize(QSize(150, 150));
+            previewButton->setStyleSheet("QToolButton { min-height: 0px; background: none; padding: 0px; border: none; }");
+        } else {
+            qDebug() << "Failed to load preview image from data";
+        }
+
+        QLabel *nameLabel = new QLabel(name);
+
+        QLabel *authorLabel = new QLabel(author);
+
+        QToolButton *downloadButton = new QToolButton;
+        downloadButton->setText("Download"); // Set the download text
+        connect(downloadButton, &QToolButton::clicked, [this, themeUrl, name, downloadButton]() {
+            // Download the ZIP file
+            downloadButton->setText("Downloading...");
+            qDebug() << "Downloading:" << themeUrl;
+            QNetworkAccessManager downloadManager;
+            QNetworkReply *downloadReply = downloadManager.get(QNetworkRequest(QUrl(themeUrl)));
+            QEventLoop downloadLoop;
+
+            QObject::connect(downloadReply, &QNetworkReply::finished, &downloadLoop, &QEventLoop::quit);
+            downloadLoop.exec();
+
+            QByteArray zipData = downloadReply->readAll();
+            downloadReply->deleteLater();
+
+            // Save the ZIP file to the created directory
+            QString zipFilePath = QDir::tempPath() + "/" + name + ".zip";
+            QFile zipFile(zipFilePath);
+            if (zipFile.open(QIODevice::WriteOnly)) {
+                zipFile.write(zipData);
+                zipFile.close();
+                qDebug() << "ZIP file downloaded and saved to:" << zipFilePath;
+                QString themeDirectoryPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/Themes/" + name;
+                Utils::unzip(zipFilePath, themeDirectoryPath);
+                downloadButton->setText("Done!");
+                MainWindow::loadThemes();
+            }
+        });
+
+        layout->addWidget(previewButton);
+        layout->addWidget(nameLabel);
+        layout->addWidget(authorLabel); // Add author label
+        layout->addWidget(downloadButton);
+
+        QWidget *themeWidget = new QWidget;
+        themeWidget->setLayout(layout);
+
+        scrollLayout->addWidget(themeWidget); // Add the theme widget to the scroll layout
+    }
+
+    QScrollArea *scrollArea = new QScrollArea;
+    scrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    scrollArea->setFrameStyle(QFrame::NoFrame); // Remove the frame/border
+    scrollArea->setWidgetResizable(true); // Make the scroll area resizable
+    scrollArea->setWidget(scrollContent); // Set the scroll area's content widget
+
+    exploreThemesLayout->addWidget(scrollArea); // Add the scroll area to the main layout
+    ui->exploreThemesCnt->setLayout(exploreThemesLayout);
+}
+
+// Loc Sim Page
+void MainWindow::on_loadLocSimBtn_clicked() {
+    ui->loadLocSimBtn->setText("Loading...");
+
+    auto diskDirectoryPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/DevDisks";
+    auto diskDirectory = QDir(diskDirectoryPath);
+
+    if (!diskDirectory.exists()) {
+        if (!diskDirectory.mkpath(".")) {
+            qDebug() << "Failed to create directory: " << diskDirectoryPath;
+            ui->loadLocSimBtn->setText("Failed - Failed to create directory: " + diskDirectoryPath);
+            return;
+        }
+    }
+
+    auto targetVersion = DeviceManager::getInstance().getCurrentVersion();
+
+    QNetworkAccessManager manager;
+    QUrl apiUrl("https://api.github.com/repos/mspvirajpatel/Xcode_Developer_Disk_Images/releases");
+
+    QNetworkReply *reply = manager.get(QNetworkRequest(apiUrl));
+    QEventLoop loop;
+
+    QObject::connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
+    loop.exec();
+
+    QByteArray responseData = reply->readAll();
+    reply->deleteLater();
+
+    QJsonDocument jsonDoc = QJsonDocument::fromJson(responseData);
+    QJsonArray releasesArray = jsonDoc.array();
+
+    Version closestVersion;
+    QString fileName;
+    bool foundMatch = false;
+
+    for (const QJsonValue &releaseValue : releasesArray) {
+        QJsonObject releaseObj = releaseValue.toObject();
+        QString tag_name = releaseObj["tag_name"].toString();
+
+        QStringList tagParts = tag_name.split('.');
+        if (tagParts.size() >= 2) {
+            int releaseMajor = tagParts[0].toInt();
+            int releaseMinor = tagParts[1].toInt();
+            int releasePatch = tagParts.size() >= 3 ? tagParts[2].toInt() : 0;
+
+            auto releaseVersion = Version(releaseMajor, releaseMinor, releasePatch);
+
+            // Compare the versions and find the closest match
+            if (!foundMatch && releaseVersion <= *targetVersion) {
+                closestVersion = releaseVersion;
+                foundMatch = true;
+                fileName = tag_name;
+            } else if (releaseVersion <= *targetVersion &&
+                       releaseVersion > closestVersion) {
+                closestVersion = releaseVersion;
+                fileName = tag_name;
+            }
+        }
+    }
+
+    if (foundMatch) {
+        QString versionDirectoryPath = diskDirectory.filePath(fileName);
+
+        if (!diskDirectory.exists(versionDirectoryPath)) {
+            // Download the ZIP file
+            QString downloadUrl = QString("https://github.com/mspvirajpatel/Xcode_Developer_Disk_Images/releases/download/%1/%1.zip").arg(fileName);
+            qDebug() << "Downloading:" << downloadUrl;
+            QNetworkAccessManager downloadManager;
+            QNetworkReply *downloadReply = downloadManager.get(QNetworkRequest(QUrl(downloadUrl)));
+            QEventLoop downloadLoop;
+
+            QObject::connect(downloadReply, &QNetworkReply::finished, &downloadLoop, &QEventLoop::quit);
+            downloadLoop.exec();
+
+            QByteArray zipData = downloadReply->readAll();
+            downloadReply->deleteLater();
+
+            // Save the ZIP file to the created directory
+            QString zipFilePath = QDir::tempPath() + "/" + fileName + ".zip";
+            QFile zipFile(zipFilePath);
+            if (zipFile.open(QIODevice::WriteOnly)) {
+                zipFile.write(zipData);
+                zipFile.close();
+                qDebug() << "ZIP file downloaded and saved to:" << zipFilePath;
+                Utils::unzip(zipFilePath, diskDirectoryPath);
+                QStringList arguments;
+                arguments << "-u" << QString::fromStdString(*(DeviceManager::getInstance().getCurrentUUID())) << versionDirectoryPath + "/DeveloperDiskImage.dmg";
+
+                QProcess process;
+                process.start("ideviceimagemounter.exe", arguments);
+                process.waitForFinished(-1);
+
+                QByteArray output = process.readAllStandardOutput();
+                QByteArray errorOutput = process.readAllStandardError();
+
+                qDebug() << "Standard Output:" << output;
+                qDebug() << "Error Output:" << errorOutput;
+                // aaaa fix \r\n
+                auto errorLines = QString::fromUtf8(output).split("\r\n");
+                if (errorLines.size() > 1) {
+                    auto error = errorLines.at(errorLines.size() - 2);
+                    if (error == "Status: Complete" || error == "Error: ImageMountFailed") {
+                        ui->loadLocSimBtn->hide();
+                        ui->locSimCnt->show();
+                    } else {
+                        ui->loadLocSimBtn->setText("Failed - " + error);
+                    }
+                }
+            } else {
+                qDebug() << "Failed to save ZIP file:" << zipFilePath;
+                ui->loadLocSimBtn->setText("Failed - Failed to save ZIP file: " + zipFilePath);
+            }
+        } else {
+            qDebug() << "Version directory already exists. Skipping download.";
+            QStringList arguments;
+            arguments << "-u" << QString::fromStdString(*(DeviceManager::getInstance().getCurrentUUID())) << versionDirectoryPath + "/DeveloperDiskImage.dmg";
+
+            QProcess process;
+            process.start("ideviceimagemounter.exe", arguments);
+            process.waitForFinished(-1);
+
+            QByteArray output = process.readAllStandardOutput();
+            QByteArray errorOutput = process.readAllStandardError();
+
+            qDebug() << "Standard Output:" << output;
+            qDebug() << "Error Output:" << errorOutput;
+            // aaaa fix \r\n
+            auto errorLines = QString::fromUtf8(output).split("\r\n");
+            if (errorLines.size() > 1) {
+                auto error = errorLines.at(errorLines.size() - 2);
+                if (error == "Status: Complete" || error == "Error: ImageMountFailed") {
+                    ui->loadLocSimBtn->hide();
+                    ui->locSimCnt->show();
+                } else {
+                    ui->loadLocSimBtn->setText("Failed - " + error);
+                }
+            }
+        }
+    } else {
+        qDebug() << "No matching release found.";
+        ui->loadLocSimBtn->setText("Failed - No matching release found.");
+    }
+}
+
+void MainWindow::on_setLocationBtn_clicked() {
+    uint32_t mode = SET_LOCATION;
+
+    idevice_t device = NULL;
+
+    auto udid = DeviceManager::getInstance().getCurrentUUID();
+
+    if (idevice_new_with_options(&device, udid->c_str(), IDEVICE_LOOKUP_USBMUX) != IDEVICE_E_SUCCESS) {
+        if (udid) {
+            printf("ERROR: Device %s not found!\n", udid->c_str());
+        } else {
+            printf("ERROR: No device found!\n");
+        }
+        return;
+    }
+
+    lockdownd_client_t lockdown;
+    lockdownd_client_new_with_handshake(device, &lockdown, "LocSim");
+
+    lockdownd_service_descriptor_t svc = NULL;
+    lockdownd_error_t lerr = lockdownd_start_service(lockdown, DT_SIMULATELOCATION_SERVICE, &svc);
+    if (lerr != LOCKDOWN_E_SUCCESS) {
+        lockdownd_client_free(lockdown);
+        idevice_free(device);
+        printf("ERROR: Could not start the simulatelocation service: %s\nMake sure a developer disk image is mounted!\n", lockdownd_strerror(lerr));
+        return;
+    }
+    lockdownd_client_free(lockdown);
+
+    service_client_t service = NULL;
+
+    service_error_t serr = service_client_new(device, svc, &service);
+
+    lockdownd_service_descriptor_free(svc);
+
+    if (serr != SERVICE_E_SUCCESS) {
+        lockdownd_client_free(lockdown);
+        idevice_free(device);
+        printf("ERROR: Could not connect to simulatelocation service (%d)\n", serr);
+        return;
+    }
+
+    uint32_t l;
+    uint32_t s = 0;
+
+    const char* lat = ui->latitudeTxt->text().toStdString().c_str();
+    const char* lon = ui->longitudeTxt->text().toStdString().c_str();
+
+    l = htobe32(mode);
+    service_send(service, (const char*)&l, 4, &s);
+    int len = 4 + strlen(lat) + 4 + strlen(lon);
+    char *buf = static_cast<char*>(malloc(len));
+    uint32_t latlen;
+    latlen = strlen(lat);
+    l = htobe32(latlen);
+    memcpy(buf, &l, 4);
+    memcpy(buf+4, lat, latlen);
+    uint32_t longlen = strlen(lon);
+    l = htobe32(longlen);
+    memcpy(buf+4+latlen, &l, 4);
+    memcpy(buf+4+latlen+4, lon, longlen);
+
+    s = 0;
+    service_send(service, buf, len, &s);
+
+    free(buf);
+
+    idevice_free(device);
+}
+
+void MainWindow::on_resetLocationBtn_clicked() {
+    uint32_t mode = RESET_LOCATION;
+
+    idevice_t device = NULL;
+
+    auto udid = DeviceManager::getInstance().getCurrentUUID();
+
+    if (idevice_new_with_options(&device, udid->c_str(), IDEVICE_LOOKUP_USBMUX) != IDEVICE_E_SUCCESS) {
+        if (udid) {
+            printf("ERROR: Device %s not found!\n", udid->c_str());
+        } else {
+            printf("ERROR: No device found!\n");
+        }
+        return;
+    }
+
+    lockdownd_client_t lockdown;
+    lockdownd_client_new_with_handshake(device, &lockdown, "LocSim");
+
+    lockdownd_service_descriptor_t svc = NULL;
+    lockdownd_error_t lerr = lockdownd_start_service(lockdown, DT_SIMULATELOCATION_SERVICE, &svc);
+    if (lerr != LOCKDOWN_E_SUCCESS) {
+        lockdownd_client_free(lockdown);
+        idevice_free(device);
+        printf("ERROR: Could not start the simulatelocation service: %s\nMake sure a developer disk image is mounted!\n", lockdownd_strerror(lerr));
+        return;
+    }
+    lockdownd_client_free(lockdown);
+
+    service_client_t service = NULL;
+
+    service_error_t serr = service_client_new(device, svc, &service);
+
+    lockdownd_service_descriptor_free(svc);
+
+    if (serr != SERVICE_E_SUCCESS) {
+        lockdownd_client_free(lockdown);
+        idevice_free(device);
+        printf("ERROR: Could not connect to simulatelocation service (%d)\n", serr);
+        return;
+    }
+
+    uint32_t l;
+    uint32_t s = 0;
+    l = htobe32(mode);
+    service_send(service, (const char*)&l, 4, &s);
+    idevice_free(device);
 }
 
 // Themes Page
@@ -345,29 +827,6 @@ void applyMaskToImage(QImage& image)
     }
 }
 
-
-// Helper function to create rounded pixmap
-QPixmap createRoundedPixmap(const QPixmap& pixmap, double roundnessPercentage)
-{
-    QPixmap roundedPixmap(pixmap.size());
-    roundedPixmap.fill(Qt::transparent);
-
-    QPainter painter(&roundedPixmap);
-    painter.setRenderHint(QPainter::Antialiasing, true);
-    painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
-
-    int width = pixmap.width();
-    int height = pixmap.height();
-    int radius = qMin(width, height) * roundnessPercentage;
-
-    QPainterPath path;
-    path.addRoundedRect(roundedPixmap.rect(), radius, radius);
-    painter.setClipPath(path);
-    painter.drawPixmap(0, 0, pixmap);
-
-    return roundedPixmap;
-}
-
 void MainWindow::loadThemesPage() {
     loadThemes();
     loadIcons();
@@ -444,7 +903,7 @@ void MainWindow::loadIcons() {
                     iconButton->setIcon(QPixmap::fromImage(image));
                 } else {
                     auto userIcon = QPixmap(QString::fromStdString(*user_icon));
-                    iconButton->setIcon(createRoundedPixmap(userIcon, 0.25));
+                    iconButton->setIcon(Utils::createRoundedPixmap(userIcon, 0.25));
                 }
             } else if (themed_icon) {
                 if (checked) {
@@ -498,7 +957,7 @@ void MainWindow::loadIcons() {
                 iconButton->setIcon(QPixmap::fromImage(image));
             } else {
                 auto userIcon = QPixmap(QString::fromStdString(*user_icon));
-                iconButton->setIcon(createRoundedPixmap(userIcon, 0.25));
+                iconButton->setIcon(Utils::createRoundedPixmap(userIcon, 0.25));
             }
         } else if (themed_icon) {
             if (border) {
@@ -535,7 +994,7 @@ void MainWindow::loadIcons() {
                     iconButton->setIcon(QPixmap::fromImage(image));
                 } else {
                     auto image = QPixmap(filePath);
-                    iconButton->setIcon(createRoundedPixmap(image, 0.25));
+                    iconButton->setIcon(Utils::createRoundedPixmap(image, 0.25));
                 }
             }
         });
@@ -609,9 +1068,6 @@ void MainWindow::loadThemes()
         }
     }
 
-    // Get a list of all folder names within the directory
-    QStringList folderList = themesDirectory.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-
     // Clear the layout
     QLayout* layout = ui->themesCnt->layout();
     if (layout)
@@ -636,6 +1092,19 @@ void MainWindow::loadThemes()
     // Create a QHBoxLayout to arrange the widgets horizontally
     QHBoxLayout* mainLayout = new QHBoxLayout();
     mainLayout->setContentsMargins(0, 0, 0, 0);
+
+    // Get a list of all folder names within the directory
+    QStringList folderList = themesDirectory.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+
+    if (folderList.isEmpty()) {
+        QVBoxLayout *layout = new QVBoxLayout(ui->themesCnt);
+        QLabel *label = new QLabel("No themes. Import one, or visit the Explore page.");
+        label->setAlignment(Qt::AlignCenter);
+        layout->addWidget(label);
+        ui->themesCnt->setFixedHeight(150);
+        ui->themesCnt->setLayout(layout);
+        return;
+    }
 
     // Iterate through the folder names
     foreach (const QString& folderName, folderList)
@@ -663,22 +1132,22 @@ void MainWindow::loadThemes()
 
         // Create QToolButtons to display the icon images
         QToolButton* phoneButton = new QToolButton(iconContainer);
-        phoneButton->setIcon(QIcon(createRoundedPixmap(phoneIcon, 0.25))); // Set the radius for rounded corners
+        phoneButton->setIcon(QIcon(Utils::createRoundedPixmap(phoneIcon, 0.25))); // Set the radius for rounded corners
         phoneButton->setIconSize(QSize(45, 45));
         phoneButton->setStyleSheet("QToolButton { min-height: 0px; background: none; padding: 0px; border: none; }");
 
         QToolButton* safariButton = new QToolButton(iconContainer);
-        safariButton->setIcon(QIcon(createRoundedPixmap(safariIcon, 0.25))); // Set the radius for rounded corners
+        safariButton->setIcon(QIcon(Utils::createRoundedPixmap(safariIcon, 0.25))); // Set the radius for rounded corners
         safariButton->setIconSize(QSize(45, 45));
         safariButton->setStyleSheet("QToolButton { min-height: 0px; background: none; padding: 0px; border: none; }");
 
         QToolButton* photosButton = new QToolButton(iconContainer);
-        photosButton->setIcon(QIcon(createRoundedPixmap(photosIcon, 0.25))); // Set the radius for rounded corners
+        photosButton->setIcon(QIcon(Utils::createRoundedPixmap(photosIcon, 0.25))); // Set the radius for rounded corners
         photosButton->setIconSize(QSize(45, 45));
         photosButton->setStyleSheet("QToolButton { min-height: 0px; background: none; padding: 0px; border: none; }");
 
         QToolButton* cameraButton = new QToolButton(iconContainer);
-        cameraButton->setIcon(QIcon(createRoundedPixmap(cameraIcon, 0.25))); // Set the radius for rounded corners
+        cameraButton->setIcon(QIcon(Utils::createRoundedPixmap(cameraIcon, 0.25))); // Set the radius for rounded corners
         cameraButton->setIconSize(QSize(45, 45));
         cameraButton->setStyleSheet("QToolButton { min-height: 0px; background: none; padding: 0px; border: none; }");
 
@@ -701,10 +1170,6 @@ void MainWindow::loadThemes()
         connect(deleteButton, &QToolButton::clicked, [this, directory]() {
             QDir(directory).removeRecursively();
             MainWindow::loadThemes();
-            // Implement your logic here to delete the theme or handle the deletion process.
-            // For example:
-            // QDir(directory).removeRecursively(); // Remove the entire theme directory and its contents
-            // After deletion, you may need to reload the themes or perform other necessary actions.
         });
 
         // Create a QHBoxLayout to arrange the icon buttons horizontally
@@ -1204,7 +1669,7 @@ void MainWindow::on_hideVPNChk_clicked(bool checked)
 void MainWindow::loadSpringboardOptions()
 {
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
-    auto location = QString::fromStdString(*workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.UIKit.plist");
+    auto location = QString::fromStdString(*workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.UIKit.plist");
     auto value = PlistManager::getPlistValue(location, "UIAnimationDragCoefficient");
     if (value)
     {
@@ -1269,7 +1734,7 @@ void MainWindow::loadSpringboardOptions()
     {
         ui->enableLSCCChk->setChecked(false);
     }
-    location = QString::fromStdString(*workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.Accessibility.plist");
+    location = QString::fromStdString(*workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.Accessibility.plist");
     value = PlistManager::getPlistValue(location, "StartupSoundEnabled");
     if (value)
     {
@@ -1290,6 +1755,28 @@ void MainWindow::loadSpringboardOptions()
     else
     {
         ui->allowAirDropEveryoneChk->setChecked(false);
+    }
+    location = QString::fromStdString(*workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.Pasteboard.plist");
+    value = PlistManager::getPlistValue(location, "PlaySoundOnPaste");
+    if (value)
+    {
+        ui->enablePasteSoundChk->setChecked(
+            dynamic_cast<PList::Boolean *>(value)->GetValue());
+    }
+    else
+    {
+        ui->enablePasteSoundChk->setChecked(false);
+    }
+    location = QString::fromStdString(*workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.CoreMotion.plist");
+    value = PlistManager::getPlistValue(location, "EnableWakeGestureHaptic");
+    if (value)
+    {
+        ui->enableWakeVibrateChk->setChecked(
+            dynamic_cast<PList::Boolean *>(value)->GetValue());
+    }
+    else
+    {
+        ui->enableWakeVibrateChk->setChecked(false);
     }
 }
 
@@ -1325,7 +1812,7 @@ void MainWindow::on_UIAnimSpeedSld_sliderMoved(int pos)
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
-    auto location = QString::fromStdString(*workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.UIKit.plist");
+    auto location = QString::fromStdString(*workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.UIKit.plist");
     if (speed != 1)
     {
         auto node = PList::Real(speed);
@@ -1410,7 +1897,7 @@ void MainWindow::on_enableShutdownSoundChk_clicked(bool checked)
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
-    auto location = QString::fromStdString(*workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.Accessibility.plist");
+    auto location = QString::fromStdString(*workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.Accessibility.plist");
     if (checked)
     {
         auto node = PList::Boolean(checked);
@@ -1436,6 +1923,38 @@ void MainWindow::on_allowAirDropEveryoneChk_clicked(bool checked)
     else
     {
         PlistManager::deletePlistKey(location, "DiscoverableMode");
+    }
+}
+
+void MainWindow::on_enablePasteSoundChk_clicked(bool checked) {
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    auto location = QString::fromStdString(*workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.Pasteboard.plist");
+    if (checked)
+    {
+        auto node = PList::Boolean(checked);
+        PlistManager::setPlistValue(location, "PlaySoundOnPaste", node);
+    }
+    else
+    {
+        PlistManager::deletePlistKey(location, "PlaySoundOnPaste");
+    }
+}
+
+void MainWindow::on_enableWakeVibrateChk_clicked(bool checked) {
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    auto location = QString::fromStdString(*workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.CoreMotion.plist");
+    if (checked)
+    {
+        auto node = PList::Boolean(checked);
+        PlistManager::setPlistValue(location, "EnableWakeGestureHaptic", node);
+    }
+    else
+    {
+        PlistManager::deletePlistKey(location, "EnableWakeGestureHaptic");
     }
 }
 
@@ -1671,7 +2190,7 @@ void MainWindow::loadInternalOptions()
     {
         ui->VCChk->setChecked(false);
     }
-    location = QString::fromStdString(*workspace + "/InternalOptions/HomeDomain/Library/Preferences/com.apple.AppStore.plist");
+    location = QString::fromStdString(*workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/com.apple.AppStore.plist");
     value = PlistManager::getPlistValue(location, "debugGestureEnabled");
     if (value)
     {
@@ -1682,7 +2201,7 @@ void MainWindow::loadInternalOptions()
     {
         ui->appStoreChk->setChecked(false);
     }
-    location = QString::fromStdString(*workspace + "/InternalOptions/HomeDomain/Library/Preferences/com.apple.mobilenotes.plist");
+    location = QString::fromStdString(*workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/com.apple.mobilenotes.plist");
     value = PlistManager::getPlistValue(location, "DebugModeEnabled");
     if (value)
     {
@@ -1692,6 +2211,17 @@ void MainWindow::loadInternalOptions()
     else
     {
         ui->notesChk->setChecked(false);
+    }
+    location = QString::fromStdString(*workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/com.apple.backboardd.plist");
+    value = PlistManager::getPlistValue(location, "BKDigitizerVisualizeTouches");
+    if (value)
+    {
+        ui->showTouchesChk->setChecked(
+            dynamic_cast<PList::Boolean *>(value)->GetValue());
+    }
+    else
+    {
+        ui->showTouchesChk->setChecked(false);
     }
 }
 
@@ -1826,7 +2356,7 @@ void MainWindow::on_appStoreChk_toggled(bool checked)
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
-    auto location = QString::fromStdString(*workspace + "/InternalOptions/HomeDomain/Library/Preferences/com.apple.AppStore.plist");
+    auto location = QString::fromStdString(*workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/com.apple.AppStore.plist");
     if (checked)
     {
         auto node = PList::Boolean(checked);
@@ -1843,7 +2373,7 @@ void MainWindow::on_notesChk_toggled(bool checked)
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
-    auto location = QString::fromStdString(*workspace + "/InternalOptions/HomeDomain/Library/Preferences/com.apple.mobilenotes.plist");
+    auto location = QString::fromStdString(*workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/com.apple.mobilenotes.plist");
     if (checked)
     {
         auto node = PList::Boolean(checked);
@@ -1852,6 +2382,22 @@ void MainWindow::on_notesChk_toggled(bool checked)
     else
     {
         PlistManager::deletePlistKey(location, "DebugModeEnabled");
+    }
+}
+
+void MainWindow::on_showTouchesChk_clicked(bool checked) {
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    auto location = QString::fromStdString(*workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/com.apple.backboardd.plist");
+    if (checked)
+    {
+        auto node = PList::Boolean(checked);
+        PlistManager::setPlistValue(location, "BKDigitizerVisualizeTouches", node);
+    }
+    else
+    {
+        PlistManager::deletePlistKey(location, "BKDigitizerVisualizeTouches");
     }
 }
 

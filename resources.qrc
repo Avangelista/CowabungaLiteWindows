@@ -26,5 +26,7 @@
         <file>icon/trash.svg</file>
         <file>cowliteicon.png</file>
         <file>icon/currency-dollar.svg</file>
+        <file>icon/geo-alt.svg</file>
+        <file>cowlite.ico</file>
     </qresource>
 </RCC>

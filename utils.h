@@ -1,6 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include "qpixmap.h"
 #include <QString>
 #include <sstream>
 
@@ -9,6 +10,7 @@ class Utils
 public:
     static bool copyDirectory(QString, QString);
     static void unzip(QString zipFile , QString outputFolder);
+    static QPixmap createRoundedPixmap(const QPixmap& pixmap, double roundnessPercentage);
 };
 
 enum class Tweak {
