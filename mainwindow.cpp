@@ -72,13 +72,10 @@ void MainWindow::updateInterfaceForNewDevice()
 //        MainWindow::loadExplorePage();
         MainWindow::loadThemesPage();
         MainWindow::loadStatusBar();
+        MainWindow::loadControlCenter();
         MainWindow::loadSpringboardOptions();
         MainWindow::loadInternalOptions();
         MainWindow::loadSetupOptions();
-    }
-    else
-    {
-        // reset all options and disable the pages
     }
     MainWindow::updateEnabledTweaks();
 }
@@ -97,9 +94,6 @@ void MainWindow::refreshDevices()
     {
         ui->devicePicker->setEnabled(false);
         ui->devicePicker->addItem(QString("None"), QVariant::fromValue(NULL));
-        // shouldn't need this
-        // DeviceManager::getInstance().resetCurrentDevice();
-
         ui->pages->setCurrentIndex(static_cast<int>(Page::Home));
         ui->homePageBtn->setChecked(true);
 
@@ -351,6 +345,7 @@ void MainWindow::addThemeRow(QWidget *parent, const QString &name, const QString
 }
 
 void MainWindow::loadExplorePage() {
+    ui->exploreSubLbl->setText("Loading...");
     QNetworkAccessManager manager;
     QUrl apiUrl("https://raw.githubusercontent.com/leminlimez/Cowabunga-explore-repo/main/icon-themes.json");
     QNetworkReply *reply = manager.get(QNetworkRequest(apiUrl));
@@ -465,6 +460,8 @@ void MainWindow::loadExplorePage() {
 
     exploreThemesLayout->addWidget(scrollArea); // Add the scroll area to the main layout
     ui->exploreThemesCnt->setLayout(exploreThemesLayout);
+
+    ui->exploreSubLbl->setText("");
 }
 
 // Loc Sim Page
@@ -1130,6 +1127,23 @@ void MainWindow::loadThemes()
         QPixmap photosIcon(QString("%1/com.apple.mobileslideshow-large.png").arg(folderPath));
         QPixmap cameraIcon(QString("%1/com.apple.camera-large.png").arg(folderPath));
 
+        // Check if the icons are null and replace with missing.png if necessary
+        if (phoneIcon.isNull()) {
+            phoneIcon = QPixmap(":/missing.png");
+        }
+
+        if (safariIcon.isNull()) {
+            safariIcon = QPixmap(":/missing.png");
+        }
+
+        if (photosIcon.isNull()) {
+            photosIcon = QPixmap(":/missing.png");
+        }
+
+        if (cameraIcon.isNull()) {
+            cameraIcon = QPixmap(":/missing.png");
+        }
+
         // Create QToolButtons to display the icon images
         QToolButton* phoneButton = new QToolButton(iconContainer);
         phoneButton->setIcon(QIcon(Utils::createRoundedPixmap(phoneIcon, 0.25))); // Set the radius for rounded corners
@@ -1220,6 +1234,49 @@ void MainWindow::loadThemes()
     scrollLayout->addWidget(scrollArea);
     ui->themesCnt->setFixedHeight(150);
     ui->themesCnt->setLayout(scrollLayout);
+}
+
+// Control Center Page
+void MainWindow::loadControlCenter() {
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    auto location = QString::fromStdString(*workspace + "/ControlCenter/ManagedPreferencesDomain/mobile/com.apple.replaykit.AudioConferenceControlCenterModule.plist");
+    auto value = PlistManager::getPlistValue(location, "SBIconVisibility");
+    if (value)
+    {
+        ui->hideConferenceModulesChk->setChecked(
+            !dynamic_cast<PList::Boolean *>(value)->GetValue());
+    }
+    else
+    {
+        ui->hideConferenceModulesChk->setChecked(false);
+    }
+}
+
+void MainWindow::on_controlCenterEnabledChk_toggled(bool checked)
+{
+    ui->controlCenterPageContent->setDisabled(!checked);
+    DeviceManager::getInstance().setTweakEnabled(Tweak::ControlCenter, checked);
+    MainWindow::updateEnabledTweaks();
+}
+
+void MainWindow::on_hideConferenceModulesChk_clicked(bool checked)
+{
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    auto location = QString::fromStdString(*workspace + "/ControlCenter/ManagedPreferencesDomain/mobile/com.apple.replaykit.AudioConferenceControlCenterModule.plist");
+    auto location1 = QString::fromStdString(*workspace + "/ControlCenter/ManagedPreferencesDomain/mobile/com.apple.replaykit.VideoConferenceControlCenterModule.plist");
+    if (checked)
+    {
+        auto node = PList::Boolean(!checked);
+        PlistManager::setPlistValue(location, "SBIconVisibility", node);
+        PlistManager::setPlistValue(location1, "SBIconVisibility", node);
+    }
+    else
+    {
+        PlistManager::deletePlistKey(location, "SBIconVisibility");
+        PlistManager::deletePlistKey(location1, "SBIconVisibility");
+    }
 }
 
 // Status Bar Page
@@ -1724,16 +1781,26 @@ void MainWindow::loadSpringboardOptions()
     {
         ui->disableBatteryAlertsChk->setChecked(false);
     }
-    value = PlistManager::getPlistValue(location, "SBControlCenterEnabledInLockScreen");
+    value = PlistManager::getPlistValue(location, "SBNeverBreadcrumb");
     if (value)
     {
-        ui->enableLSCCChk->setChecked(
+        ui->disableCrumbChk->setChecked(
             dynamic_cast<PList::Boolean *>(value)->GetValue());
     }
     else
     {
-        ui->enableLSCCChk->setChecked(false);
+        ui->disableCrumbChk->setChecked(false);
     }
+    // value = PlistManager::getPlistValue(location, "SBControlCenterEnabledInLockScreen");
+    // if (value)
+    // {
+    //     ui->enableLSCCChk->setChecked(
+    //         dynamic_cast<PList::Boolean *>(value)->GetValue());
+    // }
+    // else
+    // {
+    //     ui->enableLSCCChk->setChecked(false);
+    // }
     location = QString::fromStdString(*workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.Accessibility.plist");
     value = PlistManager::getPlistValue(location, "StartupSoundEnabled");
     if (value)
@@ -1755,28 +1822,6 @@ void MainWindow::loadSpringboardOptions()
     else
     {
         ui->allowAirDropEveryoneChk->setChecked(false);
-    }
-    location = QString::fromStdString(*workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.Pasteboard.plist");
-    value = PlistManager::getPlistValue(location, "PlaySoundOnPaste");
-    if (value)
-    {
-        ui->enablePasteSoundChk->setChecked(
-            dynamic_cast<PList::Boolean *>(value)->GetValue());
-    }
-    else
-    {
-        ui->enablePasteSoundChk->setChecked(false);
-    }
-    location = QString::fromStdString(*workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.CoreMotion.plist");
-    value = PlistManager::getPlistValue(location, "EnableWakeGestureHaptic");
-    if (value)
-    {
-        ui->enableWakeVibrateChk->setChecked(
-            dynamic_cast<PList::Boolean *>(value)->GetValue());
-    }
-    else
-    {
-        ui->enableWakeVibrateChk->setChecked(false);
     }
 }
 
@@ -1875,7 +1920,7 @@ void MainWindow::on_disableBatteryAlertsChk_clicked(bool checked)
     }
 }
 
-void MainWindow::on_enableLSCCChk_clicked(bool checked)
+void MainWindow::on_disableCrumbChk_clicked(bool checked)
 {
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
@@ -1884,13 +1929,30 @@ void MainWindow::on_enableLSCCChk_clicked(bool checked)
     if (checked)
     {
         auto node = PList::Boolean(checked);
-        PlistManager::setPlistValue(location, "SBControlCenterEnabledInLockScreen", node);
+        PlistManager::setPlistValue(location, "SBNeverBreadcrumb", node);
     }
     else
     {
-        PlistManager::deletePlistKey(location, "SBControlCenterEnabledInLockScreen");
+        PlistManager::deletePlistKey(location, "SBNeverBreadcrumb");
     }
 }
+
+// void MainWindow::on_enableLSCCChk_clicked(bool checked)
+// {
+//     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+//     if (!workspace)
+//         return;
+//     auto location = QString::fromStdString(*workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.springboard.plist");
+//     if (checked)
+//     {
+//         auto node = PList::Boolean(checked);
+//         PlistManager::setPlistValue(location, "SBControlCenterEnabledInLockScreen", node);
+//     }
+//     else
+//     {
+//         PlistManager::deletePlistKey(location, "SBControlCenterEnabledInLockScreen");
+//     }
+// }
 
 void MainWindow::on_enableShutdownSoundChk_clicked(bool checked)
 {
@@ -1926,49 +1988,17 @@ void MainWindow::on_allowAirDropEveryoneChk_clicked(bool checked)
     }
 }
 
-void MainWindow::on_enablePasteSoundChk_clicked(bool checked) {
-    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
-    if (!workspace)
-        return;
-    auto location = QString::fromStdString(*workspace + "/SpringboardOptions/HomeDomain/Library/Preferences/com.apple.Pasteboard.plist");
-    if (checked)
-    {
-        auto node = PList::Boolean(checked);
-        PlistManager::setPlistValue(location, "PlaySoundOnPaste", node);
-    }
-    else
-    {
-        PlistManager::deletePlistKey(location, "PlaySoundOnPaste");
-    }
-}
-
-void MainWindow::on_enableWakeVibrateChk_clicked(bool checked) {
-    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
-    if (!workspace)
-        return;
-    auto location = QString::fromStdString(*workspace + "/SpringboardOptions/ManagedPreferencesDomain/mobile/com.apple.CoreMotion.plist");
-    if (checked)
-    {
-        auto node = PList::Boolean(checked);
-        PlistManager::setPlistValue(location, "EnableWakeGestureHaptic", node);
-    }
-    else
-    {
-        PlistManager::deletePlistKey(location, "EnableWakeGestureHaptic");
-    }
-}
-
 // Setup Options Page
 
 void MainWindow::loadSetupOptions()
 {
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     auto location = QString::fromStdString(*workspace + "/SkipSetup/ConfigProfileDomain/Library/ConfigurationProfiles/CloudConfigurationDetails.plist");
-    auto value = PlistManager::getPlistValue(location, "CloudConfigurationUIComplete");
+    auto value = PlistManager::getPlistValue(location, "SkipSetup");
     if (value)
     {
         ui->skipSetupChk->setChecked(
-            dynamic_cast<PList::Boolean *>(value)->GetValue());
+            dynamic_cast<PList::Array *>(value)->GetSize() != 0);
     }
     else
     {
@@ -2020,8 +2050,8 @@ void MainWindow::on_skipSetupChk_clicked(bool checked)
     auto location = QString::fromStdString(*workspace + "/SkipSetup/ConfigProfileDomain/Library/ConfigurationProfiles/CloudConfigurationDetails.plist");
     if (checked)
     {
-        auto node1 = PList::Boolean(checked);
-        PlistManager::setPlistValue(location, "CloudConfigurationUIComplete", node1);
+        // auto node1 = PList::Boolean(checked);
+        // PlistManager::setPlistValue(location, "CloudConfigurationUIComplete", node1);
 
         auto strings = {
             "Diagnostics",
@@ -2040,7 +2070,8 @@ void MainWindow::on_skipSetupChk_clicked(bool checked)
             "ScreenTime",
             "Payment",
             "Passcode",
-            "Display"};
+            "Display",
+            "TOS"};
 
         auto node2 = PList::Array();
         for (const auto &str : strings)
@@ -2052,7 +2083,7 @@ void MainWindow::on_skipSetupChk_clicked(bool checked)
     }
     else
     {
-        PlistManager::deletePlistKey(location, "CloudConfigurationUIComplete");
+        // PlistManager::deletePlistKey(location, "CloudConfigurationUIComplete");
         PlistManager::deletePlistKey(location, "SkipSetup");
     }
 }
@@ -2222,6 +2253,48 @@ void MainWindow::loadInternalOptions()
     else
     {
         ui->showTouchesChk->setChecked(false);
+    }
+    value = PlistManager::getPlistValue(location, "BKHideAppleLogoOnLaunch");
+    if (value)
+    {
+        ui->hideRespringChk->setChecked(
+            dynamic_cast<PList::Boolean *>(value)->GetValue());
+    }
+    else
+    {
+        ui->hideRespringChk->setChecked(false);
+    }
+    location = QString::fromStdString(*workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/com.apple.CoreMotion.plist");
+    value = PlistManager::getPlistValue(location, "EnableWakeGestureHaptic");
+    if (value)
+    {
+        ui->enableWakeVibrateChk->setChecked(
+            dynamic_cast<PList::Boolean *>(value)->GetValue());
+    }
+    else
+    {
+        ui->enableWakeVibrateChk->setChecked(false);
+    }
+    location = QString::fromStdString(*workspace + "/InternalOptions/HomeDomain/Library/Preferences/com.apple.Pasteboard.plist");
+    value = PlistManager::getPlistValue(location, "PlaySoundOnPaste");
+    if (value)
+    {
+        ui->pasteSoundChk->setChecked(
+            dynamic_cast<PList::Boolean *>(value)->GetValue());
+    }
+    else
+    {
+        ui->pasteSoundChk->setChecked(false);
+    }
+    value = PlistManager::getPlistValue(location, "AnnounceAllPastes");
+    if (value)
+    {
+        ui->notifyPastesChk->setChecked(
+            dynamic_cast<PList::Boolean *>(value)->GetValue());
+    }
+    else
+    {
+        ui->notifyPastesChk->setChecked(false);
     }
 }
 
@@ -2398,6 +2471,70 @@ void MainWindow::on_showTouchesChk_clicked(bool checked) {
     else
     {
         PlistManager::deletePlistKey(location, "BKDigitizerVisualizeTouches");
+    }
+}
+
+void MainWindow::on_hideRespringChk_clicked(bool checked) {
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    auto location = QString::fromStdString(*workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/com.apple.backboardd.plist");
+    if (checked)
+    {
+        auto node = PList::Boolean(checked);
+        PlistManager::setPlistValue(location, "BKHideAppleLogoOnLaunch", node);
+    }
+    else
+    {
+        PlistManager::deletePlistKey(location, "BKHideAppleLogoOnLaunch");
+    }
+}
+
+void MainWindow::on_enableWakeVibrateChk_clicked(bool checked) {
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    auto location = QString::fromStdString(*workspace + "/InternalOptions/ManagedPreferencesDomain/mobile/com.apple.CoreMotion.plist");
+    if (checked)
+    {
+        auto node = PList::Boolean(checked);
+        PlistManager::setPlistValue(location, "EnableWakeGestureHaptic", node);
+    }
+    else
+    {
+        PlistManager::deletePlistKey(location, "EnableWakeGestureHaptic");
+    }
+}
+
+void MainWindow::on_pasteSoundChk_clicked(bool checked) {
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    auto location = QString::fromStdString(*workspace + "/InternalOptions/HomeDomain/Library/Preferences/com.apple.Pasteboard.plist");
+    if (checked)
+    {
+        auto node = PList::Boolean(checked);
+        PlistManager::setPlistValue(location, "PlaySoundOnPaste", node);
+    }
+    else
+    {
+        PlistManager::deletePlistKey(location, "PlaySoundOnPaste");
+    }
+}
+
+void MainWindow::on_notifyPastesChk_clicked(bool checked) {
+    auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
+    if (!workspace)
+        return;
+    auto location = QString::fromStdString(*workspace + "/InternalOptions/HomeDomain/Library/Preferences/com.apple.Pasteboard.plist");
+    if (checked)
+    {
+        auto node = PList::Boolean(checked);
+        PlistManager::setPlistValue(location, "AnnounceAllPastes", node);
+    }
+    else
+    {
+        PlistManager::deletePlistKey(location, "AnnounceAllPastes");
     }
 }
 

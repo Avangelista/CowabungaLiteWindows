@@ -118,6 +118,10 @@ private slots:
     void on_hideCarPlayChk_clicked(bool checked);
     void on_hideVPNChk_clicked(bool checked);
 
+    // Control Center
+    void on_controlCenterEnabledChk_toggled(bool checked);
+    void on_hideConferenceModulesChk_clicked(bool checked);
+
     // Springboard Options
     void on_springboardOptionsEnabledChk_toggled(bool checked);
     void on_UIAnimSpeedSld_sliderMoved(int pos);
@@ -125,11 +129,10 @@ private slots:
     void on_disableLockRespringChk_clicked(bool checked);
     void on_disableDimmingChk_clicked(bool checked);
     void on_disableBatteryAlertsChk_clicked(bool checked);
-    void on_enableLSCCChk_clicked(bool checked);
+    void on_disableCrumbChk_clicked(bool checked);
+    // void on_enableLSCCChk_clicked(bool checked);
     void on_enableShutdownSoundChk_clicked(bool checked);
     void on_allowAirDropEveryoneChk_clicked(bool checked);
-    void on_enablePasteSoundChk_clicked(bool checked);
-    void on_enableWakeVibrateChk_clicked(bool checked);
 
     // Setup Options
     void on_setupOptionsEnabledChk_toggled(bool checked);
@@ -150,6 +153,10 @@ private slots:
     void on_appStoreChk_toggled(bool checked);
     void on_notesChk_toggled(bool checked);
     void on_showTouchesChk_clicked(bool checked);
+    void on_hideRespringChk_clicked(bool checked);
+    void on_enableWakeVibrateChk_clicked(bool checked);
+    void on_pasteSoundChk_clicked(bool checked);
+    void on_notifyPastesChk_clicked(bool checked);
 
     // Apply
     void on_applyTweaksBtn_clicked();
@@ -187,6 +194,9 @@ private:
 
     // Status Bar
     void loadStatusBar();
+
+    // Control Center
+    void loadControlCenter();
 
     // Springboard Options
     void loadSpringboardOptions();

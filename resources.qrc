@@ -28,5 +28,6 @@
         <file>icon/currency-dollar.svg</file>
         <file>icon/geo-alt.svg</file>
         <file>cowlite.ico</file>
+        <file>missing.png</file>
     </qresource>
 </RCC>

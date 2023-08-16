@@ -595,6 +595,7 @@ void DeviceManager::applyTweaks(QLabel *statusLabel)
 bool DeviceManager::restoreBackupToDevice(const std::string &udid, const std::string &backupDirectory)
 {
     QStringList arguments;
+    // do we need "settings"? it seems to make it faster, maybe it messes something?
     arguments << "-u" << QString::fromStdString(udid) << "-s" << "Backup" << "restore" << "--system" << "--skip-apps" << QString::fromStdString(backupDirectory);
 
     QProcess process;

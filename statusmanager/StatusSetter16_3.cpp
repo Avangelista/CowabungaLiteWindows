@@ -184,7 +184,6 @@ namespace
 
     StatusBarOverrideData *getOverrides()
     {
-        qDebug() << "bad bad";
         auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
         if (!workspace)
             return nullptr;

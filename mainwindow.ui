@@ -771,7 +771,7 @@ QToolButton:pressed {
           <item>
            <widget class="QStackedWidget" name="pages">
             <property name="currentIndex">
-             <number>1</number>
+             <number>5</number>
             </property>
             <widget class="QWidget" name="homePage">
              <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -1610,7 +1610,7 @@ QToolButton:pressed {
                      <number>0</number>
                     </property>
                     <item>
-                     <widget class="QLabel" name="statusBarLbl_3">
+                     <widget class="QLabel" name="exploreLbl">
                       <property name="font">
                        <font>
                         <pointsize>-1</pointsize>
@@ -1623,9 +1623,9 @@ QToolButton:pressed {
                      </widget>
                     </item>
                     <item>
-                     <widget class="QLabel" name="label_14">
+                     <widget class="QLabel" name="exploreSubLbl">
                       <property name="text">
-                       <string>exploring so hard rn</string>
+                       <string/>
                       </property>
                      </widget>
                     </item>
@@ -1755,7 +1755,7 @@ QToolButton:pressed {
                     <item>
                      <widget class="QLabel" name="label_4">
                       <property name="text">
-                       <string>loccing my sim so hard rn</string>
+                       <string/>
                       </property>
                      </widget>
                     </item>
@@ -3422,7 +3422,7 @@ QComboBox QAbstractItemView::item:hover {
                      <number>0</number>
                     </property>
                     <item>
-                     <widget class="QLabel" name="setupOptionsLbl_2">
+                     <widget class="QLabel" name="controlCenterLbl">
                       <property name="font">
                        <font>
                         <pointsize>-1</pointsize>
@@ -3435,7 +3435,7 @@ QComboBox QAbstractItemView::item:hover {
                      </widget>
                     </item>
                     <item>
-                     <widget class="QCheckBox" name="setupOptionsEnabledChk_2">
+                     <widget class="QCheckBox" name="controlCenterEnabledChk">
                       <property name="text">
                        <string>Modify</string>
                       </property>
@@ -3476,7 +3476,7 @@ QComboBox QAbstractItemView::item:hover {
                </widget>
               </item>
               <item>
-               <widget class="QWidget" name="setupOptionsPageContent_2" native="true">
+               <widget class="QWidget" name="controlCenterPageContent" native="true">
                 <layout class="QVBoxLayout" name="verticalLayout_19">
                  <property name="leftMargin">
                   <number>0</number>
@@ -3491,9 +3491,9 @@ QComboBox QAbstractItemView::item:hover {
                   <number>0</number>
                  </property>
                  <item>
-                  <widget class="QCheckBox" name="skipSetupChk_2">
+                  <widget class="QCheckBox" name="hideConferenceModulesChk">
                    <property name="text">
-                    <string>Beans</string>
+                    <string>Hide &quot;Video Effects&quot; and &quot;Mic Mode&quot; Modules</string>
                    </property>
                   </widget>
                  </item>
@@ -3768,9 +3768,9 @@ QComboBox QAbstractItemView::item:hover {
                   </widget>
                  </item>
                  <item>
-                  <widget class="QCheckBox" name="enableLSCCChk">
+                  <widget class="QCheckBox" name="disableCrumbChk">
                    <property name="text">
-                    <string>Enable Control Center on Lock Screen</string>
+                    <string>Disable Breadcrumbs</string>
                    </property>
                   </widget>
                  </item>
@@ -3785,20 +3785,6 @@ QComboBox QAbstractItemView::item:hover {
                   <widget class="QCheckBox" name="allowAirDropEveryoneChk">
                    <property name="text">
                     <string>Permanently Allow Receiving AirDrop from Everyone</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QCheckBox" name="enablePasteSoundChk">
-                   <property name="text">
-                    <string>Play Sound on Paste</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QCheckBox" name="enableWakeVibrateChk">
-                   <property name="text">
-                    <string>Vibrate on Raise-to-Wake</string>
                    </property>
                   </widget>
                  </item>
@@ -4000,14 +3986,14 @@ QComboBox QAbstractItemView::item:hover {
                  <item>
                   <widget class="QCheckBox" name="IDSChk">
                    <property name="text">
-                    <string>Enable IDS Diagnostics</string>
+                    <string>Enable Continuity Diagnostics</string>
                    </property>
                   </widget>
                  </item>
                  <item>
                   <widget class="QCheckBox" name="VCChk">
                    <property name="text">
-                    <string>Enable VC Diagnostics</string>
+                    <string>Enable FaceTime Diagnostics</string>
                    </property>
                   </widget>
                  </item>
@@ -4029,6 +4015,34 @@ QComboBox QAbstractItemView::item:hover {
                   <widget class="QCheckBox" name="showTouchesChk">
                    <property name="text">
                     <string>Show Touches With Debug Info</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="hideRespringChk">
+                   <property name="text">
+                    <string>Hide Respring Icon</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="enableWakeVibrateChk">
+                   <property name="text">
+                    <string>Vibrate on Raise-to-Wake</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="pasteSoundChk">
+                   <property name="text">
+                    <string>Play Sound on Paste</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QCheckBox" name="notifyPastesChk">
+                   <property name="text">
+                    <string>Show Notifications for System Pastes</string>
                    </property>
                   </widget>
                  </item>
@@ -4333,7 +4347,7 @@ QComboBox QAbstractItemView::item:hover {
                        <item>
                         <widget class="QLabel" name="label_16">
                          <property name="text">
-                          <string>applying so hard rn</string>
+                          <string/>
                          </property>
                         </widget>
                        </item>
