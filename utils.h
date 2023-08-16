@@ -9,7 +9,7 @@ class Utils
 {
 public:
     static bool copyDirectory(QString, QString);
-    static void unzip(QString zipFile , QString outputFolder);
+    static void unzip(QString zipFile , QString outputFolder, bool expandFolders);
     static QPixmap createRoundedPixmap(const QPixmap& pixmap, double roundnessPercentage);
 };
 

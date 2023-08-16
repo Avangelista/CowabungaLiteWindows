@@ -419,12 +419,10 @@ void DeviceManager::setTweakEnabled(Tweak t, bool enabled = true)
     if (enabled)
     {
         this->enabledTweaks.insert(t);
-        qDebug() << "Tweak added: " << Tweaks::getTweakData(t).description;
     }
     else
     {
         this->enabledTweaks.erase(t);
-        qDebug() << "Tweak removed: " << Tweaks::getTweakData(t).description;
     }
 }
 
@@ -444,11 +442,16 @@ std::vector<Tweak> DeviceManager::getEnabledTweaks()
     return tweaks;
 }
 
-void DeviceManager::removeTweaks(QLabel *statusLabel) {
+void DeviceManager::removeTweaks(QLabel *statusLabel, bool deepClean) {
     statusLabel->setText("Copying restore files...");
 
     // Set the source directory path (assuming it's located in the binary directory)
-    auto sourceDir = QCoreApplication::applicationDirPath() + "/restore";
+    auto sourceDir = QCoreApplication::applicationDirPath();
+    if (deepClean) {
+        sourceDir +=  + "/restore-deepclean";
+    } else {
+        sourceDir +=  + "/restore";
+    }
     auto enabledTweaksDirectoryPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/EnabledTweaks";
     auto enabledTweaksDirectory = QDir(enabledTweaksDirectoryPath);
     if (enabledTweaksDirectory.exists())
@@ -571,7 +574,6 @@ void DeviceManager::applyTweaks(QLabel *statusLabel)
     for (auto t : DeviceManager::getEnabledTweaks())
     {
         auto folderName = Tweaks::getTweakData(t).folderName;
-        qDebug() << "Copying tweak " << Tweaks::getTweakData(t).description;
         Utils::copyDirectory(QString::fromStdString(*workspace + "/" + folderName), enabledTweaksDirectoryPath);
     }
 

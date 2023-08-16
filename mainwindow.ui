@@ -38,6 +38,10 @@
 	spacing: 0px;
 }
 
+QWidget:focus {
+    outline: none;
+}
+
 QWidget [cls=central] {
     background-color: #1e1e1e;
 	border-radius: 14px;
@@ -327,7 +331,7 @@ QToolButton:pressed {
 }</string>
          </property>
          <property name="text">
-          <string>Cowabunga Lite</string>
+          <string>Cowabunga Lite (Patreon Beta)</string>
          </property>
         </widget>
        </item>
@@ -771,7 +775,7 @@ QToolButton:pressed {
           <item>
            <widget class="QStackedWidget" name="pages">
             <property name="currentIndex">
-             <number>5</number>
+             <number>9</number>
             </property>
             <widget class="QWidget" name="homePage">
              <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -1192,7 +1196,7 @@ QToolButton:pressed {
                      </widget>
                     </item>
                     <item>
-                     <widget class="QToolButton" name="toolButton">
+                     <widget class="QToolButton" name="avangelistaKoFiBtn">
                       <property name="styleSheet">
                        <string notr="true">QToolButton {
 	border-top-left-radius: 0px;
@@ -1335,7 +1339,7 @@ QToolButton:pressed {
                      </widget>
                     </item>
                     <item>
-                     <widget class="QToolButton" name="toolButton_2">
+                     <widget class="QToolButton" name="leminKoFiBtn">
                       <property name="styleSheet">
                        <string notr="true">QToolButton {
 	border-top-left-radius: 0px;
@@ -1536,7 +1540,7 @@ QToolButton:pressed {
               <item>
                <widget class="QLabel" name="label">
                 <property name="text">
-                 <string>Cowabunga Lite Windows - Version 0.1 Beta</string>
+                 <string>Cowabunga Lite Windows - Version 0.1</string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -2390,7 +2394,7 @@ QToolButton:pressed {
                  <property name="geometry">
                   <rect>
                    <x>0</x>
-                   <y>0</y>
+                   <y>-109</y>
                    <width>650</width>
                    <height>1200</height>
                   </rect>
@@ -2719,7 +2723,7 @@ QComboBox QAbstractItemView::item:hover {
                         <item>
                          <widget class="QSlider" name="pStrengthSld">
                           <property name="maximum">
-                           <number>3</number>
+                           <number>4</number>
                           </property>
                           <property name="singleStep">
                            <number>0</number>
@@ -3016,7 +3020,7 @@ QComboBox QAbstractItemView::item:hover {
                         <item>
                          <widget class="QSlider" name="sStrengthSld">
                           <property name="maximum">
-                           <number>3</number>
+                           <number>4</number>
                           </property>
                           <property name="singleStep">
                            <number>0</number>
@@ -3477,6 +3481,9 @@ QComboBox QAbstractItemView::item:hover {
               </item>
               <item>
                <widget class="QWidget" name="controlCenterPageContent" native="true">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <layout class="QVBoxLayout" name="verticalLayout_19">
                  <property name="leftMargin">
                   <number>0</number>
@@ -3972,28 +3979,28 @@ QComboBox QAbstractItemView::item:hover {
                  <item>
                   <widget class="QCheckBox" name="accessoryChk">
                    <property name="text">
-                    <string>Enable Accessory Diagnostics</string>
+                    <string>Enable Accessory Developer</string>
                    </property>
                   </widget>
                  </item>
                  <item>
                   <widget class="QCheckBox" name="iMessageChk">
                    <property name="text">
-                    <string>Enable iMessage Diagnostics</string>
+                    <string>Enable iMessage Debugging</string>
                    </property>
                   </widget>
                  </item>
                  <item>
                   <widget class="QCheckBox" name="IDSChk">
                    <property name="text">
-                    <string>Enable Continuity Diagnostics</string>
+                    <string>Enable Continuity Debugging</string>
                    </property>
                   </widget>
                  </item>
                  <item>
                   <widget class="QCheckBox" name="VCChk">
                    <property name="text">
-                    <string>Enable FaceTime Diagnostics</string>
+                    <string>Enable FaceTime Debugging</string>
                    </property>
                   </widget>
                  </item>
@@ -4489,11 +4496,44 @@ QComboBox QAbstractItemView::item:hover {
                      <number>0</number>
                     </property>
                     <item>
+                     <spacer name="horizontalSpacer_14">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>40</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                    <item>
                      <widget class="QToolButton" name="removeTweaksBtn">
                       <property name="text">
                        <string>Remove All Tweaks</string>
                       </property>
                      </widget>
+                    </item>
+                    <item>
+                     <widget class="QToolButton" name="deepCleanBtn">
+                      <property name="text">
+                       <string>Deep Clean</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="horizontalSpacer_16">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>40</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
                     </item>
                    </layout>
                   </widget>

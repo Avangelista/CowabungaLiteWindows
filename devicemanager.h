@@ -59,7 +59,7 @@ public:
     void applyTheme(QDir themePath);
 
     void applyTweaks(QLabel* statusLabel);
-    void removeTweaks(QLabel *statusLabel);
+    void removeTweaks(QLabel *statusLabel, bool deepClean);
 private:
     DeviceManager();
     ~DeviceManager();

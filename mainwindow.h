@@ -46,8 +46,10 @@ private slots:
     // Home
     void on_avangelistaGitHubBtn_clicked();
     void on_avangelistaTwitterBtn_clicked();
+    void on_avangelistaKoFiBtn_clicked();
     void on_leminGitHubBtn_clicked();
     void on_leminTwitterBtn_clicked();
+    void on_leminKoFiBtn_clicked();
     void on_sourcelocBtn_clicked();
     void on_iTechBtn_clicked();
     void on_libiBtn_clicked();
@@ -143,15 +145,15 @@ private slots:
 
     // Internal Options
     void on_internalOptionsEnabledChk_toggled(bool checked);
-    void on_buildVersionChk_toggled(bool checked);
-    void on_RTLChk_toggled(bool checked);
-    void on_metalHUDChk_toggled(bool checked);
-    void on_accessoryChk_toggled(bool checked);
-    void on_iMessageChk_toggled(bool checked);
-    void on_IDSChk_toggled(bool checked);
-    void on_VCChk_toggled(bool checked);
-    void on_appStoreChk_toggled(bool checked);
-    void on_notesChk_toggled(bool checked);
+    void on_buildVersionChk_clicked(bool checked);
+    void on_RTLChk_clicked(bool checked);
+    void on_metalHUDChk_clicked(bool checked);
+    void on_accessoryChk_clicked(bool checked);
+    void on_iMessageChk_clicked(bool checked);
+    void on_IDSChk_clicked(bool checked);
+    void on_VCChk_clicked(bool checked);
+    void on_appStoreChk_clicked(bool checked);
+    void on_notesChk_clicked(bool checked);
     void on_showTouchesChk_clicked(bool checked);
     void on_hideRespringChk_clicked(bool checked);
     void on_enableWakeVibrateChk_clicked(bool checked);
@@ -161,6 +163,7 @@ private slots:
     // Apply
     void on_applyTweaksBtn_clicked();
     void on_removeTweaksBtn_clicked();
+    void on_deepCleanBtn_clicked();
 
     // Window
     void on_titleBar_pressed();

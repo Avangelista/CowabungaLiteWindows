@@ -151,8 +151,6 @@ std::unordered_map<std::string, std::unordered_map<std::string, std::variant<std
         auto bundle = it->first;
         auto dict = it->second;
         auto name = std::get<std::string>(dict["name"]);
-
-        qDebug() << name;
     }
 
     return apps;

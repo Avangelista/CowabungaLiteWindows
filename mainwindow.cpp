@@ -261,12 +261,20 @@ void MainWindow::on_avangelistaTwitterBtn_clicked() {
     openWebPage("https://twitter.com/AvangelistaDev");
 }
 
+void MainWindow::on_avangelistaKoFiBtn_clicked() {
+    openWebPage("https://ko-fi.com/avangelista");
+}
+
 void MainWindow::on_leminGitHubBtn_clicked() {
     openWebPage("https://github.com/leminlimez");
 }
 
 void MainWindow::on_leminTwitterBtn_clicked() {
     openWebPage("https://twitter.com/LeminLimez");
+}
+
+void MainWindow::on_leminKoFiBtn_clicked() {
+    openWebPage("https://ko-fi.com/leminlimez");
 }
 
 void MainWindow::on_sourcelocBtn_clicked() {
@@ -325,7 +333,7 @@ void MainWindow::addThemeRow(QWidget *parent, const QString &name, const QString
                     zipFile.write(downloadReply->readAll());
                     zipFile.close();
                     QString themeDirectoryPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/Themes/" + name;
-                    Utils::unzip(zipFilePath, themeDirectoryPath);
+                    Utils::unzip(zipFilePath, themeDirectoryPath, true);
                 }
             }
             downloadReply->deleteLater();
@@ -435,7 +443,7 @@ void MainWindow::loadExplorePage() {
                 zipFile.close();
                 qDebug() << "ZIP file downloaded and saved to:" << zipFilePath;
                 QString themeDirectoryPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/Themes/" + name;
-                Utils::unzip(zipFilePath, themeDirectoryPath);
+                Utils::unzip(zipFilePath, themeDirectoryPath, true);
                 downloadButton->setText("Done!");
                 MainWindow::loadThemes();
             }
@@ -549,7 +557,7 @@ void MainWindow::on_loadLocSimBtn_clicked() {
                 zipFile.write(zipData);
                 zipFile.close();
                 qDebug() << "ZIP file downloaded and saved to:" << zipFilePath;
-                Utils::unzip(zipFilePath, diskDirectoryPath);
+                Utils::unzip(zipFilePath, diskDirectoryPath, false);
                 QStringList arguments;
                 arguments << "-u" << QString::fromStdString(*(DeviceManager::getInstance().getCurrentUUID())) << versionDirectoryPath + "/DeveloperDiskImage.dmg";
 
@@ -801,7 +809,7 @@ void MainWindow::on_importThemeZipBtn_clicked() {
             if (!themeDirectory.mkpath(".")) {
                 qDebug() << "Failed to create the directory: " << themeDirectory;
             } else {
-                Utils::unzip(selectedFile, themeDirectoryPath);
+                Utils::unzip(selectedFile, themeDirectoryPath, true);
                 MainWindow::loadThemes();
             }
         }
@@ -2305,7 +2313,7 @@ void MainWindow::on_internalOptionsEnabledChk_toggled(bool checked)
     MainWindow::updateEnabledTweaks();
 }
 
-void MainWindow::on_buildVersionChk_toggled(bool checked)
+void MainWindow::on_buildVersionChk_clicked(bool checked)
 {
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
@@ -2322,7 +2330,7 @@ void MainWindow::on_buildVersionChk_toggled(bool checked)
     }
 }
 
-void MainWindow::on_RTLChk_toggled(bool checked)
+void MainWindow::on_RTLChk_clicked(bool checked)
 {
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
@@ -2339,7 +2347,7 @@ void MainWindow::on_RTLChk_toggled(bool checked)
     }
 }
 
-void MainWindow::on_metalHUDChk_toggled(bool checked)
+void MainWindow::on_metalHUDChk_clicked(bool checked)
 {
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
@@ -2356,7 +2364,7 @@ void MainWindow::on_metalHUDChk_toggled(bool checked)
     }
 }
 
-void MainWindow::on_accessoryChk_toggled(bool checked)
+void MainWindow::on_accessoryChk_clicked(bool checked)
 {
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
@@ -2373,7 +2381,7 @@ void MainWindow::on_accessoryChk_toggled(bool checked)
     }
 }
 
-void MainWindow::on_iMessageChk_toggled(bool checked)
+void MainWindow::on_iMessageChk_clicked(bool checked)
 {
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
@@ -2390,7 +2398,7 @@ void MainWindow::on_iMessageChk_toggled(bool checked)
     }
 }
 
-void MainWindow::on_IDSChk_toggled(bool checked)
+void MainWindow::on_IDSChk_clicked(bool checked)
 {
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
@@ -2407,7 +2415,7 @@ void MainWindow::on_IDSChk_toggled(bool checked)
     }
 }
 
-void MainWindow::on_VCChk_toggled(bool checked)
+void MainWindow::on_VCChk_clicked(bool checked)
 {
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
@@ -2424,7 +2432,7 @@ void MainWindow::on_VCChk_toggled(bool checked)
     }
 }
 
-void MainWindow::on_appStoreChk_toggled(bool checked)
+void MainWindow::on_appStoreChk_clicked(bool checked)
 {
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
@@ -2441,7 +2449,7 @@ void MainWindow::on_appStoreChk_toggled(bool checked)
     }
 }
 
-void MainWindow::on_notesChk_toggled(bool checked)
+void MainWindow::on_notesChk_clicked(bool checked)
 {
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
@@ -2580,7 +2588,15 @@ void MainWindow::on_removeTweaksBtn_clicked() {
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(nullptr, "Sure?", "This will remove all tweaks previously added with Cowabunga Lite (except themed app icons, you'll need to remove them manually).\n\nAre you sure?", QMessageBox::Yes | QMessageBox::No);
     if (reply == QMessageBox::Yes) {
-        DeviceManager::getInstance().removeTweaks(ui->statusLbl);
+        DeviceManager::getInstance().removeTweaks(ui->statusLbl, false);
+    }
+}
+
+void MainWindow::on_deepCleanBtn_clicked() {
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(nullptr, "Sure?", "This will remove all tweaks previously added with Cowabunga Lite (except themed app icons, you'll need to remove them manually).\n\nIt will also remove any tweaks that may have been set with older versions.\n\nAre you sure?", QMessageBox::Yes | QMessageBox::No);
+    if (reply == QMessageBox::Yes) {
+        DeviceManager::getInstance().removeTweaks(ui->statusLbl, true);
     }
 }
 

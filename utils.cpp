@@ -61,7 +61,7 @@ QPixmap Utils::createRoundedPixmap(const QPixmap& pixmap, double roundnessPercen
     return roundedPixmap;
 }
 
-void Utils::unzip (QString zipFile , QString outputFolder){
+void Utils::unzip (QString zipFile , QString outputFolder, bool expandFolders){
     QDir outputDir(outputFolder);
 
     // Check if the output folder exists and delete it if it does
@@ -85,30 +85,32 @@ void Utils::unzip (QString zipFile , QString outputFolder){
 
     // check if there was a folder in the zip
 
-    if (!outputDir.exists()) {
-        qWarning() << "Input folder does not exist.";
-        return;
-    }
+    if (expandFolders) {
+        if (!outputDir.exists()) {
+            qWarning() << "Input folder does not exist.";
+            return;
+        }
 
-    QStringList subdirs = outputDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+        QStringList subdirs = outputDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
 
-    foreach (const QString &subfolderName, subdirs) {
-        if (subfolderName != "__MACOSX") { // Exclude __MACOSX
-            QDir subfolderDir(outputDir.filePath(subfolderName));
-            QStringList fileNames = subfolderDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+        foreach (const QString &subfolderName, subdirs) {
+            if (subfolderName != "__MACOSX") { // Exclude __MACOSX
+                QDir subfolderDir(outputDir.filePath(subfolderName));
+                QStringList fileNames = subfolderDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
 
-            foreach (const QString &fileName, fileNames) {
-            QString srcPath = subfolderDir.filePath(fileName);
-            QString destPath = outputDir.filePath(fileName);
+                foreach (const QString &fileName, fileNames) {
+                QString srcPath = subfolderDir.filePath(fileName);
+                QString destPath = outputDir.filePath(fileName);
 
-            if (QFileInfo(srcPath).isDir()) {
-                QDir().rename(srcPath, destPath);
-            } else {
-                QFile::copy(srcPath, destPath);
+                if (QFileInfo(srcPath).isDir()) {
+                    QDir().rename(srcPath, destPath);
+                } else {
+                    QFile::copy(srcPath, destPath);
+                }
+                }
+
+                subfolderDir.removeRecursively();
             }
-            }
-
-            subfolderDir.removeRecursively();
         }
     }
 }
