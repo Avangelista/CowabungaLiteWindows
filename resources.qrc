@@ -29,5 +29,6 @@
         <file>icon/geo-alt.svg</file>
         <file>cowlite.ico</file>
         <file>missing.png</file>
+        <file>icon/star.svg</file>
     </qresource>
 </RCC>

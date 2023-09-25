@@ -253,6 +253,10 @@ void openWebPage(const QString& url)
     QDesktopServices::openUrl(QUrl(url));
 }
 
+void MainWindow::on_bigMilkBtn_clicked() {
+    openWebPage("https://cowabun.ga");
+}
+
 void MainWindow::on_avangelistaGitHubBtn_clicked() {
     openWebPage("https://github.com/Avangelista");
 }
@@ -298,7 +302,8 @@ void MainWindow::on_discordBtn_clicked() {
 }
 
 void MainWindow::on_patreonBtn_clicked() {
-    openWebPage("https://www.patreon.com/Cowabunga_iOS");
+    openWebPage("https://github.com/Avangelista/CowabungaLiteUniversal");
+//    openWebPage("https://www.patreon.com/Cowabunga_iOS");
 }
 
 // Explore Page

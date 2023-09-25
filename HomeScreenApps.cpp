@@ -11,6 +11,8 @@ void HomeScreenApps::scoutArray(plist_t array, std::unordered_map<std::string, s
     int num_items = plist_array_get_size(array);
     for (int j = 0; j < num_items; j++)
     {
+
+
         plist_t dict = plist_array_get_item(array, j);
         plist_t displayName = plist_dict_get_item(dict, "displayName");
         if (displayName)

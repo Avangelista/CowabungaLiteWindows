@@ -331,7 +331,7 @@ QToolButton:pressed {
 }</string>
          </property>
          <property name="text">
-          <string>Cowabunga Lite (Patreon Beta)</string>
+          <string>Cowabunga Lite</string>
          </property>
         </widget>
        </item>
@@ -775,7 +775,7 @@ QToolButton:pressed {
           <item>
            <widget class="QStackedWidget" name="pages">
             <property name="currentIndex">
-             <number>9</number>
+             <number>2</number>
             </property>
             <widget class="QWidget" name="homePage">
              <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -942,7 +942,7 @@ QToolButton:pressed {
                   </spacer>
                  </item>
                  <item>
-                  <widget class="QToolButton" name="toolButton_3">
+                  <widget class="QToolButton" name="bigMilkBtn">
                    <property name="styleSheet">
                     <string notr="true">QToolButton {
 	background-color: transparent;
@@ -1026,11 +1026,11 @@ QToolButton:pressed {
                     <item>
                      <widget class="QToolButton" name="patreonBtn">
                       <property name="text">
-                       <string>  Support us on Patreon</string>
+                       <string>  Star the Project on GitHub</string>
                       </property>
                       <property name="icon">
                        <iconset resource="resources.qrc">
-                        <normaloff>:/icon/heart-fill.svg</normaloff>:/icon/heart-fill.svg</iconset>
+                        <normaloff>:/icon/star.svg</normaloff>:/icon/star.svg</iconset>
                       </property>
                       <property name="toolButtonStyle">
                        <enum>Qt::ToolButtonTextBesideIcon</enum>
@@ -1540,7 +1540,7 @@ QToolButton:pressed {
               <item>
                <widget class="QLabel" name="label">
                 <property name="text">
-                 <string>Cowabunga Lite Windows - Version 0.1</string>
+                 <string>Cowabunga Lite Windows - Version 1.0</string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -2394,7 +2394,7 @@ QToolButton:pressed {
                  <property name="geometry">
                   <rect>
                    <x>0</x>
-                   <y>-109</y>
+                   <y>0</y>
                    <width>650</width>
                    <height>1200</height>
                   </rect>

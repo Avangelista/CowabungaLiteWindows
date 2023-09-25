@@ -44,6 +44,7 @@ private slots:
     void on_applyPageBtn_clicked();
 
     // Home
+    void on_bigMilkBtn_clicked();
     void on_avangelistaGitHubBtn_clicked();
     void on_avangelistaTwitterBtn_clicked();
     void on_avangelistaKoFiBtn_clicked();
