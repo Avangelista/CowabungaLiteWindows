@@ -16,21 +16,25 @@
 #include <QString>
 #include <QDebug>
 #include <QRandomGenerator>
+#include <QRegularExpression>
 #include <QCryptographicHash>
 
-std::string removeDomain(const std::string &domain, const std::string &input)
+QString removeDomain(const QString &domain, const QString &input)
 {
-    size_t pos = input.find(domain);
+    auto d = domain.toStdString();
+    auto i = input.toStdString();
+
+    size_t pos = i.find(d);
     if (pos != std::string::npos)
     {
-        pos += domain.length();
-        if (input[pos] == '\\' || input[pos] == '/')
+        pos += d.length();
+        if (i[pos] == '\\' || i[pos] == '/')
         {
             ++pos;
         }
-        return input.substr(pos);
+        return QString::fromStdString(i.substr(pos));
     }
-    return input;
+    return QString::fromStdString(i);
 }
 
 void writeStringWithLength(QFile &output_file, const QString &qstr)
@@ -114,7 +118,7 @@ void copyFile(const QString &source, const QString &destination)
 
 void processFiles(const QString &path, const QString &domainString, const QString &outputDir)
 {
-    QString fileString = QString::fromStdString(removeDomain(domainString.toStdString(), path.toStdString()))
+    QString fileString = removeDomain(domainString, path)
                             .replace("hiddendot", ".")
                             .replace("\\", "/");
     

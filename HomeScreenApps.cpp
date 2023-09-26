@@ -53,7 +53,20 @@ void HomeScreenApps::scoutArray(plist_t array, std::unordered_map<std::string, s
 
                     sscanf(identifier, "Cowabunga_%[^,],%[^\n]", bundle, name);
 
-                    apps[bundle]["name"] = std::string(name);
+//                    apps[bundle]["name"] = std::string(name);
+
+                    auto n = std::string(name);
+                    if (n.substr(0, 3) == "b64")
+                    {
+                        std::string rest = n.substr(3); // Remove "b64" prefix
+                        QByteArray base64Data(rest.c_str(), static_cast<int>(rest.length()));
+                        QByteArray decodedData = QByteArray::fromBase64(base64Data);
+                        apps[bundle]["name"] = decodedData.toStdString();
+                    }
+                    else
+                    {
+                        apps[bundle]["name"] = n;
+                    }
 
                     char *themed_name = nullptr;
                     plist_get_string_val(displayName, &themed_name);

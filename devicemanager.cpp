@@ -485,6 +485,13 @@ void DeviceManager::removeTweaks(QLabel *statusLabel, bool deepClean) {
     }
 }
 
+std::string base64Encode(const std::string &plainText)
+{
+    QByteArray byteArray(plainText.c_str(), static_cast<int>(plainText.length()));
+    QByteArray base64Data = byteArray.toBase64();
+    return base64Data.toStdString();
+}
+
 void DeviceManager::applyTweaks(QLabel *statusLabel)
 {
     auto workspace = DeviceManager::getCurrentWorkspace();
@@ -510,7 +517,7 @@ void DeviceManager::applyTweaks(QLabel *statusLabel)
             auto themed_icon = DeviceManager::getInstance().getThemedIcon(bundle);
             auto user_icon = DeviceManager::getInstance().getUserIcon(bundle);
             auto border = DeviceManager::getInstance().getBorder(bundle);
-            QString iconDirectoryPath = "Cowabunga_" + QString::fromStdString(bundle + "," + name + ".webclip");
+            QString iconDirectoryPath = "Cowabunga_" + QString::fromStdString(bundle + ",b64" + base64Encode(name) + ".webclip");
             themeDirectory.mkpath(iconDirectoryPath);
             auto iconDirectory = QDir(themeDirectory.absoluteFilePath(iconDirectoryPath));
 
