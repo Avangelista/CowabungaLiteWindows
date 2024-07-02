@@ -222,7 +222,7 @@ void MainWindow::updatePhoneInfo()
     {
         if (DeviceManager::getInstance().isDeviceAvailable())
         {
-            if (*version >= Version(17)) {
+            if (*version >= Version(18)) {
                 ui->phoneVersionLbl->setText("<a style=\"text-decoration:none; color: white;\" href=\"#\">iOS " + QString::fromStdString(version->toString()) + " <span style=\"color: #ffff00;\">Supported, YMMV.</span></a>");
             } else {
                 ui->phoneVersionLbl->setText("<a style=\"text-decoration:none; color: white;\" href=\"#\">iOS " + QString::fromStdString(version->toString()) + " <span style=\"color: #32d74b;\">Supported!</span></a>");
