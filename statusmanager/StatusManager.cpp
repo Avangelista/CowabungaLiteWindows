@@ -20,9 +20,7 @@ StatusManager &StatusManager::getInstance()
 StatusSetter &StatusManager::getSetter()
 {
     auto v = DeviceManager::getInstance().getCurrentVersion();
-    if (*v >= Version(16, 3)) {
-        setter = new StatusSetter16_3();
-    } else if (*v >= Version(16, 1)) {
+    if (*v >= Version(16, 1)) {
         setter = new StatusSetter16_1();
     } else if (*v >= Version(16)) {
         setter = new StatusSetter16();
