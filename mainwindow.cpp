@@ -2068,6 +2068,7 @@ void MainWindow::on_skipSetupChk_clicked(bool checked)
 
         auto strings = {
             "Location",
+                "WiFi",
                 "Restore",
                 "SIMSetup",
                 "Android",
