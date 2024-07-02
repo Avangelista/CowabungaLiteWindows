@@ -775,7 +775,7 @@ QToolButton:pressed {
           <item>
            <widget class="QStackedWidget" name="pages">
             <property name="currentIndex">
-             <number>4</number>
+             <number>0</number>
             </property>
             <widget class="QWidget" name="homePage">
              <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -1540,7 +1540,7 @@ QToolButton:pressed {
               <item>
                <widget class="QLabel" name="label">
                 <property name="text">
-                 <string>Cowabunga Lite Windows - Version 1.0.1</string>
+                 <string>Cowabunga Lite Windows - Version 1.0.2</string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
