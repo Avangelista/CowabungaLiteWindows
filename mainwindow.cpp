@@ -27,7 +27,8 @@
 
 #define DT_SIMULATELOCATION_SERVICE "com.apple.dt.simulatelocation"
 
-enum {
+enum
+{
     SET_LOCATION = 0,
     RESET_LOCATION = 1
 };
@@ -61,15 +62,18 @@ void MainWindow::updateInterfaceForNewDevice()
         // load locsim
         ui->locSimCnt->hide();
         ui->loadLocSimBtn->show();
-        if (DeviceManager::getInstance().getCurrentVersion() >= Version(17)) {
+        if (DeviceManager::getInstance().getCurrentVersion() >= Version(17))
+        {
             ui->loadLocSimBtn->setEnabled(false);
             ui->loadLocSimBtn->setText("Unavailable");
-        } else {
+        }
+        else
+        {
             ui->loadLocSimBtn->setEnabled(true);
             ui->loadLocSimBtn->setText("Start Location Simulation");
         }
 
-//        MainWindow::loadExplorePage();
+        // MainWindow::loadExplorePage();
         MainWindow::loadThemesPage();
         MainWindow::loadStatusBar();
         MainWindow::loadControlCenter();
@@ -90,6 +94,9 @@ void MainWindow::refreshDevices()
     // Load devices
     auto devices = DeviceManager::getInstance().loadDevices();
 
+    // Deprecated
+    ui->locSimPageBtn->hide();
+
     if (devices.empty())
     {
         ui->devicePicker->setEnabled(false);
@@ -98,7 +105,6 @@ void MainWindow::refreshDevices()
         ui->homePageBtn->setChecked(true);
 
         // hide all pages
-        ui->locSimPageBtn->hide();
         ui->sidebarDiv1->hide();
         ui->themesPageBtn->hide();
         ui->statusBarPageBtn->hide();
@@ -147,7 +153,8 @@ void MainWindow::on_homePageBtn_clicked()
 void MainWindow::on_explorePageBtn_clicked()
 {
     ui->pages->setCurrentIndex(static_cast<int>(Page::Explore));
-    if (!loadedExplorePage) {
+    if (!loadedExplorePage)
+    {
         loadedExplorePage = true;
         MainWindow::loadExplorePage();
     }
@@ -222,9 +229,12 @@ void MainWindow::updatePhoneInfo()
     {
         if (DeviceManager::getInstance().isDeviceAvailable())
         {
-            if (*version >= Version(18)) {
+            if (*version >= Version(18))
+            {
                 ui->phoneVersionLbl->setText("<a style=\"text-decoration:none; color: white;\" href=\"#\">iOS " + QString::fromStdString(version->toString()) + " <span style=\"color: #ffff00;\">Supported, YMMV.</span></a>");
-            } else {
+            }
+            else
+            {
                 ui->phoneVersionLbl->setText("<a style=\"text-decoration:none; color: white;\" href=\"#\">iOS " + QString::fromStdString(version->toString()) + " <span style=\"color: #32d74b;\">Supported!</span></a>");
             }
         }
@@ -248,66 +258,75 @@ void MainWindow::on_phoneVersionLbl_linkActivated(const QString &link)
     }
 }
 
-void openWebPage(const QString& url)
+void openWebPage(const QString &url)
 {
     QDesktopServices::openUrl(QUrl(url));
 }
 
-void MainWindow::on_bigMilkBtn_clicked() {
+void MainWindow::on_bigMilkBtn_clicked()
+{
     openWebPage("https://cowabun.ga");
 }
 
-void MainWindow::on_avangelistaGitHubBtn_clicked() {
+void MainWindow::on_avangelistaGitHubBtn_clicked()
+{
     openWebPage("https://github.com/Avangelista");
 }
 
-void MainWindow::on_avangelistaTwitterBtn_clicked() {
+void MainWindow::on_avangelistaTwitterBtn_clicked()
+{
     openWebPage("https://twitter.com/AvangelistaDev");
 }
 
-void MainWindow::on_avangelistaKoFiBtn_clicked() {
+void MainWindow::on_avangelistaKoFiBtn_clicked()
+{
     openWebPage("https://ko-fi.com/avangelista");
 }
 
-void MainWindow::on_leminGitHubBtn_clicked() {
+void MainWindow::on_leminGitHubBtn_clicked()
+{
     openWebPage("https://github.com/leminlimez");
 }
 
-void MainWindow::on_leminTwitterBtn_clicked() {
+void MainWindow::on_leminTwitterBtn_clicked()
+{
     openWebPage("https://twitter.com/LeminLimez");
 }
 
-void MainWindow::on_leminKoFiBtn_clicked() {
+void MainWindow::on_leminKoFiBtn_clicked()
+{
     openWebPage("https://ko-fi.com/leminlimez");
 }
 
-void MainWindow::on_sourcelocBtn_clicked() {
-    openWebPage("https://twitter.com/sourceloc");
-}
-
-void MainWindow::on_iTechBtn_clicked() {
+void MainWindow::on_iTechBtn_clicked()
+{
     openWebPage("https://twitter.com/iTechExpert21");
 }
 
-void MainWindow::on_libiBtn_clicked() {
+void MainWindow::on_libiBtn_clicked()
+{
     openWebPage("https://libimobiledevice.org");
 }
 
-void MainWindow::on_qtBtn_clicked() {
+void MainWindow::on_qtBtn_clicked()
+{
     openWebPage("https://www.qt.io/product/development-tools");
 }
 
-void MainWindow::on_discordBtn_clicked() {
+void MainWindow::on_discordBtn_clicked()
+{
     openWebPage("https://discord.gg/Cowabunga");
 }
 
-void MainWindow::on_patreonBtn_clicked() {
+void MainWindow::on_patreonBtn_clicked()
+{
     openWebPage("https://github.com/Avangelista/CowabungaLiteUniversal");
-//    openWebPage("https://www.patreon.com/Cowabunga_iOS");
+    //    openWebPage("https://www.patreon.com/Cowabunga_iOS");
 }
 
 // Explore Page
-void MainWindow::addThemeRow(QWidget *parent, const QString &name, const QString &previewUrl, const QString &downloadUrl) {
+void MainWindow::addThemeRow(QWidget *parent, const QString &name, const QString &previewUrl, const QString &downloadUrl)
+{
     QHBoxLayout *layout = new QHBoxLayout;
     QLabel *previewLabel = new QLabel;
     QToolButton *downloadButton = new QToolButton;
@@ -320,14 +339,18 @@ void MainWindow::addThemeRow(QWidget *parent, const QString &name, const QString
     QImage image;
     image.loadFromData(imageReply->readAll());
     imageReply->deleteLater();
-    if (!image.isNull()) {
+    if (!image.isNull())
+    {
         QPixmap previewImage = QPixmap::fromImage(image);
         previewLabel->setPixmap(previewImage);
-    } else {
+    }
+    else
+    {
         qDebug() << "Failed to load preview image from data";
     }
 
-    QObject::connect(downloadButton, &QToolButton::clicked, [=]() {
+    QObject::connect(downloadButton, &QToolButton::clicked, [=]()
+                     {
         QString zipFilePath = QDir::tempPath() + "/" + name + ".zip";
         QNetworkAccessManager *downloadManager = new QNetworkAccessManager(this);
         QNetworkReply *downloadReply = downloadManager->get(QNetworkRequest(QUrl(downloadUrl)));
@@ -343,8 +366,7 @@ void MainWindow::addThemeRow(QWidget *parent, const QString &name, const QString
             }
             downloadReply->deleteLater();
             downloadManager->deleteLater();
-        });
-    });
+        }); });
 
     layout->addWidget(previewLabel);
     layout->addWidget(new QLabel(name));
@@ -357,7 +379,8 @@ void MainWindow::addThemeRow(QWidget *parent, const QString &name, const QString
     parent->layout()->addItem(layout);
 }
 
-void MainWindow::loadExplorePage() {
+void MainWindow::loadExplorePage()
+{
     ui->exploreSubLbl->setText("Loading...");
     QNetworkAccessManager manager;
     QUrl apiUrl("https://raw.githubusercontent.com/leminlimez/Cowabunga-explore-repo/main/icon-themes.json");
@@ -378,7 +401,8 @@ void MainWindow::loadExplorePage() {
     QVBoxLayout *scrollLayout = new QVBoxLayout(scrollContent);
     scrollLayout->setContentsMargins(0, 0, 20, 0);
 
-    for (const QJsonValue &themeValue : themesArray) {
+    for (const QJsonValue &themeValue : themesArray)
+    {
         QJsonObject themeObj = themeValue.toObject();
         QString name = themeObj["name"].toString();
         QString preview = themeObj["preview"].toString();
@@ -386,11 +410,13 @@ void MainWindow::loadExplorePage() {
         auto previewUrl = "https://raw.githubusercontent.com/leminlimez/Cowabunga-explore-repo/main/" + preview;
         auto themeUrl = "https://raw.githubusercontent.com/leminlimez/Cowabunga-explore-repo/main/" + url;
         QString author;
-        if (themeObj.contains("contact") && themeObj["contact"].isObject()) {
+        if (themeObj.contains("contact") && themeObj["contact"].isObject())
+        {
             QJsonObject contactObj = themeObj["contact"].toObject();
 
             // Get the first value from the contact object
-            if (!contactObj.isEmpty()) {
+            if (!contactObj.isEmpty())
+            {
                 QJsonValue firstValue = contactObj.constBegin().value();
                 author = firstValue.toString();
             }
@@ -411,12 +437,15 @@ void MainWindow::loadExplorePage() {
         QImage image;
         image.loadFromData(imageReply->readAll());
         imageReply->deleteLater();
-        if (!image.isNull()) {
-            QPixmap previewIcon = QPixmap::fromImage(image)/*.scaled(150, 150, Qt::KeepAspectRatio)*/;
+        if (!image.isNull())
+        {
+            QPixmap previewIcon = QPixmap::fromImage(image) /*.scaled(150, 150, Qt::KeepAspectRatio)*/;
             previewButton->setIcon(QIcon(Utils::createRoundedPixmap(previewIcon, 0.1)));
             previewButton->setIconSize(QSize(150, 150));
             previewButton->setStyleSheet("QToolButton { min-height: 0px; background: none; padding: 0px; border: none; }");
-        } else {
+        }
+        else
+        {
             qDebug() << "Failed to load preview image from data";
         }
 
@@ -426,7 +455,8 @@ void MainWindow::loadExplorePage() {
 
         QToolButton *downloadButton = new QToolButton;
         downloadButton->setText("Download"); // Set the download text
-        connect(downloadButton, &QToolButton::clicked, [this, themeUrl, name, downloadButton]() {
+        connect(downloadButton, &QToolButton::clicked, [this, themeUrl, name, downloadButton]()
+                {
             // Download the ZIP file
             downloadButton->setText("Downloading...");
             qDebug() << "Downloading:" << themeUrl;
@@ -451,8 +481,7 @@ void MainWindow::loadExplorePage() {
                 Utils::unzip(zipFilePath, themeDirectoryPath, true);
                 downloadButton->setText("Done!");
                 MainWindow::loadThemes();
-            }
-        });
+            } });
 
         layout->addWidget(previewButton);
         layout->addWidget(nameLabel);
@@ -468,8 +497,8 @@ void MainWindow::loadExplorePage() {
     QScrollArea *scrollArea = new QScrollArea;
     scrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     scrollArea->setFrameStyle(QFrame::NoFrame); // Remove the frame/border
-    scrollArea->setWidgetResizable(true); // Make the scroll area resizable
-    scrollArea->setWidget(scrollContent); // Set the scroll area's content widget
+    scrollArea->setWidgetResizable(true);       // Make the scroll area resizable
+    scrollArea->setWidget(scrollContent);       // Set the scroll area's content widget
 
     exploreThemesLayout->addWidget(scrollArea); // Add the scroll area to the main layout
     ui->exploreThemesCnt->setLayout(exploreThemesLayout);
@@ -478,14 +507,17 @@ void MainWindow::loadExplorePage() {
 }
 
 // Loc Sim Page
-void MainWindow::on_loadLocSimBtn_clicked() {
+void MainWindow::on_loadLocSimBtn_clicked()
+{
     ui->loadLocSimBtn->setText("Loading...");
 
     auto diskDirectoryPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/DevDisks";
     auto diskDirectory = QDir(diskDirectoryPath);
 
-    if (!diskDirectory.exists()) {
-        if (!diskDirectory.mkpath(".")) {
+    if (!diskDirectory.exists())
+    {
+        if (!diskDirectory.mkpath("."))
+        {
             qDebug() << "Failed to create directory: " << diskDirectoryPath;
             ui->loadLocSimBtn->setText("Failed - Failed to create directory: " + diskDirectoryPath);
             return;
@@ -513,12 +545,14 @@ void MainWindow::on_loadLocSimBtn_clicked() {
     QString fileName;
     bool foundMatch = false;
 
-    for (const QJsonValue &releaseValue : releasesArray) {
+    for (const QJsonValue &releaseValue : releasesArray)
+    {
         QJsonObject releaseObj = releaseValue.toObject();
         QString tag_name = releaseObj["tag_name"].toString();
 
         QStringList tagParts = tag_name.split('.');
-        if (tagParts.size() >= 2) {
+        if (tagParts.size() >= 2)
+        {
             int releaseMajor = tagParts[0].toInt();
             int releaseMinor = tagParts[1].toInt();
             int releasePatch = tagParts.size() >= 3 ? tagParts[2].toInt() : 0;
@@ -526,22 +560,27 @@ void MainWindow::on_loadLocSimBtn_clicked() {
             auto releaseVersion = Version(releaseMajor, releaseMinor, releasePatch);
 
             // Compare the versions and find the closest match
-            if (!foundMatch && releaseVersion <= *targetVersion) {
+            if (!foundMatch && releaseVersion <= *targetVersion)
+            {
                 closestVersion = releaseVersion;
                 foundMatch = true;
                 fileName = tag_name;
-            } else if (releaseVersion <= *targetVersion &&
-                       releaseVersion > closestVersion) {
+            }
+            else if (releaseVersion <= *targetVersion &&
+                     releaseVersion > closestVersion)
+            {
                 closestVersion = releaseVersion;
                 fileName = tag_name;
             }
         }
     }
 
-    if (foundMatch) {
+    if (foundMatch)
+    {
         QString versionDirectoryPath = diskDirectory.filePath(fileName);
 
-        if (!diskDirectory.exists(versionDirectoryPath)) {
+        if (!diskDirectory.exists(versionDirectoryPath))
+        {
             // Download the ZIP file
             QString downloadUrl = QString("https://github.com/mspvirajpatel/Xcode_Developer_Disk_Images/releases/download/%1/%1.zip").arg(fileName);
             qDebug() << "Downloading:" << downloadUrl;
@@ -558,7 +597,8 @@ void MainWindow::on_loadLocSimBtn_clicked() {
             // Save the ZIP file to the created directory
             QString zipFilePath = QDir::tempPath() + "/" + fileName + ".zip";
             QFile zipFile(zipFilePath);
-            if (zipFile.open(QIODevice::WriteOnly)) {
+            if (zipFile.open(QIODevice::WriteOnly))
+            {
                 zipFile.write(zipData);
                 zipFile.close();
                 qDebug() << "ZIP file downloaded and saved to:" << zipFilePath;
@@ -577,20 +617,28 @@ void MainWindow::on_loadLocSimBtn_clicked() {
                 qDebug() << "Error Output:" << errorOutput;
                 // aaaa fix \r\n
                 auto errorLines = QString::fromUtf8(output).split("\r\n");
-                if (errorLines.size() > 1) {
+                if (errorLines.size() > 1)
+                {
                     auto error = errorLines.at(errorLines.size() - 2);
-                    if (error == "Status: Complete" || error == "Error: ImageMountFailed") {
+                    if (error == "Status: Complete" || error == "Error: ImageMountFailed")
+                    {
                         ui->loadLocSimBtn->hide();
                         ui->locSimCnt->show();
-                    } else {
+                    }
+                    else
+                    {
                         ui->loadLocSimBtn->setText("Failed - " + error);
                     }
                 }
-            } else {
+            }
+            else
+            {
                 qDebug() << "Failed to save ZIP file:" << zipFilePath;
                 ui->loadLocSimBtn->setText("Failed - Failed to save ZIP file: " + zipFilePath);
             }
-        } else {
+        }
+        else
+        {
             qDebug() << "Version directory already exists. Skipping download.";
             QStringList arguments;
             arguments << "-u" << QString::fromStdString(*(DeviceManager::getInstance().getCurrentUUID())) << versionDirectoryPath + "/DeveloperDiskImage.dmg";
@@ -606,33 +654,44 @@ void MainWindow::on_loadLocSimBtn_clicked() {
             qDebug() << "Error Output:" << errorOutput;
             // aaaa fix \r\n
             auto errorLines = QString::fromUtf8(output).split("\r\n");
-            if (errorLines.size() > 1) {
+            if (errorLines.size() > 1)
+            {
                 auto error = errorLines.at(errorLines.size() - 2);
-                if (error == "Status: Complete" || error == "Error: ImageMountFailed") {
+                if (error == "Status: Complete" || error == "Error: ImageMountFailed")
+                {
                     ui->loadLocSimBtn->hide();
                     ui->locSimCnt->show();
-                } else {
+                }
+                else
+                {
                     ui->loadLocSimBtn->setText("Failed - " + error);
                 }
             }
         }
-    } else {
+    }
+    else
+    {
         qDebug() << "No matching release found.";
         ui->loadLocSimBtn->setText("Failed - No matching release found.");
     }
 }
 
-void MainWindow::on_setLocationBtn_clicked() {
+void MainWindow::on_setLocationBtn_clicked()
+{
     uint32_t mode = SET_LOCATION;
 
     idevice_t device = NULL;
 
     auto udid = DeviceManager::getInstance().getCurrentUUID();
 
-    if (idevice_new_with_options(&device, udid->c_str(), IDEVICE_LOOKUP_USBMUX) != IDEVICE_E_SUCCESS) {
-        if (udid) {
+    if (idevice_new_with_options(&device, udid->c_str(), IDEVICE_LOOKUP_USBMUX) != IDEVICE_E_SUCCESS)
+    {
+        if (udid)
+        {
             printf("ERROR: Device %s not found!\n", udid->c_str());
-        } else {
+        }
+        else
+        {
             printf("ERROR: No device found!\n");
         }
         return;
@@ -643,7 +702,8 @@ void MainWindow::on_setLocationBtn_clicked() {
 
     lockdownd_service_descriptor_t svc = NULL;
     lockdownd_error_t lerr = lockdownd_start_service(lockdown, DT_SIMULATELOCATION_SERVICE, &svc);
-    if (lerr != LOCKDOWN_E_SUCCESS) {
+    if (lerr != LOCKDOWN_E_SUCCESS)
+    {
         lockdownd_client_free(lockdown);
         idevice_free(device);
         printf("ERROR: Could not start the simulatelocation service: %s\nMake sure a developer disk image is mounted!\n", lockdownd_strerror(lerr));
@@ -657,7 +717,8 @@ void MainWindow::on_setLocationBtn_clicked() {
 
     lockdownd_service_descriptor_free(svc);
 
-    if (serr != SERVICE_E_SUCCESS) {
+    if (serr != SERVICE_E_SUCCESS)
+    {
         lockdownd_client_free(lockdown);
         idevice_free(device);
         printf("ERROR: Could not connect to simulatelocation service (%d)\n", serr);
@@ -667,22 +728,22 @@ void MainWindow::on_setLocationBtn_clicked() {
     uint32_t l;
     uint32_t s = 0;
 
-    const char* lat = ui->latitudeTxt->text().toStdString().c_str();
-    const char* lon = ui->longitudeTxt->text().toStdString().c_str();
+    const char *lat = ui->latitudeTxt->text().toStdString().c_str();
+    const char *lon = ui->longitudeTxt->text().toStdString().c_str();
 
     l = htobe32(mode);
-    service_send(service, (const char*)&l, 4, &s);
+    service_send(service, (const char *)&l, 4, &s);
     int len = 4 + strlen(lat) + 4 + strlen(lon);
-    char *buf = static_cast<char*>(malloc(len));
+    char *buf = static_cast<char *>(malloc(len));
     uint32_t latlen;
     latlen = strlen(lat);
     l = htobe32(latlen);
     memcpy(buf, &l, 4);
-    memcpy(buf+4, lat, latlen);
+    memcpy(buf + 4, lat, latlen);
     uint32_t longlen = strlen(lon);
     l = htobe32(longlen);
-    memcpy(buf+4+latlen, &l, 4);
-    memcpy(buf+4+latlen+4, lon, longlen);
+    memcpy(buf + 4 + latlen, &l, 4);
+    memcpy(buf + 4 + latlen + 4, lon, longlen);
 
     s = 0;
     service_send(service, buf, len, &s);
@@ -692,17 +753,22 @@ void MainWindow::on_setLocationBtn_clicked() {
     idevice_free(device);
 }
 
-void MainWindow::on_resetLocationBtn_clicked() {
+void MainWindow::on_resetLocationBtn_clicked()
+{
     uint32_t mode = RESET_LOCATION;
 
     idevice_t device = NULL;
 
     auto udid = DeviceManager::getInstance().getCurrentUUID();
 
-    if (idevice_new_with_options(&device, udid->c_str(), IDEVICE_LOOKUP_USBMUX) != IDEVICE_E_SUCCESS) {
-        if (udid) {
+    if (idevice_new_with_options(&device, udid->c_str(), IDEVICE_LOOKUP_USBMUX) != IDEVICE_E_SUCCESS)
+    {
+        if (udid)
+        {
             printf("ERROR: Device %s not found!\n", udid->c_str());
-        } else {
+        }
+        else
+        {
             printf("ERROR: No device found!\n");
         }
         return;
@@ -713,7 +779,8 @@ void MainWindow::on_resetLocationBtn_clicked() {
 
     lockdownd_service_descriptor_t svc = NULL;
     lockdownd_error_t lerr = lockdownd_start_service(lockdown, DT_SIMULATELOCATION_SERVICE, &svc);
-    if (lerr != LOCKDOWN_E_SUCCESS) {
+    if (lerr != LOCKDOWN_E_SUCCESS)
+    {
         lockdownd_client_free(lockdown);
         idevice_free(device);
         printf("ERROR: Could not start the simulatelocation service: %s\nMake sure a developer disk image is mounted!\n", lockdownd_strerror(lerr));
@@ -727,7 +794,8 @@ void MainWindow::on_resetLocationBtn_clicked() {
 
     lockdownd_service_descriptor_free(svc);
 
-    if (serr != SERVICE_E_SUCCESS) {
+    if (serr != SERVICE_E_SUCCESS)
+    {
         lockdownd_client_free(lockdown);
         idevice_free(device);
         printf("ERROR: Could not connect to simulatelocation service (%d)\n", serr);
@@ -737,7 +805,7 @@ void MainWindow::on_resetLocationBtn_clicked() {
     uint32_t l;
     uint32_t s = 0;
     l = htobe32(mode);
-    service_send(service, (const char*)&l, 4, &s);
+    service_send(service, (const char *)&l, 4, &s);
     idevice_free(device);
 }
 
@@ -750,30 +818,36 @@ void MainWindow::on_themesEnabledChk_toggled(bool checked)
     MainWindow::updateEnabledTweaks();
 }
 
-void MainWindow::on_addAllBtn_clicked() {
+void MainWindow::on_addAllBtn_clicked()
+{
     auto state = DeviceManager::getInstance().addAllIcons();
     MainWindow::loadIcons();
 }
 
-void MainWindow::on_hideNamesBtn_clicked() {
+void MainWindow::on_hideNamesBtn_clicked()
+{
     auto state = DeviceManager::getInstance().hideAllNames();
     MainWindow::loadIcons();
 }
 
-void MainWindow::on_borderAllBtn_clicked() {
+void MainWindow::on_borderAllBtn_clicked()
+{
     auto state = DeviceManager::getInstance().borderAllIcons();
     MainWindow::loadIcons();
 }
 
-void MainWindow::on_themesBtn_clicked() {
+void MainWindow::on_themesBtn_clicked()
+{
     themesEasterEgg = !themesEasterEgg;
     MainWindow::loadIcons();
 }
 
-void MainWindow::on_importThemeFolderBtn_clicked() {
+void MainWindow::on_importThemeFolderBtn_clicked()
+{
     QString selectedFile = QFileDialog::getExistingDirectory(nullptr, "Select Folder", "", QFileDialog::ShowDirsOnly);
 
-    if (!selectedFile.isEmpty()) {
+    if (!selectedFile.isEmpty())
+    {
         QFileInfo fileInfo(selectedFile);
         QString folderName = fileInfo.fileName();
 
@@ -783,24 +857,31 @@ void MainWindow::on_importThemeFolderBtn_clicked() {
         if (themeDirectory.exists())
         {
             themeDirectory.removeRecursively();
-        } else {
+        }
+        else
+        {
             if (!themeDirectory.mkpath("."))
             {
                 qDebug() << "Failed to create the directory: " << themeDirectory;
             }
-            if (Utils::copyDirectory(selectedFile, themeDirectoryPath)) {
+            if (Utils::copyDirectory(selectedFile, themeDirectoryPath))
+            {
                 MainWindow::loadThemes();
-            } else {
+            }
+            else
+            {
                 qDebug() << "Couldn't copy folder " << selectedFile;
             }
         }
     }
 }
 
-void MainWindow::on_importThemeZipBtn_clicked() {
+void MainWindow::on_importThemeZipBtn_clicked()
+{
     QString selectedFile = QFileDialog::getOpenFileName(nullptr, "Select Zip File", "", "Zip Files (*.zip)", nullptr, QFileDialog::ReadOnly);
 
-    if (!selectedFile.isEmpty()) {
+    if (!selectedFile.isEmpty())
+    {
         QFileInfo fileInfo(selectedFile);
         QRegularExpression regex("(\\.zip$)", QRegularExpression::CaseInsensitiveOption);
         QString zipName = fileInfo.fileName().replace(regex, "");
@@ -808,12 +889,18 @@ void MainWindow::on_importThemeZipBtn_clicked() {
         auto themeDirectoryPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/Themes/" + zipName;
         auto themeDirectory = QDir(themeDirectoryPath);
 
-        if (themeDirectory.exists()) {
+        if (themeDirectory.exists())
+        {
             themeDirectory.removeRecursively();
-        } else {
-            if (!themeDirectory.mkpath(".")) {
+        }
+        else
+        {
+            if (!themeDirectory.mkpath("."))
+            {
                 qDebug() << "Failed to create the directory: " << themeDirectory;
-            } else {
+            }
+            else
+            {
                 Utils::unzip(selectedFile, themeDirectoryPath, true);
                 MainWindow::loadThemes();
             }
@@ -821,7 +908,7 @@ void MainWindow::on_importThemeZipBtn_clicked() {
     }
 }
 
-void applyMaskToImage(QImage& image)
+void applyMaskToImage(QImage &image)
 {
     image = image.scaled(QSize(120, 120), Qt::KeepAspectRatio, Qt::SmoothTransformation).convertToFormat(QImage::Format_ARGB32);
     QImage mask(":/overlay.png");
@@ -837,15 +924,18 @@ void applyMaskToImage(QImage& image)
     }
 }
 
-void MainWindow::loadThemesPage() {
+void MainWindow::loadThemesPage()
+{
     loadThemes();
     loadIcons();
 }
 
-void MainWindow::loadIcons() {
+void MainWindow::loadIcons()
+{
     int scrollPos = -1;
-    QScrollArea* scrollArea = ui->iconsCnt->findChild<QScrollArea*>();
-    if (scrollArea) {
+    QScrollArea *scrollArea = ui->iconsCnt->findChild<QScrollArea *>();
+    if (scrollArea)
+    {
         scrollPos = scrollArea->verticalScrollBar()->value();
     }
 
@@ -853,38 +943,39 @@ void MainWindow::loadIcons() {
     auto layout1 = ui->iconsCnt->layout();
     if (layout1)
     {
-        QLayoutItem* child;
+        QLayoutItem *child;
         while ((child = layout1->takeAt(0)) != nullptr)
         {
             delete child->widget(); // Remove and delete the widget
-            delete child; // Delete the layout item
+            delete child;           // Delete the layout item
         }
         delete layout1; // Delete the layout itself
-//        ui->iconsCnt->setLayout(nullptr); // Reset the layout pointer
+                        //        ui->iconsCnt->setLayout(nullptr); // Reset the layout pointer
     }
 
     // Clear the widget contents (if it's a container widget)
-    const QObjectList& children1 = ui->iconsCnt->children();
-    for (QObject* child : children1)
+    const QObjectList &children1 = ui->iconsCnt->children();
+    for (QObject *child : children1)
     {
         delete child; // Delete each child widget
     }
 
     // Create a QVBoxLayout to arrange the widgets vertically
-    QVBoxLayout* outerLayout = new QVBoxLayout(ui->iconsCnt);
+    QVBoxLayout *outerLayout = new QVBoxLayout(ui->iconsCnt);
     outerLayout->setContentsMargins(0, 0, 0, 0);
 
     // Create a scroll area to contain the innerLayout
-    QScrollArea* scrollArea2 = new QScrollArea(ui->iconsCnt);
+    QScrollArea *scrollArea2 = new QScrollArea(ui->iconsCnt);
     scrollArea2->setWidgetResizable(true);
     scrollArea2->setFrameStyle(QFrame::NoFrame);
 
     // Create a QWidget to hold the innerLayout
-    QWidget* scrollContentWidget = new QWidget();
-    QVBoxLayout* innerLayout = new QVBoxLayout(scrollContentWidget);
+    QWidget *scrollContentWidget = new QWidget();
+    QVBoxLayout *innerLayout = new QVBoxLayout(scrollContentWidget);
     innerLayout->setContentsMargins(0, 0, 20, 0);
 
-    for (auto bundle : DeviceManager::getInstance().getAppBundles()) {
+    for (auto bundle : DeviceManager::getInstance().getAppBundles())
+    {
         auto name = DeviceManager::getInstance().getAppName(bundle);
         auto themed_name = DeviceManager::getInstance().getThemedName(bundle);
         auto user_name = DeviceManager::getInstance().getUserName(bundle);
@@ -893,14 +984,15 @@ void MainWindow::loadIcons() {
         auto user_icon = DeviceManager::getInstance().getUserIcon(bundle);
         auto border = DeviceManager::getInstance().getBorder(bundle);
 
-        QCheckBox* borderCheckBox = new QCheckBox("Border", ui->iconsCnt);
-        QCheckBox* addToDeviceCheckBox = new QCheckBox("Add to Device", ui->iconsCnt);
-        QLineEdit* nameLineEdit = new QLineEdit(ui->iconsCnt);
-        QToolButton* iconButton = new QToolButton(ui->iconsCnt);
+        QCheckBox *borderCheckBox = new QCheckBox("Border", ui->iconsCnt);
+        QCheckBox *addToDeviceCheckBox = new QCheckBox("Add to Device", ui->iconsCnt);
+        QLineEdit *nameLineEdit = new QLineEdit(ui->iconsCnt);
+        QToolButton *iconButton = new QToolButton(ui->iconsCnt);
 
         // Border Check Box
         borderCheckBox->setChecked(DeviceManager::getInstance().getBorder(bundle));
-        connect(borderCheckBox, &QCheckBox::clicked, [this, bundle, iconButton, addToDeviceCheckBox](bool checked) {
+        connect(borderCheckBox, &QCheckBox::clicked, [this, bundle, iconButton, addToDeviceCheckBox](bool checked)
+                {
             DeviceManager::getInstance().setBorder(bundle, checked);
             // make icon use mask
             auto icon = DeviceManager::getInstance().getIcon(bundle);
@@ -935,62 +1027,80 @@ void MainWindow::loadIcons() {
                 }
             }
             DeviceManager::getInstance().setAddToDevice(bundle, true);
-            addToDeviceCheckBox->setChecked(true);
-        });
+            addToDeviceCheckBox->setChecked(true); });
 
         // Add to Device Check Box
         addToDeviceCheckBox->setChecked(DeviceManager::getInstance().getAddToDevice(bundle));
-        connect(addToDeviceCheckBox, &QCheckBox::clicked, [this, bundle](bool checked) {
-            DeviceManager::getInstance().setAddToDevice(bundle, checked);
-        });
+        connect(addToDeviceCheckBox, &QCheckBox::clicked, [this, bundle](bool checked)
+                { DeviceManager::getInstance().setAddToDevice(bundle, checked); });
 
         // Name Line Edit
         nameLineEdit->setPlaceholderText("Hidden Name (" + QString::fromStdString(name) + ")");
-        if (user_name) {
+        if (user_name)
+        {
             nameLineEdit->setText(QString::fromStdString(*user_name));
-        } else if (themed_name) {
+        }
+        else if (themed_name)
+        {
             nameLineEdit->setText(QString::fromStdString(*themed_name));
-        } else {
+        }
+        else
+        {
             nameLineEdit->setText(QString::fromStdString(name));
         }
-        connect(nameLineEdit, &QLineEdit::textEdited, [this, bundle, addToDeviceCheckBox](const QString& name) {
+        connect(nameLineEdit, &QLineEdit::textEdited, [this, bundle, addToDeviceCheckBox](const QString &name)
+                {
             DeviceManager::getInstance().setUserName(bundle, name.toStdString());
             DeviceManager::getInstance().setAddToDevice(bundle, true);
-            addToDeviceCheckBox->setChecked(true);
-        });
+            addToDeviceCheckBox->setChecked(true); });
 
         // Icon Button
-        if (user_icon) {
-            if (border) {
+        if (user_icon)
+        {
+            if (border)
+            {
                 auto image = QImage(QString::fromStdString(*user_icon));
                 applyMaskToImage(image);
                 iconButton->setIcon(QPixmap::fromImage(image));
-            } else {
+            }
+            else
+            {
                 auto userIcon = QPixmap(QString::fromStdString(*user_icon));
                 iconButton->setIcon(Utils::createRoundedPixmap(userIcon, 0.25));
             }
-        } else if (themed_icon) {
-            if (border) {
+        }
+        else if (themed_icon)
+        {
+            if (border)
+            {
                 auto image = QImage::fromData(QByteArray(themed_icon->data(), themed_icon->size()));
                 applyMaskToImage(image);
                 iconButton->setIcon(QPixmap::fromImage(image));
-            } else {
+            }
+            else
+            {
                 auto image = QPixmap::fromImage(QImage::fromData(QByteArray(themed_icon->data(), themed_icon->size())));
                 iconButton->setIcon(image);
             }
-        } else if (icon) {
-            if (border) {
+        }
+        else if (icon)
+        {
+            if (border)
+            {
                 auto image = QImage::fromData(QByteArray(icon->data(), icon->size()));
                 applyMaskToImage(image);
                 iconButton->setIcon(QPixmap::fromImage(image));
-            } else {
+            }
+            else
+            {
                 auto image = QPixmap::fromImage(QImage::fromData(QByteArray(icon->data(), icon->size())));
                 iconButton->setIcon(image);
             }
         }
         iconButton->setIconSize(QSize(32, 32));
         iconButton->setStyleSheet("QToolButton { min-height: 0px; background: none; padding: 0px; border: none; }");
-        connect(iconButton, &QToolButton::clicked, [this, bundle, addToDeviceCheckBox, iconButton]() {
+        connect(iconButton, &QToolButton::clicked, [this, bundle, addToDeviceCheckBox, iconButton]()
+                {
             QString initialPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/Themes";
             QString filePath = QFileDialog::getOpenFileName(this, "Select File", initialPath, "App Icons (*.PNG)");
 
@@ -1006,11 +1116,11 @@ void MainWindow::loadIcons() {
                     auto image = QPixmap(filePath);
                     iconButton->setIcon(Utils::createRoundedPixmap(image, 0.25));
                 }
-            }
-        });
+            } });
         // Right click, reset all
         iconButton->setContextMenuPolicy(Qt::CustomContextMenu);
-        connect(iconButton, &QToolButton::customContextMenuRequested, [this, bundle, addToDeviceCheckBox, iconButton, themed_icon, icon, nameLineEdit, name, borderCheckBox, themed_name]() {
+        connect(iconButton, &QToolButton::customContextMenuRequested, [this, bundle, addToDeviceCheckBox, iconButton, themed_icon, icon, nameLineEdit, name, borderCheckBox, themed_name]()
+                {
             DeviceManager::getInstance().resetUserPrefs(bundle);
             addToDeviceCheckBox->setChecked(false);
             borderCheckBox->setChecked(false);
@@ -1025,19 +1135,21 @@ void MainWindow::loadIcons() {
                 nameLineEdit->setText(QString::fromStdString(*themed_name));
             } else {
                 nameLineEdit->setText(QString::fromStdString(name));
-            }
-        });
+            } });
 
         // Create a QHBoxLayout to arrange the icon button, line edit, label, and check box horizontally
-        QHBoxLayout* iconLayout = new QHBoxLayout();
+        QHBoxLayout *iconLayout = new QHBoxLayout();
         iconLayout->addWidget(iconButton);
         iconLayout->addWidget(nameLineEdit);
         iconLayout->addWidget(borderCheckBox);
         iconLayout->addWidget(addToDeviceCheckBox);
 
-        if (themesEasterEgg) {
+        if (themesEasterEgg)
+        {
             borderCheckBox->show();
-        } else {
+        }
+        else
+        {
             borderCheckBox->hide();
         }
 
@@ -1052,17 +1164,20 @@ void MainWindow::loadIcons() {
     outerLayout->addWidget(scrollArea2);
 
     // keep height the same
-    if (scrollPos != -1) scrollArea2->verticalScrollBar()->setValue(scrollPos);
+    if (scrollPos != -1)
+        scrollArea2->verticalScrollBar()->setValue(scrollPos);
 
     // Set the outer layout on the ui->iconsCnt container
     ui->iconsCnt->setLayout(outerLayout);
 
-    if (themesEasterEgg) {
+    if (themesEasterEgg)
+    {
         ui->borderAllBtn->show();
-    } else {
+    }
+    else
+    {
         ui->borderAllBtn->hide();
     }
-
 }
 
 void MainWindow::loadThemes()
@@ -1079,34 +1194,35 @@ void MainWindow::loadThemes()
     }
 
     // Clear the layout
-    QLayout* layout = ui->themesCnt->layout();
+    QLayout *layout = ui->themesCnt->layout();
     if (layout)
     {
-        QLayoutItem* child;
+        QLayoutItem *child;
         while ((child = layout->takeAt(0)) != nullptr)
         {
             delete child->widget(); // Remove and delete the widget
-            delete child; // Delete the layout item
+            delete child;           // Delete the layout item
         }
         delete layout; // Delete the layout itself
-//        ui->themesCnt->setLayout(nullptr); // Reset the layout pointer
+                       //        ui->themesCnt->setLayout(nullptr); // Reset the layout pointer
     }
 
     // Clear the widget contents (if it's a container widget)
-    const QObjectList& children = ui->themesCnt->children();
-    for (QObject* child : children)
+    const QObjectList &children = ui->themesCnt->children();
+    for (QObject *child : children)
     {
         delete child; // Delete each child widget
     }
 
     // Create a QHBoxLayout to arrange the widgets horizontally
-    QHBoxLayout* mainLayout = new QHBoxLayout();
+    QHBoxLayout *mainLayout = new QHBoxLayout();
     mainLayout->setContentsMargins(0, 0, 0, 0);
 
     // Get a list of all folder names within the directory
     QStringList folderList = themesDirectory.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
 
-    if (folderList.isEmpty()) {
+    if (folderList.isEmpty())
+    {
         QVBoxLayout *layout = new QVBoxLayout(ui->themesCnt);
         QLabel *label = new QLabel("No themes. Import one, or visit the Explore page.");
         label->setAlignment(Qt::AlignCenter);
@@ -1117,7 +1233,7 @@ void MainWindow::loadThemes()
     }
 
     // Iterate through the folder names
-    foreach (const QString& folderName, folderList)
+    foreach (const QString &folderName, folderList)
     {
         QString folderPath = themesDirectory.filePath(folderName);
         QDir directory(folderPath);
@@ -1128,10 +1244,10 @@ void MainWindow::loadThemes()
         auto numIcons = pngFiles.size();
 
         // Create the widget containing a container for the background and a button arranged vertically
-        QWidget* widget = new QWidget();
+        QWidget *widget = new QWidget();
 
         // Create a container widget to hold the iconLayout with background
-        QWidget* iconContainer = new QWidget();
+        QWidget *iconContainer = new QWidget();
         iconContainer->setStyleSheet(":enabled { background-image: url(:/background.png); background-repeat: no-repeat; background-position: center; } :disabled { background-color: gray; }");
 
         // Load the icon images from the folder
@@ -1141,66 +1257,70 @@ void MainWindow::loadThemes()
         QPixmap cameraIcon(QString("%1/com.apple.camera-large.png").arg(folderPath));
 
         // Check if the icons are null and replace with missing.png if necessary
-        if (phoneIcon.isNull()) {
+        if (phoneIcon.isNull())
+        {
             phoneIcon = QPixmap(":/missing.png");
         }
 
-        if (safariIcon.isNull()) {
+        if (safariIcon.isNull())
+        {
             safariIcon = QPixmap(":/missing.png");
         }
 
-        if (photosIcon.isNull()) {
+        if (photosIcon.isNull())
+        {
             photosIcon = QPixmap(":/missing.png");
         }
 
-        if (cameraIcon.isNull()) {
+        if (cameraIcon.isNull())
+        {
             cameraIcon = QPixmap(":/missing.png");
         }
 
         // Create QToolButtons to display the icon images
-        QToolButton* phoneButton = new QToolButton(iconContainer);
+        QToolButton *phoneButton = new QToolButton(iconContainer);
         phoneButton->setIcon(QIcon(Utils::createRoundedPixmap(phoneIcon, 0.25))); // Set the radius for rounded corners
         phoneButton->setIconSize(QSize(45, 45));
         phoneButton->setStyleSheet("QToolButton { min-height: 0px; background: none; padding: 0px; border: none; }");
 
-        QToolButton* safariButton = new QToolButton(iconContainer);
+        QToolButton *safariButton = new QToolButton(iconContainer);
         safariButton->setIcon(QIcon(Utils::createRoundedPixmap(safariIcon, 0.25))); // Set the radius for rounded corners
         safariButton->setIconSize(QSize(45, 45));
         safariButton->setStyleSheet("QToolButton { min-height: 0px; background: none; padding: 0px; border: none; }");
 
-        QToolButton* photosButton = new QToolButton(iconContainer);
+        QToolButton *photosButton = new QToolButton(iconContainer);
         photosButton->setIcon(QIcon(Utils::createRoundedPixmap(photosIcon, 0.25))); // Set the radius for rounded corners
         photosButton->setIconSize(QSize(45, 45));
         photosButton->setStyleSheet("QToolButton { min-height: 0px; background: none; padding: 0px; border: none; }");
 
-        QToolButton* cameraButton = new QToolButton(iconContainer);
+        QToolButton *cameraButton = new QToolButton(iconContainer);
         cameraButton->setIcon(QIcon(Utils::createRoundedPixmap(cameraIcon, 0.25))); // Set the radius for rounded corners
         cameraButton->setIconSize(QSize(45, 45));
         cameraButton->setStyleSheet("QToolButton { min-height: 0px; background: none; padding: 0px; border: none; }");
 
-        QLabel* name = new QLabel(widget);
+        QLabel *name = new QLabel(widget);
         name->setText(folderName + " • " + QString::number(numIcons) + " Icons");
         name->setAlignment(Qt::AlignCenter);
 
         // Create a QPushButton
-        QToolButton* applyButton = new QToolButton(widget);
+        QToolButton *applyButton = new QToolButton(widget);
         applyButton->setText("Apply");
         applyButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-        connect(applyButton, &QToolButton::clicked, [this, directory]() {
+        connect(applyButton, &QToolButton::clicked, [this, directory]()
+                {
             DeviceManager::getInstance().applyTheme(directory);
-            MainWindow::loadIcons();
-        });
+            MainWindow::loadIcons(); });
 
         // Create a QPushButton for "Delete"
-        QToolButton* deleteButton = new QToolButton(widget);
+        QToolButton *deleteButton = new QToolButton(widget);
         deleteButton->setIcon(QIcon(":/icon/trash.svg")); // Set the trash.svg resource icon
-        connect(deleteButton, &QToolButton::clicked, [this, directory]() {
+        connect(deleteButton, &QToolButton::clicked, [this, directory]()
+                {
             QDir(directory).removeRecursively();
-            MainWindow::loadThemes();
-        });
+            MainWindow::loadThemes(); });
 
         // Create a QHBoxLayout to arrange the icon buttons horizontally
-        QHBoxLayout* iconLayout = new QHBoxLayout(iconContainer);
+        QHBoxLayout *iconLayout = new QHBoxLayout(iconContainer);
         iconLayout->addWidget(phoneButton);
         iconLayout->addWidget(safariButton);
         iconLayout->addWidget(photosButton);
@@ -1208,12 +1328,12 @@ void MainWindow::loadThemes()
         iconContainer->setLayout(iconLayout); // Set iconLayout as the layout for iconContainer
 
         // Create a QHBoxLayout to arrange the buttons horizontally
-        QHBoxLayout* buttonLayout = new QHBoxLayout();
+        QHBoxLayout *buttonLayout = new QHBoxLayout();
         buttonLayout->addWidget(applyButton);
         buttonLayout->addWidget(deleteButton);
 
         // Create a QVBoxLayout for the widget and add the iconContainer, buttons, and name to it
-        QVBoxLayout* layout = new QVBoxLayout(widget);
+        QVBoxLayout *layout = new QVBoxLayout(widget);
         layout->setContentsMargins(0, 0, 0, 9);
         layout->addWidget(iconContainer); // Add iconContainer to the main layout
         layout->addWidget(name);
@@ -1225,14 +1345,14 @@ void MainWindow::loadThemes()
     }
 
     // Create a QWidget to act as the container for the scroll area
-    QWidget* scrollWidget = new QWidget();
+    QWidget *scrollWidget = new QWidget();
 
     // Set the main layout (containing all the widgets) on the scroll widget
     scrollWidget->setLayout(mainLayout);
 
     // Create a QScrollArea to hold the content widget (scrollWidget)
-    QScrollArea* scrollArea = new QScrollArea();
-    scrollArea->setWidgetResizable(true); // Allow the content widget to resize within the scroll area
+    QScrollArea *scrollArea = new QScrollArea();
+    scrollArea->setWidgetResizable(true);       // Allow the content widget to resize within the scroll area
     scrollArea->setFrameStyle(QFrame::NoFrame); // Remove the outline from the scroll area
 
     // Set the scrollWidget as the content widget of the scroll area
@@ -1250,7 +1370,8 @@ void MainWindow::loadThemes()
 }
 
 // Control Center Page
-void MainWindow::loadControlCenter() {
+void MainWindow::loadControlCenter()
+{
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     auto location = QString::fromStdString(*workspace + "/ControlCenter/ManagedPreferencesDomain/mobile/com.apple.replaykit.AudioConferenceControlCenterModule.plist");
     auto value = PlistManager::getPlistValue(location, "SBIconVisibility");
@@ -1299,13 +1420,19 @@ void MainWindow::loadStatusBar()
     auto sm = StatusManager::getInstance();
 
     // Primary Cellular
-    if (sm.isCellularServiceOverridden()) {
-        if (sm.getCellularServiceOverride()) {
+    if (sm.isCellularServiceOverridden())
+    {
+        if (sm.getCellularServiceOverride())
+        {
             ui->pShowRdo->setChecked(true);
-        } else {
+        }
+        else
+        {
             ui->pHideRdo->setChecked(true);
         }
-    } else {
+    }
+    else
+    {
         ui->pDefaultRdo->setChecked(true);
     }
     ui->pCarrierChk->setChecked(StatusManager::getInstance().isCarrierOverridden());
@@ -1320,13 +1447,19 @@ void MainWindow::loadStatusBar()
     ui->pStrengthLbl->setText(QString::number(pos) + (pos == 1 ? " Bar" : " Bars"));
 
     // Secondary Cellular
-    if (sm.isSecondaryCellularServiceOverridden()) {
-        if (sm.getSecondaryCellularServiceOverride()) {
+    if (sm.isSecondaryCellularServiceOverridden())
+    {
+        if (sm.getSecondaryCellularServiceOverride())
+        {
             ui->sShowRdo->setChecked(true);
-        } else {
+        }
+        else
+        {
             ui->sHideRdo->setChecked(true);
         }
-    } else {
+    }
+    else
+    {
         ui->sDefaultRdo->setChecked(true);
     }
     ui->sCarrierChk->setChecked(StatusManager::getInstance().isSecondaryCarrierOverridden());
@@ -1434,7 +1567,8 @@ void MainWindow::on_pBadgeTxt_textEdited(const QString &text)
     }
 }
 
-void MainWindow::on_pTypeChk_clicked(bool checked) {
+void MainWindow::on_pTypeChk_clicked(bool checked)
+{
     if (checked)
     {
         StatusManager::getInstance().setDataNetworkType(ui->pTypeDrp->currentIndex());
@@ -1445,7 +1579,8 @@ void MainWindow::on_pTypeChk_clicked(bool checked) {
     }
 }
 
-void MainWindow::on_pTypeDrp_activated(int index) {
+void MainWindow::on_pTypeDrp_activated(int index)
+{
     if (ui->pTypeChk->checkState())
     {
         StatusManager::getInstance().setDataNetworkType(index);
@@ -1528,7 +1663,8 @@ void MainWindow::on_sBadgeTxt_textEdited(const QString &text)
     }
 }
 
-void MainWindow::on_sTypeChk_clicked(bool checked) {
+void MainWindow::on_sTypeChk_clicked(bool checked)
+{
     if (checked)
     {
         StatusManager::getInstance().setSecondaryDataNetworkType(ui->sTypeDrp->currentIndex());
@@ -1539,7 +1675,8 @@ void MainWindow::on_sTypeChk_clicked(bool checked) {
     }
 }
 
-void MainWindow::on_sTypeDrp_activated(int index) {
+void MainWindow::on_sTypeDrp_activated(int index)
+{
     if (ui->sTypeChk->checkState())
     {
         StatusManager::getInstance().setSecondaryDataNetworkType(index);
@@ -2068,47 +2205,47 @@ void MainWindow::on_skipSetupChk_clicked(bool checked)
 
         auto strings = {
             "Location",
-                "WiFi",
-                "Restore",
-                "SIMSetup",
-                "Android",
-                "AppleID",
-                "IntendedUser",
-                "TOS",
-                "Siri",
-                "ScreenTime",
-                "Diagnostics",
-                "SoftwareUpdate",
-                "Passcode",
-                "Biometric",
-                "Payment",
-                "Zoom",
-                "DisplayTone",
-                "MessagingActivationUsingPhoneNumber",
-                "HomeButtonSensitivity",
-                "CloudStorage",
-                "ScreenSaver",
-                "TapToSetup",
-                "Keyboard",
-                "PreferredLanguage",
-                "SpokenLanguage",
-                "WatchMigration",
-                "OnBoarding",
-                "TVProviderSignIn",
-                "TVHomeScreenSync",
-                "Privacy",
-                "TVRoom",
-                "iMessageAndFaceTime",
-                "AppStore",
-                "Safety",
-                "Multitasking",
-                "ActionButton",
-                "TermsOfAddress",
-                "AccessibilityAppearance",
-                "Welcome",
-                "Appearance",
-                "RestoreCompleted",
-                "UpdateCompleted"};
+            "WiFi",
+            "Restore",
+            "SIMSetup",
+            "Android",
+            "AppleID",
+            "IntendedUser",
+            "TOS",
+            "Siri",
+            "ScreenTime",
+            "Diagnostics",
+            "SoftwareUpdate",
+            "Passcode",
+            "Biometric",
+            "Payment",
+            "Zoom",
+            "DisplayTone",
+            "MessagingActivationUsingPhoneNumber",
+            "HomeButtonSensitivity",
+            "CloudStorage",
+            "ScreenSaver",
+            "TapToSetup",
+            "Keyboard",
+            "PreferredLanguage",
+            "SpokenLanguage",
+            "WatchMigration",
+            "OnBoarding",
+            "TVProviderSignIn",
+            "TVHomeScreenSync",
+            "Privacy",
+            "TVRoom",
+            "iMessageAndFaceTime",
+            "AppStore",
+            "Safety",
+            "Multitasking",
+            "ActionButton",
+            "TermsOfAddress",
+            "AccessibilityAppearance",
+            "Welcome",
+            "Appearance",
+            "RestoreCompleted",
+            "UpdateCompleted"};
 
         auto node2 = PList::Array();
         for (const auto &str : strings)
@@ -2495,7 +2632,8 @@ void MainWindow::on_notesChk_clicked(bool checked)
     }
 }
 
-void MainWindow::on_showTouchesChk_clicked(bool checked) {
+void MainWindow::on_showTouchesChk_clicked(bool checked)
+{
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
@@ -2511,7 +2649,8 @@ void MainWindow::on_showTouchesChk_clicked(bool checked) {
     }
 }
 
-void MainWindow::on_hideRespringChk_clicked(bool checked) {
+void MainWindow::on_hideRespringChk_clicked(bool checked)
+{
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
@@ -2527,7 +2666,8 @@ void MainWindow::on_hideRespringChk_clicked(bool checked) {
     }
 }
 
-void MainWindow::on_enableWakeVibrateChk_clicked(bool checked) {
+void MainWindow::on_enableWakeVibrateChk_clicked(bool checked)
+{
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
@@ -2543,7 +2683,8 @@ void MainWindow::on_enableWakeVibrateChk_clicked(bool checked) {
     }
 }
 
-void MainWindow::on_pasteSoundChk_clicked(bool checked) {
+void MainWindow::on_pasteSoundChk_clicked(bool checked)
+{
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
@@ -2559,7 +2700,8 @@ void MainWindow::on_pasteSoundChk_clicked(bool checked) {
     }
 }
 
-void MainWindow::on_notifyPastesChk_clicked(bool checked) {
+void MainWindow::on_notifyPastesChk_clicked(bool checked)
+{
     auto workspace = DeviceManager::getInstance().getCurrentWorkspace();
     if (!workspace)
         return;
@@ -2589,10 +2731,14 @@ void MainWindow::updateEnabledTweaks()
     {
         std::ostringstream labelTextStream;
         bool firstTweak = true;
-        for (auto t : tweaks) {
-            if (!firstTweak) {
+        for (auto t : tweaks)
+        {
+            if (!firstTweak)
+            {
                 labelTextStream << ", ";
-            } else {
+            }
+            else
+            {
                 firstTweak = false;
             }
             labelTextStream << Tweaks::getTweakData(t).description;
@@ -2613,18 +2759,22 @@ void MainWindow::on_applyTweaksBtn_clicked()
     DeviceManager::getInstance().applyTweaks(ui->statusLbl);
 }
 
-void MainWindow::on_removeTweaksBtn_clicked() {
+void MainWindow::on_removeTweaksBtn_clicked()
+{
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(nullptr, "Sure?", "This will remove all tweaks previously added with Cowabunga Lite (except themed app icons, you'll need to remove them manually).\n\nAre you sure?", QMessageBox::Yes | QMessageBox::No);
-    if (reply == QMessageBox::Yes) {
+    if (reply == QMessageBox::Yes)
+    {
         DeviceManager::getInstance().removeTweaks(ui->statusLbl, false);
     }
 }
 
-void MainWindow::on_deepCleanBtn_clicked() {
+void MainWindow::on_deepCleanBtn_clicked()
+{
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(nullptr, "Sure?", "This will remove all tweaks previously added with Cowabunga Lite (except themed app icons, you'll need to remove them manually).\n\nIt will also remove any tweaks that may have been set with older versions.\n\nAre you sure?", QMessageBox::Yes | QMessageBox::No);
-    if (reply == QMessageBox::Yes) {
+    if (reply == QMessageBox::Yes)
+    {
         DeviceManager::getInstance().removeTweaks(ui->statusLbl, true);
     }
 }

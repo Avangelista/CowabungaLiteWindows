@@ -1427,7 +1427,7 @@ QToolButton:pressed {
                      </widget>
                     </item>
                     <item>
-                     <widget class="QToolButton" name="sourcelocBtn">
+                     <widget class="QToolButton" name="iTechBtn">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                         <horstretch>0</horstretch>
@@ -1449,32 +1449,6 @@ QToolButton:pressed {
                       </property>
                       <property name="text">
                        <string>sourcelocation</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
-                     <widget class="QToolButton" name="iTechBtn">
-                      <property name="sizePolicy">
-                       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                        <horstretch>0</horstretch>
-                        <verstretch>0</verstretch>
-                       </sizepolicy>
-                      </property>
-                      <property name="styleSheet">
-                       <string notr="true">QToolButton {
-	border-radius: 0px;
-	background: none;
-	border: 1px solid #3b3b3b;
-	border-left: none;
-}
-
-QToolButton:pressed {
-    background-color: #535353;
-    color: #FFFFFF;
-}</string>
-                      </property>
-                      <property name="text">
-                       <string>iTechExpert</string>
                       </property>
                      </widget>
                     </item>

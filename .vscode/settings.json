@@ -18,6 +18,9 @@
         "xlocmon": "cpp",
         "xtr1common": "cpp",
         "xutility": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "array": "cpp",
+        "string_view": "cpp",
+        "span": "cpp"
     }
 }

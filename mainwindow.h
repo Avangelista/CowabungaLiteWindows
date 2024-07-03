@@ -51,7 +51,6 @@ private slots:
     void on_leminGitHubBtn_clicked();
     void on_leminTwitterBtn_clicked();
     void on_leminKoFiBtn_clicked();
-    void on_sourcelocBtn_clicked();
     void on_iTechBtn_clicked();
     void on_libiBtn_clicked();
     void on_qtBtn_clicked();
